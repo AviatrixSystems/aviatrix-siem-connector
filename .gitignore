@@ -6,20 +6,27 @@ origin_logstash.conf
 # macOS files
 .DS_Store
 
-# Claude Code local settings (user-specific)
+# IDE and tool-specific settings (user-specific)
 .claude/
+.serena/
+.devcontainer/
 
 # Terraform files
-**/*.tfvars                    # Variable files (may contain secrets)
-**/.terraform/*                # Local .terraform directories
-**/.terraform.lock.hcl         # Lock files
-*.tfstate                      # State files
-*.tfstate.*                    # State backups
+# Variable files (may contain secrets)
+**/*.tfvars
+# Local .terraform directories
+**/.terraform/*
+**/.terraform.lock.hcl
+# State files
+*.tfstate
+*.tfstate.*
 terraform.tfstate.backup
 terraform.tfstate.d
-*tfplan*                       # Plan output files
-crash.log                      # Crash logs
-*.backup                       # Backup files
+# Plan output files
+*tfplan*
+# Crash logs and backups
+crash.log
+*.backup
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
