@@ -1,48 +1,110 @@
-
 # Aviatrix Log Integration Engine
 
-Flexible and Scalable log integration between Aviatrix and 3rd party SIEM, Logging and Observability tools.
+Flexible and scalable log integration between Aviatrix and 3rd party SIEM, logging, and observability tools.
 
-  
+The integration is built on top of Logstash with an Aviatrix-validated log parsing configuration. The engine is best-effort community supported.
 
-The integration is built on top of Logstash with an Aviatrix validated log parsing configuration.  The engine is best effort community supported.
+## Quick Start
 
-  
+### 1. Build the Logstash Configuration
 
-## AWS deployment option
-The logging engine is deployed as a set of VM instances alongside the existing Aviatrix Control plane. The framework provides example configurations for 2 components:
+```bash
+cd logstash-configs
 
-1. deployment-tf\aws* folders : Terraform to deploy the cloud infrastructure (Compute with Logstash, Logstash configuration in an object store (S3) bucket, and optionally load balancers) to point Aviatrix logging to and then forward it to the observability platform.
+# For Splunk output
+./scripts/assemble-config.sh splunk-hec
 
-2. logstash-configs\output_splunk_hec folder : Example Logstash configurations based on the Aviatrix CoPilot validated configurations to parse Aviatrix syslog and forward to destinations (Splunk or Log Analytics)
+# For Azure Log Analytics output
+./scripts/assemble-config.sh azure-log-ingestion
+```
 
-## Azure deployment option
-The logging engine is deployed as an Azure Container Instance (ACI). As a first release, it uses public connectivity to Aviatrix Control plane to export logs.
+This generates a complete configuration file in `logstash-configs/assembled/`.
 
-The framework provides example configurations for 2 components:
+### 2. Deploy
 
-1. Terraform to deploy the cloud infrastructure (ACI with Logstash, Logstash configuration in an Azure Storage Account FileShare being mounted by the ACI, Microsoft Sentinel Log Ingestion API Logstash plugin preview) to point Aviatrix logging to and then forward it to the observability platform.
+Choose a deployment architecture from `deployment-tf/` and follow its README:
 
-2. logstash-configs\base_config and output_azure_log_ingestion_api folder : Example Logstash configurations based on the Aviatrix CoPilot validated configurations to parse Aviatrix syslog and forward to destinations. (Log Analytics)
+| Architecture | Description |
+|--------------|-------------|
+| [aws-ec2-autoscale](./deployment-tf/aws-ec2-autoscale) | HA autoscaling EC2 instances behind NLB |
+| [aws-ec2-single-instance](./deployment-tf/aws-ec2-single-instance) | Single EC2 instance |
+| [azure-aci](./deployment-tf/azure-aci) | Azure Container Instance |
 
-You can adapt Logstash configuration to output from AWS to Splunk or Log Analytics as well as from Azure to Splunk and Log Analytics.
+### 3. Configure Aviatrix
+
+Point your Aviatrix Controller/CoPilot syslog export to the deployed engine's IP on port 5000 (UDP/TCP).
+
+## Configuration Structure
+
+```
+logstash-configs/
+├── inputs/                 # Syslog listener (UDP/TCP 5000)
+├── filters/                # Log parsing modules
+├── outputs/                # Destination-specific outputs
+│   ├── splunk-hec/         # Splunk HTTP Event Collector
+│   └── azure-log-ingestion/# Azure Log Analytics
+├── patterns/               # Custom grok patterns
+├── assembled/              # Generated configs (do not edit directly)
+└── scripts/
+    └── assemble-config.sh  # Build script
+```
+
+See [logstash-configs/README.md](./logstash-configs/README.md) for detailed configuration instructions.
 
 ## Deployment Architectures
-Currently, the following engine deployment architectures are published in the `deployment-tf` folder:
-| Deployment Architecture | Description | README |
-|--|--|--|
-|aws-ec2-autoscale  | An highly-available autoscaling set of EC2 instances running Logstash behind an AWS NLB with a public Elastic IP. An S3 bucket contains the Logstash configuration and roles are created to allow the VMs to pull the logstash configuration. When the logstash configuration changes, and the terraform is re-applied, the instances will automatically refresh with the new configuration via a rolling upgrade. | [Folder](./deployment-tf/aws-ec2-autoscale) |
-|aws-ec2-single-instance| A single EC2 instance with Logstash and a public Elastic IP. An S3 bucket contains the Logstash configuration and roles are created to allow the VM to pull the Logstash configuration. When the Logstash configuration changes, and the Terraform is re-applied, the instances will automatically refresh with the new configuration via a rolling upgrade.| [Folder](./deployment-tf/aws-ec2-single-instance/) |
-|azure-aci | A single Azure Container Instance (ACI) with Logstash and a public IP. An Azure Storage Account Fileshare contains the Logstash configuration. ACI mounts the fileshare at deployment time to read the Logstash configuration. Any update to those files trigger a Logstash reload. When the Logstash configuration changes, and the Terraform is re-applied, the instances will automatically refresh with the new configuration via a rolling upgrade.| [README](./deployment-tf/azure-aci/README.md) |
 
+| Architecture | Description | Link |
+|--------------|-------------|------|
+| aws-ec2-autoscale | Highly-available autoscaling EC2 instances behind AWS NLB with public Elastic IP. S3 bucket stores Logstash config. Rolling upgrades on config changes. | [Folder](./deployment-tf/aws-ec2-autoscale) |
+| aws-ec2-single-instance | Single EC2 instance with public Elastic IP. S3 bucket stores Logstash config. | [Folder](./deployment-tf/aws-ec2-single-instance/) |
+| azure-aci | Single Azure Container Instance with public IP. Azure Storage Fileshare stores Logstash config. | [README](./deployment-tf/azure-aci/README.md) |
 
 ## Observability Destinations
-Currently, the following destination observability outputs are published:
 
-| Destination | Description | README |
-|--|--|--|
-| output_splunk_hec | Outputs JSON formatted logs to the Splunk HTTP Event Collector interface | [Folder](./logstash-configs/output_splunk_hec/) |
-| output_azure_log_ingestion_api | Outputs logs to Azure Log Analytics via Logstash using Azure Log Ingestion API Logstash plugin (preview) | [Folder](./logstash-configs/output_azure_log_ingestion_api/) |
+| Destination | Description | Link |
+|-------------|-------------|------|
+| splunk-hec | Splunk HTTP Event Collector | [Folder](./logstash-configs/outputs/splunk-hec/) |
+| azure-log-ingestion | Azure Log Analytics via Data Collection Rules | [Folder](./logstash-configs/outputs/azure-log-ingestion/) |
 
-  
-If modifying the Logstash configurations, it is recommended to modify only the "output" section as the inputs will be continuously updated to maintain compatibility with Aviatrix logs. 
+## Supported Log Types
+
+| Log Type | Tag | Source |
+|----------|-----|--------|
+| FQDN Firewall | `fqdn` | AviatrixFQDNRule |
+| Controller API | `cmd` | AviatrixCMD, AviatrixAPI |
+| L4 Microsegmentation | `microseg` | AviatrixGwMicrosegPacket |
+| L7/TLS Inspection | `mitm` | traffic_server |
+| Suricata IDS | `suricata` | suricata JSON |
+| Gateway Network Stats | `gw_net_stats` | AviatrixGwNetStats |
+| Gateway System Stats | `gw_sys_stats` | AviatrixGwSysStats |
+| Tunnel Status | `tunnel_status` | AviatrixTunnelStatusChange |
+
+## Adding a New Output
+
+1. Create `logstash-configs/outputs/<new-type>/output.conf`
+2. Run `./scripts/assemble-config.sh <new-type>`
+3. Deploy the generated config from `assembled/`
+
+See [logstash-configs/README.md](./logstash-configs/README.md) for details.
+
+## Environment Variables
+
+### Splunk HEC
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SPLUNK_ADDRESS` | Splunk server hostname/IP | (required) |
+| `SPLUNK_PORT` | HEC port | 8088 |
+| `SPLUNK_HEC_AUTH` | HEC authentication token | (required) |
+
+### Azure Log Analytics
+
+| Variable | Description |
+|----------|-------------|
+| `client_app_id` | Azure AD application ID |
+| `client_app_secret` | Azure AD application secret |
+| `tenant_id` | Azure AD tenant ID |
+| `data_collection_endpoint` | DCE endpoint URL |
+| `azure_dcr_*_id` | DCR immutable IDs |
+| `azure_stream_*` | Stream names |
+| `azure_cloud` | `public` or `china` |

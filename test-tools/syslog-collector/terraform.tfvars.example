@@ -1,0 +1,27 @@
+# AWS Region
+aws_region = "us-east-2"
+
+# Instance configuration
+instance_type = "t3.small"
+ssh_key_name  = "your-key-name"  # Replace with your actual SSH key name
+
+# Network configuration
+vpc_cidr           = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+
+# Security - restrict access as needed
+ssh_allowed_cidrs    = ["0.0.0.0/0"]  # Restrict to your IP for better security
+web_ui_allowed_cidrs = ["0.0.0.0/0"]  # Restrict to your IP for better security
+
+# Web UI password
+web_ui_password = "changeme123!"  # Change this to a secure password
+
+# Storage
+root_volume_size = 20  # GB
+
+# Tags
+tags = {
+  Project     = "syslog-collector"
+  Environment = "test"
+  Owner       = "your-name"
+}

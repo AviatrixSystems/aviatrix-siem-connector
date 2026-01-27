@@ -1,0 +1,151 @@
+# Aviatrix Log Integration Engine - Test Sample Logs
+# This file contains representative samples of each supported log type
+# Generated from messages.log for testing filter configurations
+#
+# Log Types Included:
+# - AviatrixGwMicrosegPacket (L4 Microsegmentation)
+# - AviatrixGwNetStats (Gateway Network Statistics)
+# - AviatrixGwSysStats (Gateway System Statistics)
+# - Suricata (IDS/IPS Alerts)
+# - traffic_server (L7/TLS/MITM inspection)
+# - AviatrixCMD (Controller API/Command logs)
+
+###############################################################################
+# MICROSEG LOGS - AviatrixGwMicrosegPacket
+###############################################################################
+
+# --- Legacy format (simple, older 7.x style) ---
+<14>Dec  9 00:30:00 avx-gw-test AviatrixGwMicrosegPacket: SRC_MAC=aa:bb:cc:dd:ee:ff DST_MAC=11:22:33:44:55:66 PROTO=TCP SPT=443 DPT=8080 ACTION=PERMIT
+
+# --- 8.2+ Format with Session fields - PERMIT action, session start (SESSION_EVENT=0) ---
+<158>Dec  9 00:28:06 GW-frontend-eks-spoke-18.216.17.241-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:06 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=60 SRC_IP=100.64.242.5 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=37368 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=15625921951502722107 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- 8.2+ Format - PERMIT action, session end (SESSION_EVENT=1) with stats ---
+<158>Dec  9 00:28:06 GW-frontend-eks-spoke-18.216.17.241-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:06 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=52 SRC_IP=100.64.242.5 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=37368 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=14657611050032487314 SESSION_EVENT=1 SESSION_END_REASON=1 SESSION_PKT_CNT=3 SESSION_BYTE_CNT=39936 SESSION_DUR=236983
+
+# --- Different gateway (backend-eks-spoke) ---
+<158>Dec  9 00:28:06 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:06 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.240.131 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=45790 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=12183715674629234859 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- k8s-demo-db gateway, larger packet size, session end with high byte count ---
+<158>Dec  9 00:28:17 GW-k8s-demo-db-3.18.67.36-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:17 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:bf:79:2c:59:55 DST_MAC=02:60:17:2c:e7:ff IP_SZ=831 SRC_IP=10.5.0.8 DST_IP=10.10.0.9 PROTO=TCP SRC_PORT=80 DST_PORT=46580 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=16367601629487859407 SESSION_EVENT=1 SESSION_END_REASON=1 SESSION_PKT_CNT=7 SESSION_BYTE_CNT=129283 SESSION_DUR=3685851
+
+# --- DENY action (ENFORCED=false, monitoring mode) ---
+<158>Dec  9 00:30:04 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:30:04 AviatrixGwMicrosegPacket: POLICY=126bafc2-10ee-4eb7-b5e8-238f10515c5f SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.82.93 DST_IP=212.227.228.245 PROTO=TCP SRC_PORT=57476 DST_PORT=443 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=3574532756463495801 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- DENY with different destination IP ---
+<158>Dec  9 00:32:35 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:32:35 AviatrixGwMicrosegPacket: POLICY=126bafc2-10ee-4eb7-b5e8-238f10515c5f SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.3.221 DST_IP=149.28.58.137 PROTO=TCP SRC_PORT=42574 DST_PORT=443 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=17916192532688554942 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- Port 8080 traffic (app to app communication) ---
+<158>Dec  9 00:28:07 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:07 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.240.131 DST_IP=10.10.1.108 PROTO=TCP SRC_PORT=53290 DST_PORT=8080 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=11813502966478450463 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+
+###############################################################################
+# GATEWAY NETWORK STATS - AviatrixGwNetStats
+###############################################################################
+
+# --- Controller stats (simpler format, eth0 interface) ---
+<14>Dec  9 00:21:54 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2025-12-09T00:21:54.970223 name=controller public_ip=18.190.163.185 private_ip=10.0.0.120 interface=eth0 total_rx_rate=186.97Kb total_tx_rate=158.35Kb total_rx_tx_rate=345.33Kb total_rx_cum=718.5MB total_tx_cum=496.4MB total_rx_tx_cum=1.2GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=1267
+
+# --- Gateway stats with alias and conntrack_allowance_available ---
+<14>Dec  9 00:28:17 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:17 AviatrixGwNetStats: timestamp=2025-12-09T00:28:14.662879854 name=backend-eks-spoke alias=backend-eks-spoke public_ip=18.119.198.171 private_ip=10.20.0.10 interface=eth0 total_rx_rate=519.70Kb total_tx_rate=284.39Kb total_rx_tx_rate=804.09Kb total_rx_cum=1.95GB total_tx_cum=1.85GB total_rx_tx_cum=3.80GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=180 bw_out_limit_exceeded=2094 pps_limit_exceeded=2915 linklocal_limit_exceeded=0 conntrack_count=898 conntrack_allowance_available=51010 conntrack_usage_rate=0.02
+
+# --- Transit gateway eth0 interface ---
+<14>Dec  9 00:28:34 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:34 AviatrixGwNetStats: timestamp=2025-12-09T00:28:31.883180813 name=k8s-transit alias=k8s-transit public_ip=3.128.129.113 private_ip=10.2.0.14 interface=eth0 total_rx_rate=112.23Kb total_tx_rate=147.55Kb total_rx_tx_rate=259.78Kb total_rx_cum=62.48MB total_tx_cum=71.21MB total_rx_tx_cum=133.69MB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=833 conntrack_allowance_available=205207 conntrack_usage_rate=0.02
+
+# --- Transit gateway firenet interface eth-fn1 (no public_ip) ---
+<14>Dec  9 00:28:34 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:34 AviatrixGwNetStats: timestamp=2025-12-09T00:28:31.883180813 name=k8s-transit alias=k8s-transit  private_ip=10.2.0.90 interface=eth-fn1 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=13.45KB total_tx_cum=23.15KB total_rx_tx_cum=36.60KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=833 conntrack_allowance_available=205207 conntrack_usage_rate=0.02
+
+# --- Transit gateway firenet interface eth-fn0 (no public_ip) ---
+<14>Dec  9 00:28:34 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:34 AviatrixGwNetStats: timestamp=2025-12-09T00:28:31.883180813 name=k8s-transit alias=k8s-transit  private_ip=10.2.0.77 interface=eth-fn0 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=13.45KB total_tx_cum=23.15KB total_rx_tx_cum=36.60KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=833 conntrack_allowance_available=205207 conntrack_usage_rate=0.02
+
+# --- Controller stats with higher rates ---
+<14>Dec  9 00:30:54 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2025-12-09T00:30:54.971817 name=controller public_ip=18.190.163.185 private_ip=10.0.0.120 interface=eth0 total_rx_rate=214.74Kb total_tx_rate=350.94Kb total_rx_tx_rate=565.68Kb total_rx_cum=730.8MB total_tx_cum=509.6MB total_rx_tx_cum=1.2GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=1167
+
+
+###############################################################################
+# GATEWAY SYSTEM STATS - AviatrixGwSysStats
+###############################################################################
+
+# --- Controller stats (simpler format) ---
+<14>Dec  9 00:21:54 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2025-12-09T00:21:54.970223 name=controller cpu_idle=91 memory_free=1509804 memory_available=4847420 memory_total=8027376 disk_total=65842432 disk_free=49704556
+
+# --- Gateway stats with alias and cpu_cores detail ---
+<14>Dec  9 00:28:17 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:17 AviatrixGwSysStats: timestamp=2025-12-09T00:28:14.662879854 name=backend-eks-spoke alias=backend-eks-spoke cpu_idle=99 memory_free=205972 memory_available=1372680 memory_total=3828976 disk_total=65842432 disk_free=58005892 cpu_cores=[busy:{start:{seconds:1765240053  nanos:643773820}  end:{seconds:1765240093  nanos:643956622}  min:2  max:16  avg:4} name:1  busy:{start:{seconds:1765240053  nanos:643773820}  end:{seconds:1765240093  nanos:643956622}  min:1  max:13  avg:3} name:-1  busy:{start:{seconds:1765240053  nanos:643773820}  end:{seconds:1765240093  nanos:643956622}  min:2  max:14  avg:4}]
+
+# --- Transit gateway with different cpu_cores format ---
+<14>Dec  9 00:28:34 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 00:28:34 AviatrixGwSysStats: timestamp=2025-12-09T00:28:31.883180813 name=k8s-transit alias=k8s-transit cpu_idle=100 memory_free=5556856 memory_available=6934948 memory_total=7867120 disk_total=65842432 disk_free=58036576 cpu_cores=[name:2  busy:{start:{seconds:1765240065  nanos:50928335}  end:{seconds:1765240105  nanos:51263074}  max:2} name:3  busy:{start:{seconds:1765240065  nanos:50928335}  end:{seconds:1765240105  nanos:51263074}  max:2} name:-1  busy:{start:{seconds:1765240065  nanos:50928335}  end:{seconds:1765240105  nanos:51263074}  max:1} busy:{start:{seconds:1765240065  nanos:50928335}  end:{seconds:1765240105  nanos:51263074}  max:1} name:1  busy:{start:{seconds:1765240065  nanos:50928335}  end:{seconds:1765240105  nanos:51263074}  max:1}]
+
+# --- Controller with lower cpu_idle (higher load) ---
+<14>Dec  9 00:25:54 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2025-12-09T00:25:54.971269 name=controller cpu_idle=84 memory_free=1498796 memory_available=4838432 memory_total=8027376 disk_total=65842432 disk_free=49703160
+
+# --- Controller normal load ---
+<14>Dec  9 00:28:54 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2025-12-09T00:28:54.970700 name=controller cpu_idle=90 memory_free=1531636 memory_available=4872892 memory_total=8027376 disk_total=65842432 disk_free=49702152
+
+
+###############################################################################
+# SURICATA IDS/IPS LOGS (JSON format)
+###############################################################################
+
+# --- Suricata startup/info notice ---
+<14>Dec  9 00:31:43 GW-backend-eks-spoke-18.119.198.171-sink suricata[25587]: Notice: lipc: Note: LIPC version mismatch. 33864 != 1 [ProcessLipcRequest:source-lipc.c:442]
+
+# --- Suricata IDS alert - GPL ATTACK_RESPONSE (full JSON format) ---
+<174>Dec  9 00:37:28 GW-backend-eks-spoke-18.119.198.171-sink suricata[4]: {"timestamp":"2025-12-09T00:37:28.699696+0000","flow_id":255638648850226,"pcap_cnt":88796,"event_type":"alert","src_ip":"3.170.131.31","src_port":80,"dest_ip":"100.64.59.124","dest_port":42324,"proto":"TCP","pkt_src":"wire/pcap","tx_id":0,"tx_guessed":true,"alert":{"action":"allowed","gid":1,"signature_id":2100498,"rev":7,"signature":"GPL ATTACK_RESPONSE id check returned root","category":"Potentially Bad Traffic","severity":2,"metadata":{"confidence":["Medium"],"created_at":["2010_09_23"],"signature_severity":["Informational"],"updated_at":["2019_07_26"]},"policy_id":""},"http":{"hostname":"testmynids.org","url":"http:///uid/index.html","http_user_agent":"curl/8.17.0","http_content_type":"text/html","http_method":"GET","protocol":"HTTP/1.1","status":200,"length":40},"files":[{"filename":"/uid/index.html","gaps":true,"state":"TRUNCATED","stored":false,"size":40,"tx_id":0}],"app_proto":"http","direction":"to_client","flow":{"pkts_toserver":5,"pkts_toclient":5,"bytes_toserver":299,"bytes_toclient":738,"start":"2025-12-09T00:37:28.649344+0000","src_ip":"100.64.59.124","dest_ip":"3.170.131.31","src_port":42324,"dest_port":80}}
+
+
+###############################################################################
+# TRAFFIC_SERVER LOGS - L7/TLS/MITM Inspection (JSON format)
+###############################################################################
+
+# --- Session start (stage=SNI) - github.com ---
+<153>Dec  9 00:36:55 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"100.64.242.5","src_port":52792,"dest":"140.82.112.3","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"github.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240615296592159,"session_stage":"start","session_id":"52e4c272-6a9c-406f-88e2-414b7f4e5ef9","timestamp":1765240615}
+
+# --- TLS check stage with certificate validation warning ---
+<156>Dec  9 00:36:55 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_WARNING","action":"Permit","reason":"TLS_PROFILE","src":"100.64.242.5","src_port":52792,"dest":"140.82.112.3","dest_port":443,"enforced":true,"ids":true,"message":"unable to get local issuer certificate","stage":"ORIGIN_CERT_VALIDATE","sni_hostname":"github.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240615296592159,"session_time":104080,"session_stage":"tls_check","session_id":"52e4c272-6a9c-406f-88e2-414b7f4e5ef9","timestamp":1765240615}
+
+# --- Session end with byte counts ---
+<153>Dec  9 00:36:55 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"100.64.242.5","src_port":52792,"dest":"140.82.112.3","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"github.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240615296592159,"session_time":123029745,"session_stage":"end","session_id":"52e4c272-6a9c-406f-88e2-414b7f4e5ef9","request_bytes":1727,"response_bytes":136328,"timestamp":1765240615}
+
+# --- Different source IP session ---
+<153>Dec  9 00:36:55 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"100.64.17.166","src_port":48762,"dest":"140.82.112.3","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"github.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240615564425514,"session_stage":"start","session_id":"c3026ef9-00ba-493a-89e8-89c33251fb26","timestamp":1765240615}
+
+# --- AWS SSM endpoint (different destination) ---
+<153>Dec  9 00:28:07 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"10.10.1.163","src_port":43374,"dest":"3.146.9.169","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"ssm.us-east-2.amazonaws.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240087061698856,"session_stage":"start","session_id":"1247e3cb-49f1-49f8-85f3-6233cc297b24","timestamp":1765240087}
+
+# --- TLS check for AWS SSM ---
+<156>Dec  9 00:28:07 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_WARNING","action":"Permit","reason":"TLS_PROFILE","src":"10.10.1.163","src_port":43374,"dest":"3.146.9.169","dest_port":443,"enforced":true,"ids":true,"message":"unable to get local issuer certificate","stage":"ORIGIN_CERT_VALIDATE","sni_hostname":"ssm.us-east-2.amazonaws.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240087061698856,"session_time":96370,"session_stage":"tls_check","session_id":"1247e3cb-49f1-49f8-85f3-6233cc297b24","timestamp":1765240087}
+
+# --- Route53 session end with byte counts ---
+<153>Dec  9 00:28:07 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"100.64.166.42","src_port":49870,"dest":"44.216.197.17","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"route53.amazonaws.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240081175494985,"session_time":6405635612,"session_stage":"end","session_id":"fb9125c3-e756-4e23-b545-034cc18ccef9","request_bytes":7598,"response_bytes":9859,"timestamp":1765240087}
+
+# --- Backend gateway traffic_server sample ---
+<153>Dec  9 00:28:08 GW-backend-eks-spoke-18.119.198.171-sink traffic_server[5363]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"100.64.240.131","src_port":53892,"dest":"140.82.114.4","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"github.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240088533257641,"session_stage":"start","session_id":"01887025-0027-4f0d-bdfd-4788c5fa738c","timestamp":1765240088}
+
+
+###############################################################################
+# AVIATRIX CMD LOGS - Controller API/Command Logs
+###############################################################################
+
+# --- User login management (copilot service account) ---
+Dec  9 00:45:08 18.190.163.185 Dec  9 00:45:07 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password', 'get_password', '--user_name', 'copilot_service_account', '--password', '********', '--api_token', '', '--login_ip', ''], result=Success, reason=
+
+# --- Disable rsyslog forwarder ---
+Dec  9 00:38:56 18.190.163.185 Dec  9 00:38:55 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=DISABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'disable_rsyslog_forwarder', '--index', '1'], result=Success, reason=, username=admin
+
+# --- Enable rsyslog forwarder (basic) ---
+Dec  9 00:28:07 18.190.163.185 Dec  9 00:28:06 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=ENABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'enable_rsyslog_forwarder', '3.149.191.227', '514', '--index', '1', '--name', 'Sample Data', '--protocol', 'UDP'], result=Success, reason=, username=admin
+
+# --- Enable rsyslog forwarder with exclude list ---
+Dec  9 00:21:25 18.190.163.185 Dec  9 00:21:25 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=ENABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'enable_rsyslog_forwarder', '3.149.191.227', '514', '--index', '1', '--name', 'Sample Data', '--protocol', 'UDP', '--exclude_list', 'backend-eks-spoke,frontend-eks-spoke,k8s-demo-db,k8s-transit'], result=Success, reason=, username=admin
+
+
+###############################################################################
+# ADDITIONAL LOG TYPES (not found in source sample)
+###############################################################################
+
+# NOTE: The following log types were NOT present in the source messages.log file:
+# - AviatrixFQDNRule (DNS/FQDN Firewall rules)
+# - AviatrixTunnelStatusChange (Tunnel state changes)
+#
+# If you need samples of these log types, capture them from a controller/gateway
+# with those features enabled.

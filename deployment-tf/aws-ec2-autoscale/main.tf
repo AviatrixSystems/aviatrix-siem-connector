@@ -14,17 +14,17 @@ resource "aws_s3_bucket" "default" {
 
 resource "aws_s3_object" "default" {
   bucket = aws_s3_bucket.default.id
-  key    = "${var.logstash_output_config_name}"
-  source = "${var.logstash_output_config_path}/${var.logstash_output_config_name}"
-  etag   = md5(file("${var.logstash_output_config_path}/${var.logstash_output_config_name}"))
+  key    = "${var.logstash_config_name}"
+  source = "${var.logstash_config_path}/${var.logstash_config_name}"
+  etag   = md5(file("${var.logstash_config_path}/${var.logstash_config_name}"))
   tags   = var.tags
 }
 
 resource "aws_s3_object" "base_pattern_config" {
   bucket = aws_s3_bucket.default.id
   key    = "avx.conf"
-  source = "${var.logstash_base_config_path}/patterns/avx.conf"
-  etag   = md5(file("${var.logstash_base_config_path}/patterns/avx.conf"))
+  source = "${var.logstash_patterns_path}/avx.conf"
+  etag   = md5(file("${var.logstash_patterns_path}/avx.conf"))
   tags   = var.tags
 }
 
@@ -131,7 +131,7 @@ locals {
   launch_template = format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
     aws_s3_bucket_id     = "${aws_s3_bucket.default.id}",
     logstash_config_name = "${aws_s3_object.default.key}"
-  }), templatefile("${var.logstash_output_config_path}/docker_run.tftpl", var.logstash_config_variables))
+  }), templatefile("${var.docker_run_template_path}", var.logstash_config_variables))
 }
 
 resource "aws_launch_template" "default" {
@@ -145,9 +145,9 @@ resource "aws_launch_template" "default" {
   }
 
   block_device_mappings {
-    device_name = "/dev/sda1"
+    device_name = "/dev/xvda"
     ebs {
-      volume_size = 20
+      volume_size = 30
       volume_type = "gp3"
     }
   }
@@ -167,7 +167,7 @@ resource "aws_launch_template" "default" {
   }
 
   lifecycle {
-    replace_triggered_by  = [aws_s3_object.default.etag, aws_s3_object.base_pattern_config.default.etag]
+    replace_triggered_by  = [aws_s3_object.default.etag, aws_s3_object.base_pattern_config.etag]
   }
 
 }

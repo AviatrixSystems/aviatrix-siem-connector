@@ -53,19 +53,24 @@ variable "syslog_protocol" {
   default     = "tcp"
 }
 
-variable "logstash_base_config_path" {
-  description = "Path to logstash config file"
-  default     = "../../logstash_configs/output_splunk_hec"
+variable "logstash_config_path" {
+  description = "Path to assembled logstash config directory"
+  default     = "../../logstash-configs/assembled"
 }
 
-variable "logstash_output_config_path" {
-  description = "Path to logstash config file"
-  default     = "../../logstash_configs/output_splunk_hec"
+variable "logstash_config_name" {
+  description = "Name of assembled logstash config file"
+  default     = "splunk-hec-full.conf"
 }
 
-variable "logstash_output_config_name" {
-  description = "Name of logstash config file"
-  default     = "logstash_output.conf"
+variable "logstash_patterns_path" {
+  description = "Path to logstash patterns directory"
+  default     = "../../logstash-configs/patterns"
+}
+
+variable "docker_run_template_path" {
+  description = "Path to docker run template file"
+  default     = "../../logstash-configs/outputs/splunk-hec/docker_run.tftpl"
 }
 
 variable "autoscale_min_size" {
