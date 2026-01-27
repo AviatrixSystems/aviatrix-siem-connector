@@ -145,8 +145,7 @@ resource "aws_instance" "default" {
     network_interface_id = aws_network_interface.default.id
   }
 
-  ebs_block_device {
-    device_name = "/dev/sda1"
+  root_block_device {
     volume_type = "gp3"
     volume_size = 20
   }
@@ -159,7 +158,7 @@ resource "aws_instance" "default" {
   }, var.tags)
 
   lifecycle {
-    replace_triggered_by = [aws_s3_object.default.etag, aws_s3_object.base_pattern_config.default.etag]
+    replace_triggered_by = [aws_s3_object.default.etag, aws_s3_object.base_pattern_config.etag]
   }
 }
 

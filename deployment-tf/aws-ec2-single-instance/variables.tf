@@ -42,18 +42,18 @@ variable "syslog_protocol" {
 }
 
 variable "logstash_base_config_path" {
-  description = "Path to logstash config file"
-  default     = "../../logstash_configs/output_splunk_hec"
+  description = "Base path to logstash configs directory (should contain patterns/ subdirectory)"
+  default     = "../../logstash-configs"
 }
 
 variable "logstash_output_config_path" {
-  description = "Path to logstash config file"
-  default     = "../../logstash_configs/output_splunk_hec"
+  description = "Path to the assembled output config directory (must contain both .conf file and docker_run.tftpl)"
+  default     = "../../logstash-configs/assembled"
 }
 
 variable "logstash_output_config_name" {
-  description = "Name of logstash config file"
-  default     = "logstash_output.conf"
+  description = "Name of the assembled logstash config file (e.g., splunk-hec-full.conf, azure-log-ingestion-full.conf)"
+  default     = "splunk-hec-full.conf"
 }
 
 variable "autoscale_min_size" {
@@ -80,9 +80,11 @@ variable "tags" {
 }
 
 variable "logstash_config_variables" {
-    #map variable
+    description = "Environment variables for Logstash container (e.g., Splunk HEC token, address, port)"
     type = map(string)
     default = {
-      "name" = "value"
+      "splunk_hec_auth" = "YOUR_SPLUNK_HEC_TOKEN_HERE",
+      "splunk_port" = "8088",
+      "splunk_address" = "https://YOUR_SPLUNK_IP_HERE"
     }
 }
