@@ -3,6 +3,10 @@ origin_logstash.conf
 *logstash_output_splunk_hec_all*
 *avxlogs.conf
 
+# Test environment information
+.env_aviatrix
+.env_splunk
+
 # macOS files
 .DS_Store
 
