@@ -54,22 +54,22 @@ variable "syslog_protocol" {
 }
 
 variable "logstash_config_path" {
-  description = "Path to assembled logstash config directory"
+  description = "Path to the assembled output config directory (must contain both .conf file and docker_run.tftpl)"
   default     = "../../logstash-configs/assembled"
 }
 
 variable "logstash_config_name" {
-  description = "Name of assembled logstash config file"
+  description = "Name of the assembled logstash config file (e.g., splunk-hec-full.conf, azure-log-ingestion-full.conf)"
   default     = "splunk-hec-full.conf"
 }
 
 variable "logstash_patterns_path" {
-  description = "Path to logstash patterns directory"
+  description = "Base path to logstash configs directory (should contain patterns/ subdirectory)"
   default     = "../../logstash-configs/patterns"
 }
 
 variable "docker_run_template_path" {
-  description = "Path to docker run template file"
+  description = "Path to docker run template file (docker_run.tftpl for the output type)"
   default     = "../../logstash-configs/outputs/splunk-hec/docker_run.tftpl"
 }
 
@@ -96,10 +96,22 @@ variable "tags" {
     }
 }
 
+variable "log_profile" {
+    description = "Which log types to forward: all (default), security (suricata, mitm, microseg, fqdn, cmd), or operations (gw_net_stats, gw_sys_stats, tunnel_status)"
+    type        = string
+    default     = "all"
+    validation {
+        condition     = contains(["all", "security", "operations"], var.log_profile)
+        error_message = "log_profile must be one of: all, security, operations"
+    }
+}
+
 variable "logstash_config_variables" {
-    #map variable
+    description = "Environment variables for Logstash container (e.g., Splunk HEC token, address, port)"
     type = map(string)
     default = {
-      "name" = "value"
+      "splunk_hec_auth" = "YOUR_SPLUNK_HEC_TOKEN_HERE",
+      "splunk_port" = "8088",
+      "splunk_address" = "https://YOUR_SPLUNK_IP_HERE"
     }
 }

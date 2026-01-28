@@ -131,7 +131,9 @@ locals {
   launch_template = format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
     aws_s3_bucket_id     = "${aws_s3_bucket.default.id}",
     logstash_config_name = "${aws_s3_object.default.key}"
-  }), templatefile("${var.docker_run_template_path}", var.logstash_config_variables))
+  }), templatefile("${var.docker_run_template_path}", merge(var.logstash_config_variables, {
+    log_profile = var.log_profile
+  })))
 }
 
 resource "aws_launch_template" "default" {
@@ -147,7 +149,7 @@ resource "aws_launch_template" "default" {
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
-      volume_size = 30
+      volume_size = 20
       volume_type = "gp3"
     }
   }
@@ -167,7 +169,7 @@ resource "aws_launch_template" "default" {
   }
 
   lifecycle {
-    replace_triggered_by  = [aws_s3_object.default.etag, aws_s3_object.base_pattern_config.etag]
+    create_before_destroy = true
   }
 
 }

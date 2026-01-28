@@ -130,7 +130,9 @@ locals {
   launch_template = format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
     aws_s3_bucket_id     = "${aws_s3_bucket.default.id}",
     logstash_config_name = "${aws_s3_object.default.key}"
-  }), templatefile("${var.logstash_output_config_path}/docker_run.tftpl", var.logstash_config_variables))
+  }), templatefile("${var.logstash_output_config_path}/docker_run.tftpl", merge(var.logstash_config_variables, {
+    log_profile = var.log_profile
+  })))
 }
 
 resource "aws_instance" "default" {
