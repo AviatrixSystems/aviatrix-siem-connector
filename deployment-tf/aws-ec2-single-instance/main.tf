@@ -149,7 +149,7 @@ resource "aws_instance" "default" {
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 20
+    volume_size = 30
   }
 
   user_data = base64encode(local.launch_template)
