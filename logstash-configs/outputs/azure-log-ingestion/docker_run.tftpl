@@ -1,2 +1,24 @@
-# DOCKER RUN FOR AZURE LOG INGESTION API OUTPUT
-sudo docker run -d --restart=always -v /logstash/pipeline/:/usr/share/logstash/pipeline/ -v /logstash/patterns:/usr/share/logstash/patterns -e LOG_PROFILE=${log_profile} -e AZURE_DCE_ENDPOINT=${azure_dce_endpoint} -e AZURE_ACCESS_TOKEN=${azure_access_token} -e AZURE_DCR_SURICATA_ID=${azure_dcr_suricata_id} -e AZURE_DCR_MITM_ID=${azure_dcr_mitm_id} -e AZURE_DCR_MICROSEG_ID=${azure_dcr_microseg_id} -e AZURE_DCR_FQDN_ID=${azure_dcr_fqdn_id} -e AZURE_DCR_CMD_ID=${azure_dcr_cmd_id} -e AZURE_STREAM_SURICATA=${azure_stream_suricata} -e AZURE_STREAM_MITM=${azure_stream_mitm} -e AZURE_STREAM_MICROSEG=${azure_stream_microseg} -e AZURE_STREAM_FQDN=${azure_stream_fqdn} -e AZURE_STREAM_CMD=${azure_stream_cmd} -e XPACK_MONITORING_ENABLED=false -p 5000:5000 aviatrixacr.azurecr.io/aviatrix-logstash-sentinel
+# Docker Run Template for Azure Log Ingestion
+# This template is for reference only - the ACI deployment uses Terraform directly
+# For manual Docker deployment, use this command:
+
+docker run -d --restart=always \
+  -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
+  -v /logstash/patterns:/usr/share/logstash/patterns \
+  -p 5000:5000/tcp \
+  -p 5000:5000/udp \
+  -e client_app_id="${client_app_id}" \
+  -e client_app_secret="${client_app_secret}" \
+  -e tenant_id="${tenant_id}" \
+  -e data_collection_endpoint="${data_collection_endpoint}" \
+  -e azure_dcr_suricata_id="${azure_dcr_suricata_id}" \
+  -e azure_dcr_microseg_id="${azure_dcr_microseg_id}" \
+  -e azure_stream_suricata="${azure_stream_suricata}" \
+  -e azure_stream_microseg="${azure_stream_microseg}" \
+  -e azure_cloud="${azure_cloud}" \
+  -e XPACK_MONITORING_ENABLED=false \
+  -e CONFIG_RELOAD_AUTOMATIC=true \
+  -e LS_JAVA_OPTS="-Xmx1g -Xms1g" \
+  docker.elastic.co/logstash/logstash:8.16.2
+
+# Note: Use 'public' or 'china' for azure_cloud (not 'AzureCloud' or 'AzureChinaCloud')

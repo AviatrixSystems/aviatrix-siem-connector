@@ -23,7 +23,7 @@ from pathlib import Path
 LOG_TYPE_PATTERNS = {
     "microseg": r"AviatrixGwMicrosegPacket",
     "suricata": r'"event_type"\s*:\s*"alert"',
-    "mitm": r"traffic_server.*application/json",
+    "mitm": r"traffic_server\[",
     "cmd": r"AviatrixCMD|AviatrixAPI",
     "fqdn": r"AviatrixFQDNRule",
     "netstats": r"AviatrixGwNetStats",

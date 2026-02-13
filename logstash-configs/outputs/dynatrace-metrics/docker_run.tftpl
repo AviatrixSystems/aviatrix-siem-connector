@@ -1,0 +1,23 @@
+#!/bin/bash
+# Dynatrace Metrics Logstash Container Runner
+# Generated for Dynatrace metrics ingest
+
+docker run -d \
+  --name aviatrix-logstash-dynatrace \
+  --restart unless-stopped \
+  -p 5000:5000/udp \
+  -p 5000:5000/tcp \
+  -e DT_ENVIRONMENT_ID="${dt_environment_id}" \
+  -e DT_API_TOKEN="${dt_api_token}" \
+  -e DT_REGION="${dt_region}" \
+  -e LOG_PROFILE="${log_profile}" \
+  -v $(pwd)/dynatrace-metrics-full.conf:/usr/share/logstash/pipeline/logstash.conf:ro \
+  -v $(pwd)/patterns:/usr/share/logstash/patterns:ro \
+  docker.elastic.co/logstash/logstash:8.11.0
+
+echo "Dynatrace Logstash container started"
+echo "Listening on UDP/TCP port 5000 for syslog"
+echo "Metrics will be sent to: https://${dt_environment_id}.${dt_region}.dynatrace.com"
+echo ""
+echo "View logs: docker logs -f aviatrix-logstash-dynatrace"
+echo "Stop: docker stop aviatrix-logstash-dynatrace"

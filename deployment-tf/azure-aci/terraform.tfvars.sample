@@ -7,6 +7,9 @@ location            = "West Europe"
 
 # Container Configuration
 container_name      = "aviatrix-logstash-sentinel"
+# IMPORTANT: Default image requires custom build with Azure Sentinel plugin
+# See logstash-container-build/README.md for instructions
+# Official Logstash image without plugin: docker.elastic.co/logstash/logstash:8.16.2
 container_image     = "your-registry.azurecr.io/aviatrix-logstash-sentinel"
 cpu_cores          = 1
 memory_gb          = 1.5

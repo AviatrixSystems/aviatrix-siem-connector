@@ -50,27 +50,112 @@ This is a first release that mixes Terraform code along with some Azure CLI comm
 
 ### Custom log table creation example (not available through Terraform azurerm provider yet)
 
+#### AviatrixMicroseg_CL - L4 Microsegmentation and L7 MITM/TLS Inspection
+
+This table stores both L4 microsegmentation logs and L7 MITM/TLS inspection logs.
+
 ```bash
 az monitor log-analytics workspace table create \
     --resource-group <your-resource-group-name> \
     --workspace-name <your-log-analytics-workspace-name> \
     --name "AviatrixMicroseg_CL" \
-    --columns TimeGenerated=datetime action=string dst_ip=string dst_mac=string dst_port=int \
-    enforced=boolean gw_hostname=string ls_timestamp=string proto=string src_ip=string src_mac=string \
-    src_port=int tags=dynamic uuid=string
+    --columns \
+        TimeGenerated=datetime \
+        Computer=string \
+        RawData=string \
+        action=string \
+        proto=string \
+        src_ip=string \
+        src_port=string \
+        dst_ip=string \
+        dst_port=string \
+        enforced=string \
+        uuid=string \
+        gw_ip=string \
+        src_mac=string \
+        dst_mac=string \
+        ip_size=string \
+        session_id=string \
+        session_event=string \
+        session_end_reason=string \
+        session_pkt_cnt=string \
+        session_byte_cnt=string \
+        session_dur=string \
+        direction=string \
+        mitm_sni_hostname=string \
+        mitm_url_parts=string \
+        mitm_decrypted_by=string \
+        gw_hostname=string \
+        message=string \
+        unix_time=long
 ```
+
+**Field Descriptions:**
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| `TimeGenerated` | datetime | All | Event timestamp (required by Azure) |
+| `action` | string | L4, MITM | PERMIT or DENY |
+| `proto` | string | L4, MITM | Protocol (TCP, UDP, ICMP) |
+| `src_ip`, `src_port` | string | L4, MITM | Source IP and port |
+| `dst_ip`, `dst_port` | string | L4, MITM | Destination IP and port |
+| `enforced` | string | L4, MITM | Enforcement status (true/false) |
+| `uuid` | string | L4, MITM | Rule UUID |
+| `session_*` | string | L4 | Session fields (8.2+): id, event, end_reason, pkt_cnt, byte_cnt, dur |
+| `mitm_sni_hostname` | string | MITM | SNI hostname from TLS handshake (e.g., "github.com") |
+| `mitm_url_parts` | string | MITM | Full URL if available |
+| `mitm_decrypted_by` | string | MITM | Gateway that decrypted the traffic |
+
+#### AviatrixSuricata_CL - IDS/IPS Alerts
+
 ```bash
 az monitor log-analytics workspace table create \
    --resource-group <your-resource-group-name> \
    --workspace-name <your-log-analytics-workspace-name> \
    --name "AviatrixSuricata_CL" \
-   --columns TimeGenerated=datetime Computer=string alert=dynamic app_proto=string dest_ip=string dest_port=int event_type=string files=dynamic flow=dynamic flow_id=long http=dynamic in_iface=string ls_timestamp=string ls_version=string proto=string src_ip=string src_port=int tags=dynamic timestamp=string tx_id=int
+   --columns \
+        TimeGenerated=datetime \
+        Computer=string \
+        RawData=string \
+        timestamp=string \
+        flow_id=long \
+        event_type=string \
+        src_ip=string \
+        src_port=int \
+        dest_ip=string \
+        dest_port=int \
+        proto=string \
+        alert_action=string \
+        alert_signature=string \
+        alert_category=string \
+        alert_severity=int \
+        alert_signature_id=int \
+        alert_rev=int \
+        alert_gid=int \
+        gw_hostname=string \
+        message=string \
+        unix_time=long
 ```
 
 | Log Type | Stream Name | Custom Table | Description |
 |----------|-------------|--------------|-------------|
 | Suricata | `Custom-AviatrixSuricata_CL` | `AviatrixSuricata_CL` | Intrusion Detection System logs |
-| Microseg | `Custom-AviatrixMicroseg_CL` | `AviatrixMicroseg_CL` | Layer 4 microsegmentation logs |
+| Microseg (L4) | `Custom-AviatrixMicroseg_CL` | `AviatrixMicroseg_CL` | Layer 4 microsegmentation logs |
+| MITM (L7) | `Custom-AviatrixMicroseg_CL` | `AviatrixMicroseg_CL` | Layer 7 TLS inspection logs with SNI hostname |
+
+#### Updating Existing Tables
+
+If you need to add fields to an existing table (e.g., adding MITM fields):
+
+```bash
+az monitor log-analytics workspace table update \
+    --resource-group <your-resource-group-name> \
+    --workspace-name <your-log-analytics-workspace-name> \
+    --name "AviatrixMicroseg_CL" \
+    --columns <full-column-list-including-new-fields>
+```
+
+**Note:** You must provide the complete column list when updating. See [AZURE_LOG_ANALYTICS_SETUP.md](../../AZURE_LOG_ANALYTICS_SETUP.md) for detailed schema documentation.
 
 Below is a screenshot showing the custom tables created in Log Analytics:
 
@@ -88,22 +173,27 @@ Once deployed, come back here to continue with SPN IAM role assignment
    cd .\deployment-tf\azure-aci\deploy-public,china
    ```
 
-2. **Initialize Terraform**:
+2. **Validate Prerequisites**:
+   ```bash
+   ../scripts/validate-deployment.sh
+   ```
+
+3. **Initialize Terraform**:
    ```bash
    terraform init
    ```
 
-3. **Review the plan**:
+4. **Review the plan**:
    ```bash
    terraform plan [-var-file="terraform.tfvars"]
    ```
 
-4. **Apply the configuration**:
+5. **Apply the configuration**:
    ```bash
    terraform apply [-var-file="terraform.tfvars"]
    ```
 
-5. **Get outputs**:
+6. **Get outputs**:
    ```bash
    terraform output
    ```
@@ -171,9 +261,15 @@ Replace `<your-resource-group>` and `<your-container-group-name>` with your actu
 
 The deployment automatically uploads the following configuration files to the Azure File Share:
 
-- **Main Configuration**: `pipeline/logstash.conf` (from `../../logstash-configs/output_azure_log_ingestion_api/logstash_output_azure_lia.conf`)
-- **Patterns**: `patterns/avx.conf` (from `../../logstash-configs/base_config/patterns/avx.conf`)
+- **Main Configuration**: `pipeline/logstash.conf` (from `../../logstash-configs/assembled/azure-log-ingestion-full.conf`)
+- **Patterns**: `patterns/avx.conf` (from `../../logstash-configs/patterns/avx.conf`)
 
 These files are mounted to the container at `/usr/share/logstash/pipeline` and `/usr/share/logstash/patterns` respectively.
 
-If you decide to change any configuration, container is configured for auto reload of configuration using the variable "CONFIG_RELOAD_AUTOMATIC" = "true"
+**IMPORTANT:** Before deploying, ensure you have assembled the config:
+```bash
+cd logstash-configs
+./scripts/assemble-config.sh azure-log-ingestion
+```
+
+If you decide to change any filter or pattern, reassemble the config and re-apply Terraform to update the Azure File Share. The container is configured for auto reload using `CONFIG_RELOAD_AUTOMATIC=true`.

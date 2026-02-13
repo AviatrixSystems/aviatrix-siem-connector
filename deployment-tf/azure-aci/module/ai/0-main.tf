@@ -39,7 +39,7 @@ resource "azurerm_storage_share" "pipeline" {
 resource "azurerm_storage_share_file" "logstash_conf" {
   name             = "logstash.conf"
   storage_share_id = azurerm_storage_share.pipeline.id
-  source           = "${path.module}/../../../../logstash-configs/output_azure_log_ingestion_api/logstash_output_azure_lia.conf"
+  source           = "${path.module}/../../../../logstash-configs/assembled/azure-log-ingestion-full.conf"
   depends_on       = [azurerm_monitor_data_collection_endpoint.dce]
 }
 
@@ -47,7 +47,7 @@ resource "azurerm_storage_share_file" "logstash_conf" {
 resource "azurerm_storage_share_file" "avx_pattern" {
   name             = "avx.conf"
   storage_share_id = azurerm_storage_share.patterns.id
-  source           = "${path.module}/../../../../logstash-configs/base_config/patterns/avx.conf"
+  source           = "${path.module}/../../../../logstash-configs/patterns/avx.conf"
 }
 
 # Container group with Logstash container
@@ -77,6 +77,7 @@ resource "azurerm_container_group" "logstash" {
       "client_app_id"            = var.use_existing_spn ? var.client_app_id : azuread_application.logstash_app[0].client_id
       "client_app_secret"        = var.use_existing_spn ? var.client_app_secret : azuread_application_password.logstash_app_password[0].value
       "tenant_id"                = var.use_existing_spn ? var.tenant_id : data.azuread_client_config.current[0].tenant_id
+      # Pass azure_cloud directly - plugin expects AzureCloud, AzureChinaCloud, or AzureUSGovernment
       "azure_cloud"              = var.azure_cloud
     })
 
