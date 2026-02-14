@@ -56,3 +56,31 @@ resource "azurerm_role_assignment" "aviatrix_microseg_dcr_assignment" {
   principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
   depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_microseg]
 }
+
+resource "azurerm_role_assignment" "aviatrix_gw_net_stats_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-gw-net-stats-dcr"
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_gw_net_stats]
+}
+
+resource "azurerm_role_assignment" "aviatrix_gw_sys_stats_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-gw-sys-stats-dcr"
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_gw_sys_stats]
+}
+
+resource "azurerm_role_assignment" "aviatrix_cmd_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-cmd-dcr"
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_cmd]
+}
+
+resource "azurerm_role_assignment" "aviatrix_tunnel_status_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-tunnel-status-dcr"
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_tunnel_status]
+}

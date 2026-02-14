@@ -29,6 +29,7 @@ module "deployment" {
   providers = {
     azurerm = azurerm.public
     azuread = azuread.public
+    azapi   = azapi
   }
 
   # Resource Configuration

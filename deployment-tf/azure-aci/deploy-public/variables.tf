@@ -93,8 +93,12 @@ variable "environment_variables" {
     "XPACK_MONITORING_ENABLED" = "false"
     "PIPELINE_WORKERS"         = "1"
     "CONFIG_RELOAD_AUTOMATIC"  = "true"
-    "azure_stream_suricata"    = "Custom-AviatrixSuricata_CL"
-    "azure_stream_microseg"    = "Custom-AviatrixMicroseg_CL"
+    "azure_stream_suricata"      = "Custom-AviatrixSuricata_CL"
+    "azure_stream_microseg"      = "Custom-AviatrixMicroseg_CL"
+    "azure_stream_gw_net_stats"  = "Custom-AviatrixGwNetStats_CL"
+    "azure_stream_gw_sys_stats"  = "Custom-AviatrixGwSysStats_CL"
+    "azure_stream_cmd"           = "Custom-AviatrixCmd_CL"
+    "azure_stream_tunnel_status" = "Custom-AviatrixTunnelStatus_CL"
   }
 }
 

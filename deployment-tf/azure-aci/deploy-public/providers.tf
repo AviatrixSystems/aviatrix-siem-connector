@@ -13,3 +13,5 @@ provider "azurerm" {
 provider "azuread" {
   alias = "public"
 }
+
+provider "azapi" {}
