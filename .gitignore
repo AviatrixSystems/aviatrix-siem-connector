@@ -1,5 +1,6 @@
 # Project-specific files to ignore
 origin_logstash.conf
+*avx_official_logstash
 *logstash_output_splunk_hec_all*
 *avxlogs.conf
 
@@ -14,6 +15,7 @@ origin_logstash.conf
 .claude/
 .serena/
 .devcontainer/
+.playwright-mcp/
 
 # Terraform files
 # Variable files (may contain secrets)

@@ -65,9 +65,11 @@ logstash-configs/
 │   ├── 14-suricata.conf                 # Suricata IDS parsing
 │   ├── 15-gateway-stats.conf            # gw_net_stats, gw_sys_stats
 │   ├── 16-tunnel-status.conf            # Tunnel state changes
+│   ├── 17-cpu-cores-parse.conf          # CPU cores protobuf text → structured JSON
 │   ├── 80-throttle.conf                 # Microseg throttling
 │   ├── 90-timestamp.conf                # Date normalization
-│   └── 95-field-conversion.conf         # Type conversions
+│   ├── 95-field-conversion.conf         # Type conversions
+│   └── 96-sys-stats-hec.conf            # gw_sys_stats HEC payload builder
 ├── outputs/                             # Output-specific configs
 │   ├── splunk-hec/
 │   │   ├── output.conf                  # Splunk HEC output
@@ -97,7 +99,9 @@ deployment-tf/
 test-tools/
 ├── sample-logs/
 │   ├── test-samples.log                 # Curated test samples for all log types
-│   └── stream-logs.py                   # Syslog streamer for testing
+│   ├── stream-logs.py                   # Syslog streamer for testing
+│   ├── update-timestamps.py             # Rewrite all timestamps to current UTC window
+│   └── generate-current-samples.sh      # Wrapper: refresh timestamps in-place
 ├── syslog-collector/                    # AWS EC2 syslog capture tool
 │   ├── main.tf, variables.tf, etc.      # Terraform deployment
 │   └── user_data.sh                     # Container setup
@@ -231,14 +235,18 @@ When editing or building Logstash configurations, use the following test workflo
 1. **Sample Logs** (`test-tools/sample-logs/`)
    - `test-samples.log` - Curated samples of each supported log type
    - `stream-logs.py` - Python script to stream logs to syslog endpoint
+   - `update-timestamps.py` - Rewrites all 9 timestamp formats to a UTC window around now
+   - `generate-current-samples.sh` - Wrapper that calls update-timestamps.py
    - Includes both legacy 7.x and 8.2+ format variations
 
    ```bash
-   ./stream-logs.py                           # Stream all to localhost:5000
-   ./stream-logs.py --filter microseg         # Only microseg logs
-   ./stream-logs.py --target 10.0.0.5 --tcp   # TCP to custom host
-   ./stream-logs.py --loop --delay 1          # Continuous replay
-   ./stream-logs.py --list-types              # Show available filters
+   ./generate-current-samples.sh --overwrite   # Refresh timestamps to now (UTC)
+   ./stream-logs.py                            # Stream all to localhost:5000
+   ./stream-logs.py --port 5002 -v             # Stream to port 5002, verbose
+   ./stream-logs.py --filter microseg          # Only microseg logs
+   ./stream-logs.py --target 10.0.0.5 --tcp    # TCP to custom host
+   ./stream-logs.py --loop --delay 1           # Continuous replay
+   ./stream-logs.py --list-types               # Show available filters
    ```
 
 2. **Webhook Viewer** (`test-tools/webhook-viewer/local/`)

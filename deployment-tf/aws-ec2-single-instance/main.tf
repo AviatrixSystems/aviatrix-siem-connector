@@ -8,7 +8,7 @@ resource "random_string" "random" {
 }
 
 resource "aws_s3_bucket" "default" {
-  bucket = "avx-log-int-${lower(random_string.random.id)}"
+  bucket = "avxlog-${lower(random_string.random.id)}"
   tags   = var.tags
 }
 
@@ -29,7 +29,7 @@ resource "aws_s3_object" "base_pattern_config" {
 }
 
 resource "aws_s3_access_point" "default" {
-  name   = "avx-log-integration-config"
+  name   = "avxlog-${lower(random_string.random.id)}"
   bucket = aws_s3_bucket.default.id
   vpc_configuration {
     vpc_id = var.vpc_id
@@ -37,7 +37,7 @@ resource "aws_s3_access_point" "default" {
 }
 
 resource "aws_iam_policy" "s3_read_policy" {
-  name        = "avx-log-integration-s3-read-policy"
+  name        = "avxlog-s3-${lower(random_string.random.id)}"
   description = "Policy to allow EC2 instances to read a specific S3 bucket"
 
   policy = jsonencode({
@@ -58,7 +58,7 @@ resource "aws_iam_policy" "s3_read_policy" {
 }
 
 resource "aws_iam_role" "ec2_s3_access_role" {
-  name = "avx-log-integration-ec2-s3-access-role"
+  name = "avxlog-role-${lower(random_string.random.id)}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -81,7 +81,7 @@ resource "aws_iam_role_policy_attachment" "s3_read_attach" {
 }
 
 resource "aws_iam_instance_profile" "ec2_s3_access_profile" {
-  name = "avx-log-integration-ec2-s3-access-profile"
+  name = "avxlog-profile-${lower(random_string.random.id)}"
   role = aws_iam_role.ec2_s3_access_role.name
   tags = var.tags
 }
@@ -89,7 +89,7 @@ resource "aws_iam_instance_profile" "ec2_s3_access_profile" {
 
 resource "aws_security_group" "default" {
   count  = var.use_existing_copilot_security_group ? 0 : 1
-  name   = "avx-log-integration-copilot-sg"
+  name   = "avxlog-${lower(random_string.random.id)}"
   vpc_id = var.vpc_id
   ingress {
     from_port   = var.syslog_port
@@ -156,7 +156,7 @@ resource "aws_instance" "default" {
 
 
   tags = merge({
-    Name = "avx-log-int-engine"
+    Name = "avxlog-${lower(random_string.random.id)}"
   }, var.tags)
 
   lifecycle {

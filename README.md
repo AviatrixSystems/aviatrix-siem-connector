@@ -108,3 +108,7 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for details.
 | `azure_dcr_*_id` | DCR immutable IDs |
 | `azure_stream_*` | Stream names |
 | `azure_cloud` | `public` or `china` |
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow, test methodology, and architecture notes.

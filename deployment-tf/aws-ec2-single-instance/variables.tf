@@ -56,21 +56,6 @@ variable "logstash_output_config_name" {
   default     = "splunk-hec-full.conf"
 }
 
-variable "autoscale_min_size" {
-    description = "Minimum number of instances in autoscale group"
-    default     = 2
-}
-
-variable "autoscale_max_size" {
-    description = "Maximum number of instances in autoscale group"
-    default     = 6
-}
-
-variable "autoscale_step_size" {
-    description = "Number of instances to add/remove when scaling"
-    default     = 2
-}
-
 variable "tags" {
     description = "Tags to apply to all resources"
     type        = map(string)

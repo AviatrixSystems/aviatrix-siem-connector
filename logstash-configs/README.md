@@ -74,9 +74,11 @@ Filters are processed in numerical order by filename:
 | `14-suricata.conf` | Suricata IDS alerts |
 | `15-gateway-stats.conf` | Gateway performance metrics |
 | `16-tunnel-status.conf` | Tunnel state changes |
+| `17-cpu-cores-parse.conf` | CPU cores protobuf text → structured JSON |
 | `80-throttle.conf` | Rate limiting for microseg logs |
 | `90-timestamp.conf` | Timestamp normalization |
 | `95-field-conversion.conf` | Field type conversions |
+| `96-sys-stats-hec.conf` | gw_sys_stats HEC payload builder |
 
 ## Adding a New Output Type
 

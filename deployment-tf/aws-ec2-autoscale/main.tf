@@ -149,7 +149,7 @@ resource "aws_launch_template" "default" {
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
-      volume_size = 20
+      volume_size = 30
       volume_type = "gp3"
     }
   }
@@ -206,7 +206,7 @@ resource "aws_autoscaling_policy" "scale_up" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "high_cpu" {
-  alarm_name          = "avxlog-${lower(random_string.random.id)}"
+  alarm_name          = "avxlog-high-cpu-${lower(random_string.random.id)}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
@@ -215,6 +215,32 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu" {
   statistic           = "Average"
   threshold           = 75
   alarm_actions       = [aws_autoscaling_policy.scale_up.arn]
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.default.name
+  }
+}
+
+resource "aws_autoscaling_policy" "scale_down" {
+  name                   = "scale_down"
+  scaling_adjustment     = -var.autoscale_step_size
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.default.name
+}
+
+resource "aws_cloudwatch_metric_alarm" "low_cpu" {
+  alarm_name          = "avxlog-low-cpu-${lower(random_string.random.id)}"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = 4
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 120
+  statistic           = "Average"
+  threshold           = 25
+  alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.default.name
+  }
 }
 
 resource "aws_lb" "default" {
@@ -235,7 +261,7 @@ resource "aws_lb_target_group" "default" {
   vpc_id   = var.vpc_id
 
   health_check {
-    protocol            = upper(var.syslog_protocol)
+    protocol            = "TCP"
     port                = var.syslog_port
     interval            = 30
     healthy_threshold   = 3
