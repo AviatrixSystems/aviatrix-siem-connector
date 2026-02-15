@@ -16,6 +16,7 @@ Handles every timestamp format in the sample file:
   7. session_start: "session_start":1765240615296592159  (nanoseconds)
   8. cpu_cores:     seconds:1765240053 ... seconds:1765240093  (start/end pairs)
   9. CMD dual:      "Dec  9 00:45:08 1.2.3.4 Dec  9 00:45:07"
+ 10. ISO syslog:    2026-02-14T21:16:45.718808+00:00  (tunnel status, RFC 5424)
 """
 
 import argparse
@@ -49,6 +50,11 @@ def suricata_iso_fmt(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{random.randint(100000, 999999)}+0000"
 
 
+def iso_syslog_fmt(dt: datetime) -> str:
+    """Format as '2026-02-14T09:32:05.718808+00:00' (RFC 5424 syslog)."""
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{random.randint(100000, 999999)}+00:00"
+
+
 def rewrite_line(line: str, base_epoch: int) -> str:
     """Replace all timestamps in a single log line with times based on base_epoch."""
     dt = datetime.fromtimestamp(base_epoch, tz=timezone.utc)
@@ -65,6 +71,15 @@ def rewrite_line(line: str, base_epoch: int) -> str:
         r" (\d{2}:\d{2}:\d{2})"
     )
     line = syslog_pat.sub(syslog_fmt(dt), line)
+
+    # --- 1b. ISO8601 syslog timestamps: "YYYY-MM-DDTHH:MM:SS.ffffff+HH:MM" ---
+    # Used by tunnel_status logs (RFC 5424 format with colon in tz offset).
+    # Must run before patterns 3/4 which match different ISO8601 variants.
+    line = re.sub(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+\+\d{2}:\d{2}",
+        iso_syslog_fmt(dt),
+        line,
+    )
 
     # --- 2. Internal slash format: "YYYY/MM/DD HH:MM:SS" ---
     line = re.sub(r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}", slash_fmt(dt), line)
