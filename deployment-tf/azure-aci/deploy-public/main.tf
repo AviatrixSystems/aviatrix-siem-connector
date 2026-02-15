@@ -37,14 +37,19 @@ module "deployment" {
   location            = var.location
 
   # Container Configuration
-  container_name  = var.container_name
-  container_image = var.container_image
-  cpu_cores       = var.cpu_cores
-  memory_gb       = var.memory_gb
-  container_port  = var.container_port
+  container_name     = var.container_name
+  container_image    = var.container_image
+  cpu_cores          = var.cpu_cores
+  memory_gb          = var.memory_gb
+  container_port     = var.container_port
+  container_protocol = var.container_protocol
 
   # Storage Configuration
   storage_account_name = var.storage_account_name
+  file_share_quota_gb  = var.file_share_quota_gb
+
+  # Environment
+  environment_variables = var.environment_variables
 
   # Log Analytics Configuration
   log_analytics_workspace           = var.log_analytics_subscription_id == "dummy" ? module.log_analytics_same_subscription[0].log_analytics_workspace : module.log_analytics_diff_subscription[0].log_analytics_workspace

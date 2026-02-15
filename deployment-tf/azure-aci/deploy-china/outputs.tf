@@ -19,6 +19,6 @@ output "container_group_name" {
 }
 
 output "attach_container_command" {
-  description = "Copy / Past that command to attach to container"
+  description = "Copy / paste this command to attach to container"
   value       = "az container attach --resource-group ${module.deployment.resource_group_name} --name ${module.deployment.container_group_name}"
 }

@@ -1,0 +1,64 @@
+# Azure ACI Logstash Deployment Configuration
+# Copy this file to terraform.tfvars and fill in your values.
+#
+# Required: container_image, log_analytics_workspace_name,
+#           log_analytics_resource_group_name, and SPN credentials.
+
+# ── Resource ─────────────────────────────────────────────────────────────────
+resource_group_name = "your-logstash-rg"
+location            = "eastus"
+
+# ── Container ────────────────────────────────────────────────────────────────
+# IMPORTANT: The stock Elastic image does NOT include the Sentinel plugin.
+# You must build a custom image first. See logstash-container-build/README.md
+container_name  = "aviatrix-logstash-sentinel"
+container_image = "your-registry.azurecr.io/aviatrix-logstash-sentinel:latest"
+cpu_cores       = 1
+memory_gb       = 1.5
+container_port  = 5000
+
+# ACI exposes only one protocol per port. TCP is recommended for syslog
+# reliability. Set to "UDP" only if your gateways are configured for UDP.
+container_protocol = "TCP"
+
+# ── Storage ──────────────────────────────────────────────────────────────────
+storage_account_name = "yourstorageaccount"
+
+# ── Log Analytics ────────────────────────────────────────────────────────────
+# The workspace must already exist. Terraform creates the custom tables inside it.
+log_analytics_workspace_name      = "your-log-analytics-workspace"
+log_analytics_resource_group_name = "your-log-analytics-rg"
+# Uncomment if the workspace is in a different subscription:
+# log_analytics_subscription_id   = "00000000-0000-0000-0000-000000000000"
+
+# ── Service Principal ────────────────────────────────────────────────────────
+# Option 1 (default): Provide an existing SPN with "Monitoring Metrics Publisher"
+# role on the resource group. Terraform will assign the role to each DCR.
+use_existing_spn  = true
+client_app_id     = "00000000-0000-0000-0000-000000000000"
+client_app_secret = "your-client-secret"
+tenant_id         = "00000000-0000-0000-0000-000000000000"
+
+# Option 2: Let Terraform create a new SPN (requires "Application Administrator"
+# or "Cloud Application Administrator" Entra ID role).
+# use_existing_spn = false
+
+# ── Azure Cloud ──────────────────────────────────────────────────────────────
+# "AzureCloud" (default), "AzureChinaCloud", or "AzureUSGovernment"
+azure_cloud = "AzureCloud"
+
+# ── Tags ─────────────────────────────────────────────────────────────────────
+tags = {
+  Environment = "production"
+  Project     = "log-integration-engine"
+  Service     = "logstash"
+  ManagedBy   = "terraform"
+}
+
+# ── Notes ────────────────────────────────────────────────────────────────────
+# Stream names (azure_stream_*) and DCR IDs (azure_dcr_*_id) are injected
+# automatically by the Terraform module — do NOT set them manually.
+#
+# ASIM parser deployment (optional): After deployment, you can install KQL
+# ASIM parsers for Sentinel. See logstash-configs/outputs/azure-log-ingestion/
+# asim-parsers/ for the .kql files and deployment instructions.

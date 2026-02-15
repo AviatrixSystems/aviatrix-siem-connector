@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.0"
+    }
+  }
+}
+
 # Current provider / subscription is China
 provider "azurerm" {
   features {}
@@ -15,5 +24,9 @@ provider "azurerm" {
 
 provider "azuread" {
   alias       = "china"
+  environment = "china"
+}
+
+provider "azapi" {
   environment = "china"
 }

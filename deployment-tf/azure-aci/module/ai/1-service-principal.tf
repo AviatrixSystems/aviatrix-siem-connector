@@ -17,7 +17,7 @@ data "azuread_service_principal" "existing_client_app_id" {
 # 1. Application (Service Principal) creation
 resource "azuread_application" "logstash_app" {
   count        = var.use_existing_spn ? 0 : 1
-  display_name = "aweiss-logstash-sentinel-${random_integer.suffix.result}"
+  display_name = "aviatrix-logstash-sentinel-${random_integer.suffix.result}"
   owners       = [data.azuread_client_config.current[0].object_id]
 }
 
@@ -42,19 +42,27 @@ resource "azuread_service_principal_password" "logstash_sp_password" {
   service_principal_id = azuread_service_principal.logstash_sp[0].id
 }
 
-# Role assignment for the Log Analytics Data Collection Rules
-resource "azurerm_role_assignment" "aviatrix_suricata_dcr_assignment" {
-  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-suricata-dcr"
+# Role assignments for the Log Analytics Data Collection Rules
+
+resource "azurerm_role_assignment" "aviatrix_ids_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-ids-dcr"
   role_definition_name = "Monitoring Metrics Publisher"
   principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
-  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_suricata]
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_ids]
 }
 
-resource "azurerm_role_assignment" "aviatrix_microseg_dcr_assignment" {
-  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-microseg-dcr"
+resource "azurerm_role_assignment" "aviatrix_netsession_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-netsession-dcr"
   role_definition_name = "Monitoring Metrics Publisher"
   principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
-  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_microseg]
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_netsession]
+}
+
+resource "azurerm_role_assignment" "aviatrix_websession_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-websession-dcr"
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_websession]
 }
 
 resource "azurerm_role_assignment" "aviatrix_gw_net_stats_dcr_assignment" {

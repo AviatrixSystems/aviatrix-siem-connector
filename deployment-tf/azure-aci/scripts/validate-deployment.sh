@@ -32,7 +32,7 @@ fi
 echo "✅ Azure Sentinel output plugin found in config"
 
 # Check for required environment variables in config
-REQUIRED_VARS=("client_app_id" "client_app_secret" "tenant_id" "data_collection_endpoint" "azure_dcr_suricata_id" "azure_dcr_microseg_id" "azure_stream_suricata" "azure_stream_microseg" "azure_cloud")
+REQUIRED_VARS=("client_app_id" "client_app_secret" "tenant_id" "data_collection_endpoint" "azure_dcr_ids_id" "azure_dcr_netsession_id" "azure_dcr_websession_id" "azure_stream_ids" "azure_stream_netsession" "azure_stream_websession" "azure_cloud")
 MISSING_VARS=0
 for var in "${REQUIRED_VARS[@]}"; do
     if ! grep -q "\${$var}" "$ASSEMBLED_CONFIG"; then

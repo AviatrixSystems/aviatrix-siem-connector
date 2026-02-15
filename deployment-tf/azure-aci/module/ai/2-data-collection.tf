@@ -8,19 +8,19 @@ resource "azurerm_monitor_data_collection_endpoint" "dce" {
 
 }
 
-## Data Collection Rule for Aviatrix Microseg/MITM logs
-resource "azurerm_monitor_data_collection_rule" "aviatrix_microseg" {
-  name                        = "aviatrix-microseg-dcr"
+## Data Collection Rule for Aviatrix L4 Network Session (ASIM NetworkSession)
+resource "azurerm_monitor_data_collection_rule" "aviatrix_netsession" {
+  name                        = "aviatrix-netsession-dcr"
   location                    = azurerm_resource_group.aci_rg.location
   resource_group_name         = azurerm_resource_group.aci_rg.name
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
 
-  depends_on = [azapi_resource.table_microseg]
+  depends_on = [azapi_resource.table_netsession]
 
   data_flow {
-    streams       = ["Custom-AviatrixMicroseg_CL"]
+    streams       = ["Custom-AviatrixNetworkSession_CL"]
     destinations  = ["loganalytics-destination"]
-    output_stream = "Custom-AviatrixMicroseg_CL"
+    output_stream = "Custom-AviatrixNetworkSession_CL"
     transform_kql = "source"
   }
 
@@ -32,62 +32,142 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_microseg" {
   }
 
   stream_declaration {
-    stream_name = "Custom-AviatrixMicroseg_CL"
+    stream_name = "Custom-AviatrixNetworkSession_CL"
+    # ASIM common fields
     column {
       name = "TimeGenerated"
       type = "datetime"
     }
     column {
-      name = "action"
+      name = "EventVendor"
       type = "string"
     }
     column {
-      name = "dst_ip"
+      name = "EventProduct"
       type = "string"
     }
     column {
-      name = "dst_mac"
+      name = "EventSchema"
       type = "string"
     }
     column {
-      name = "dst_port"
+      name = "EventSchemaVersion"
+      type = "string"
+    }
+    column {
+      name = "EventType"
+      type = "string"
+    }
+    column {
+      name = "EventCount"
       type = "int"
     }
     column {
+      name = "EventResult"
+      type = "string"
+    }
+    column {
+      name = "EventSeverity"
+      type = "string"
+    }
+    column {
+      name = "EventStartTime"
+      type = "datetime"
+    }
+    column {
+      name = "EventEndTime"
+      type = "datetime"
+    }
+    column {
+      name = "EventSubType"
+      type = "string"
+    }
+    # ASIM action/device fields
+    column {
+      name = "DvcAction"
+      type = "string"
+    }
+    column {
+      name = "DvcOriginalAction"
+      type = "string"
+    }
+    column {
+      name = "DvcHostname"
+      type = "string"
+    }
+    column {
+      name = "DvcIpAddr"
+      type = "string"
+    }
+    # ASIM network fields
+    column {
+      name = "SrcIpAddr"
+      type = "string"
+    }
+    column {
+      name = "DstIpAddr"
+      type = "string"
+    }
+    column {
+      name = "SrcPortNumber"
+      type = "int"
+    }
+    column {
+      name = "DstPortNumber"
+      type = "int"
+    }
+    column {
+      name = "SrcMacAddr"
+      type = "string"
+    }
+    column {
+      name = "DstMacAddr"
+      type = "string"
+    }
+    column {
+      name = "NetworkProtocol"
+      type = "string"
+    }
+    column {
+      name = "NetworkRuleName"
+      type = "string"
+    }
+    column {
+      name = "NetworkSessionId"
+      type = "string"
+    }
+    column {
+      name = "NetworkBytes"
+      type = "long"
+    }
+    column {
+      name = "NetworkDuration"
+      type = "int"
+    }
+    column {
+      name = "NetworkPackets"
+      type = "long"
+    }
+    # Aviatrix-specific fields
+    column {
       name = "enforced"
       type = "boolean"
-    }
-    column {
-      name = "gw_hostname"
-      type = "string"
-    }
-    column {
-      name = "gw_ip"
-      type = "string"
     }
     column {
       name = "ip_size"
       type = "int"
     }
     column {
-      name = "ls_timestamp"
-      type = "string"
+      name = "session_event"
+      type = "int"
     }
     column {
-      name = "mitm_decrypted_by"
-      type = "string"
+      name = "session_end_reason"
+      type = "int"
     }
     column {
-      name = "mitm_sni_hostname"
-      type = "string"
-    }
-    column {
-      name = "mitm_url_parts"
-      type = "string"
-    }
-    column {
-      name = "proto"
-      type = "string"
+      name = "session_pkt_cnt"
+      type = "long"
     }
     column {
       name = "session_byte_cnt"
@@ -98,32 +178,8 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_microseg" {
       type = "long"
     }
     column {
-      name = "session_end_reason"
-      type = "int"
-    }
-    column {
-      name = "session_event"
-      type = "int"
-    }
-    column {
       name = "session_id"
       type = "long"
-    }
-    column {
-      name = "session_pkt_cnt"
-      type = "long"
-    }
-    column {
-      name = "src_ip"
-      type = "string"
-    }
-    column {
-      name = "src_mac"
-      type = "string"
-    }
-    column {
-      name = "src_port"
-      type = "int"
     }
     column {
       name = "tags"
@@ -133,26 +189,22 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_microseg" {
       name = "unix_time"
       type = "long"
     }
-    column {
-      name = "uuid"
-      type = "string"
-    }
   }
 }
 
-## Data Collection Rule for Aviatrix IDS (Suricata) logs
-resource "azurerm_monitor_data_collection_rule" "aviatrix_suricata" {
-  name                        = "aviatrix-suricata-dcr"
+## Data Collection Rule for Aviatrix L7 Web Session (ASIM WebSession)
+resource "azurerm_monitor_data_collection_rule" "aviatrix_websession" {
+  name                        = "aviatrix-websession-dcr"
   location                    = azurerm_resource_group.aci_rg.location
   resource_group_name         = azurerm_resource_group.aci_rg.name
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
 
-  depends_on = [azapi_resource.table_suricata]
+  depends_on = [azapi_resource.table_websession]
 
   data_flow {
-    streams       = ["Custom-AviatrixSuricata_CL"]
+    streams       = ["Custom-AviatrixWebSession_CL"]
     destinations  = ["loganalytics-destination"]
-    output_stream = "Custom-AviatrixSuricata_CL"
+    output_stream = "Custom-AviatrixWebSession_CL"
     transform_kql = "source"
   }
 
@@ -164,37 +216,295 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_suricata" {
   }
 
   stream_declaration {
-    stream_name = "Custom-AviatrixSuricata_CL"
+    stream_name = "Custom-AviatrixWebSession_CL"
+    # ASIM common fields
     column {
       name = "TimeGenerated"
       type = "datetime"
     }
     column {
-      name = "Computer"
+      name = "EventVendor"
       type = "string"
     }
     column {
-      name = "alert"
-      type = "dynamic"
-    }
-    column {
-      name = "app_proto"
+      name = "EventProduct"
       type = "string"
     }
     column {
-      name = "dest_ip"
+      name = "EventSchema"
       type = "string"
     }
     column {
-      name = "dest_port"
+      name = "EventSchemaVersion"
+      type = "string"
+    }
+    column {
+      name = "EventType"
+      type = "string"
+    }
+    column {
+      name = "EventCount"
       type = "int"
     }
     column {
-      name = "event_type"
+      name = "EventResult"
       type = "string"
     }
     column {
-      name = "files"
+      name = "EventSeverity"
+      type = "string"
+    }
+    column {
+      name = "EventStartTime"
+      type = "datetime"
+    }
+    column {
+      name = "EventEndTime"
+      type = "datetime"
+    }
+    # ASIM action/device fields
+    column {
+      name = "DvcAction"
+      type = "string"
+    }
+    column {
+      name = "DvcOriginalAction"
+      type = "string"
+    }
+    column {
+      name = "DvcHostname"
+      type = "string"
+    }
+    column {
+      name = "DvcIpAddr"
+      type = "string"
+    }
+    # ASIM network fields
+    column {
+      name = "SrcIpAddr"
+      type = "string"
+    }
+    column {
+      name = "DstIpAddr"
+      type = "string"
+    }
+    column {
+      name = "SrcPortNumber"
+      type = "int"
+    }
+    column {
+      name = "DstPortNumber"
+      type = "int"
+    }
+    column {
+      name = "NetworkProtocol"
+      type = "string"
+    }
+    column {
+      name = "NetworkRuleName"
+      type = "string"
+    }
+    # ASIM web session fields
+    column {
+      name = "DstFqdn"
+      type = "string"
+    }
+    column {
+      name = "DstHostname"
+      type = "string"
+    }
+    column {
+      name = "Url"
+      type = "string"
+    }
+    # Aviatrix-specific fields
+    column {
+      name = "enforced"
+      type = "boolean"
+    }
+    column {
+      name = "mitm_sni_hostname"
+      type = "string"
+    }
+    column {
+      name = "mitm_url_parts"
+      type = "string"
+    }
+    column {
+      name = "mitm_decrypted_by"
+      type = "string"
+    }
+    column {
+      name = "tags"
+      type = "dynamic"
+    }
+    column {
+      name = "unix_time"
+      type = "long"
+    }
+  }
+}
+
+## Data Collection Rule for Aviatrix IDS (Suricata) logs (ASIM NetworkSession, EventType=IDS)
+resource "azurerm_monitor_data_collection_rule" "aviatrix_ids" {
+  name                        = "aviatrix-ids-dcr"
+  location                    = azurerm_resource_group.aci_rg.location
+  resource_group_name         = azurerm_resource_group.aci_rg.name
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
+
+  depends_on = [azapi_resource.table_ids]
+
+  data_flow {
+    streams       = ["Custom-AviatrixIDS_CL"]
+    destinations  = ["loganalytics-destination"]
+    output_stream = "Custom-AviatrixIDS_CL"
+    transform_kql = "source"
+  }
+
+  destinations {
+    log_analytics {
+      workspace_resource_id = var.log_analytics_workspace.id
+      name                  = "loganalytics-destination"
+    }
+  }
+
+  stream_declaration {
+    stream_name = "Custom-AviatrixIDS_CL"
+    # ASIM common fields
+    column {
+      name = "TimeGenerated"
+      type = "datetime"
+    }
+    column {
+      name = "EventVendor"
+      type = "string"
+    }
+    column {
+      name = "EventProduct"
+      type = "string"
+    }
+    column {
+      name = "EventSchema"
+      type = "string"
+    }
+    column {
+      name = "EventSchemaVersion"
+      type = "string"
+    }
+    column {
+      name = "EventType"
+      type = "string"
+    }
+    column {
+      name = "EventCount"
+      type = "int"
+    }
+    column {
+      name = "EventResult"
+      type = "string"
+    }
+    column {
+      name = "EventSeverity"
+      type = "string"
+    }
+    column {
+      name = "EventStartTime"
+      type = "datetime"
+    }
+    column {
+      name = "EventEndTime"
+      type = "datetime"
+    }
+    # ASIM action fields
+    column {
+      name = "DvcAction"
+      type = "string"
+    }
+    column {
+      name = "DvcOriginalAction"
+      type = "string"
+    }
+    column {
+      name = "DvcInboundInterface"
+      type = "string"
+    }
+    # ASIM network fields
+    column {
+      name = "SrcIpAddr"
+      type = "string"
+    }
+    column {
+      name = "DstIpAddr"
+      type = "string"
+    }
+    column {
+      name = "SrcPortNumber"
+      type = "int"
+    }
+    column {
+      name = "DstPortNumber"
+      type = "int"
+    }
+    column {
+      name = "NetworkProtocol"
+      type = "string"
+    }
+    column {
+      name = "NetworkApplicationProtocol"
+      type = "string"
+    }
+    column {
+      name = "NetworkRuleName"
+      type = "string"
+    }
+    column {
+      name = "NetworkRuleNumber"
+      type = "int"
+    }
+    column {
+      name = "NetworkSessionId"
+      type = "string"
+    }
+    column {
+      name = "SrcBytes"
+      type = "long"
+    }
+    column {
+      name = "DstBytes"
+      type = "long"
+    }
+    column {
+      name = "SrcPackets"
+      type = "long"
+    }
+    column {
+      name = "DstPackets"
+      type = "long"
+    }
+    # ASIM threat fields
+    column {
+      name = "ThreatName"
+      type = "string"
+    }
+    column {
+      name = "ThreatId"
+      type = "string"
+    }
+    column {
+      name = "ThreatCategory"
+      type = "string"
+    }
+    column {
+      name = "ThreatRiskLevel"
+      type = "int"
+    }
+    column {
+      name = "ThreatOriginalRiskLevel"
+      type = "string"
+    }
+    # Suricata-native / Aviatrix-specific fields
+    column {
+      name = "alert"
       type = "dynamic"
     }
     column {
@@ -202,43 +512,39 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_suricata" {
       type = "dynamic"
     }
     column {
-      name = "flow_id"
-      type = "long"
-    }
-    column {
       name = "http"
       type = "dynamic"
     }
     column {
-      name = "in_iface"
-      type = "string"
-    }
-    column {
-      name = "ls_timestamp"
-      type = "string"
-    }
-    column {
-      name = "ls_version"
-      type = "string"
-    }
-    column {
-      name = "proto"
-      type = "string"
-    }
-    column {
-      name = "src_ip"
-      type = "string"
-    }
-    column {
-      name = "src_port"
-      type = "int"
-    }
-    column {
-      name = "tags"
+      name = "tls"
       type = "dynamic"
     }
     column {
-      name = "timestamp"
+      name = "dns"
+      type = "dynamic"
+    }
+    column {
+      name = "tcp"
+      type = "dynamic"
+    }
+    column {
+      name = "event_type"
+      type = "string"
+    }
+    column {
+      name = "app_proto"
+      type = "string"
+    }
+    column {
+      name = "flow_id"
+      type = "long"
+    }
+    column {
+      name = "direction"
+      type = "string"
+    }
+    column {
+      name = "pkt_src"
       type = "string"
     }
     column {
@@ -246,8 +552,16 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_suricata" {
       type = "int"
     }
     column {
+      name = "tags"
+      type = "dynamic"
+    }
+    column {
       name = "unix_time"
       type = "long"
+    }
+    column {
+      name = "timestamp"
+      type = "string"
     }
   }
 }

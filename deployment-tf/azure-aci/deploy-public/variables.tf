@@ -85,7 +85,7 @@ variable "log_analytics_resource_group_name" {
 }
 
 variable "environment_variables" {
-  description = "Environment variables for the container"
+  description = "Environment variables for the container (Logstash JVM/runtime settings). Stream names and DCR IDs are injected automatically by the module."
   type        = map(string)
   default = {
     "LS_JAVA_OPTS"             = "-Xmx1g -Xms1g"
@@ -93,12 +93,6 @@ variable "environment_variables" {
     "XPACK_MONITORING_ENABLED" = "false"
     "PIPELINE_WORKERS"         = "1"
     "CONFIG_RELOAD_AUTOMATIC"  = "true"
-    "azure_stream_suricata"      = "Custom-AviatrixSuricata_CL"
-    "azure_stream_microseg"      = "Custom-AviatrixMicroseg_CL"
-    "azure_stream_gw_net_stats"  = "Custom-AviatrixGwNetStats_CL"
-    "azure_stream_gw_sys_stats"  = "Custom-AviatrixGwSysStats_CL"
-    "azure_stream_cmd"           = "Custom-AviatrixCmd_CL"
-    "azure_stream_tunnel_status" = "Custom-AviatrixTunnelStatus_CL"
   }
 }
 
@@ -111,32 +105,6 @@ variable "tags" {
     Service     = "logstash"
   }
 }
-
-# DEPRECATED: This variable is no longer used after modularization refactor
-# Stream names are now passed via var.environment_variables instead
-# The only supported log types are: microseg and suricata
-# Reserved for future use if additional log types are added
-#
-# variable "logstash_config_variables" {
-#   description = "Configuration variables for Logstash output plugins"
-#   type        = map(string)
-#   default = {
-#     # Azure Log Ingestion API Configuration
-#     "azure_dcr_mitm_id"     = ""
-#     "azure_dcr_fqdn_id"     = ""
-#     "azure_dcr_cmd_id"      = ""
-#     "azure_stream_suricata" = "Custom-AviatrixSuricata_CL"
-#     "azure_stream_mitm"     = "Custom-AviatrixMITM_CL"
-#     "azure_stream_microseg" = "Custom-AviatrixMicroseg_CL"
-#     "azure_stream_fqdn"     = "Custom-AviatrixFQDN_CL"
-#     "azure_stream_cmd"      = "Custom-AviatrixCMD_CL"
-#
-#     # Microsoft Sentinel Plugin Configuration
-#     "client_app_id"     = "your-client-app-id"
-#     "client_app_secret" = "your-client-app-secret"
-#     "tenant_id"         = "your-tenant-id"
-#   }
-# }
 
 variable "use_existing_spn" {
   description = "Whether to use an existing service principal (true) or create a new one (false) for the plugin to send logs to Log Analytics via DCR rules"

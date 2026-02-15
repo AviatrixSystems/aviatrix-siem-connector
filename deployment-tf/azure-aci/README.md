@@ -1,275 +1,339 @@
 # Azure Container Instances (ACI) Logstash Deployment
 
-This Terraform configuration deploys a Logstash container on Azure Container Instances (ACI) with the below specifications.
-It uses the Microsoft Log Ingestion API along with the Microsoft Sentinel Logstash output plugin.
-> For detailed guidance on connecting Logstash to Microsoft Sentinel using Data Collection Rules, see the [Microsoft Learn article](https://learn.microsoft.com/en-us/azure/sentinel/connect-logstash-data-connection-rules).
+Terraform deployment for the Aviatrix Log Integration Engine on Azure Container Instances. Receives syslog from Aviatrix gateways/controllers and forwards parsed, ASIM-normalized events to Azure Log Analytics via the Microsoft Log Ingestion API.
 
-## Architecture Diagram
+> For background on connecting Logstash to Microsoft Sentinel using Data Collection Rules, see the [Microsoft Learn article](https://learn.microsoft.com/en-us/azure/sentinel/connect-logstash-data-connection-rules).
 
-![Log Engine API Architecture](images/log-engine-api.png)
+## Architecture
 
-## Configuration Details
+```
+Aviatrix Gateways/Controllers
+         |
+         v (syslog TCP or UDP 5000)
+  Azure Container Instance (Logstash)
+         |
+         v (Log Ingestion API)
+  Data Collection Rules (7 DCRs)
+         |
+         v
+  Azure Log Analytics (7 custom tables)
+         |
+         v
+  Microsoft Sentinel (ASIM parsers)
+```
 
-- **Location**: Provide any preferred Azure region
-- **Container Image**: aviatrixacr.azurecr.io/aviatrix-logstash-sentinel
-  - This is a custom image built with the Azure Log Ingestion API plugin. You can built your own following [README](logstash-container-build/README.md) into the logstash-container-builder folder. Update your terraform.tfvars file accordingly.
-- **Resources**: 1 vCPU, 1.5GB memory
-  - You can adapt to the expected load on your container.
-- **Network**: Public IP with TCP port 5000 exposed.
-  - You can use UDP for higher performance by updating "container_protocol" variable.
-- **OS Type**: Linux
-- **Storage**: Azure File Shares mounted at `/usr/share/logstash/pipeline` and `/usr/share/logstash/patterns` for configuration and pattern files
-- **Logging**: Provide your own Lag Analytcis workspace's name and resource group using log_analytics_workspace_name and log_analytics_resource_group_name variables.
+> **ACI protocol limitation**: Azure Container Instances can expose only one protocol (TCP or UDP) per port. This deployment defaults to **TCP**, which is recommended for syslog reliability. Set `container_protocol = "UDP"` in tfvars if your gateways use UDP. You cannot expose both TCP and UDP on port 5000 simultaneously.
+
+## What Terraform Creates
+
+| # | Resource | Description |
+|---|----------|-------------|
+| 1 | Resource Group | Container and all child resources |
+| 2 | Storage Account + 2 File Shares | Pipeline config (`logstash.conf`) and patterns (`avx.conf`) |
+| 3 | Container Group | Logstash container with file share mounts |
+| 4 | Data Collection Endpoint | Log Ingestion API endpoint |
+| 5 | 7 Custom Tables | ASIM-normalized + operational tables in Log Analytics |
+| 6 | 7 Data Collection Rules | One per table, pass-through KQL transform |
+| 7 | Service Principal (optional) | Created only when `use_existing_spn = false` |
+| 8 | 7 Role Assignments | SPN "Monitoring Metrics Publisher" on each DCR |
+
+![Resource Group Overview](images/resource-group-overview.png)
+
+### Tables Created
+
+| Table | Log Type | ASIM Schema |
+|-------|----------|-------------|
+| `AviatrixNetworkSession_CL` | L4 Microsegmentation | NetworkSession (v0.2.7) |
+| `AviatrixWebSession_CL` | L7 MITM/TLS Inspection | WebSession (v0.2.7) |
+| `AviatrixIDS_CL` | Suricata IDS | NetworkSession, EventType=IDS |
+| `AviatrixGwNetStats_CL` | Gateway Network Stats | (none) |
+| `AviatrixGwSysStats_CL` | Gateway System Stats | (none) |
+| `AviatrixCmd_CL` | Controller CMD/API | (none) |
+| `AviatrixTunnelStatus_CL` | Tunnel Status Changes | (none) |
+
+> **Note**: FQDN firewall events are parsed by Logstash but do not have an Azure output. Only 7 of the 8 log types are forwarded to Log Analytics.
 
 ## Prerequisites
-1. Azure CLI installed  
-2. Azure CLI authenticated
 
-   - ```az cloud set --name AzureCloud``` to point az cli to public cloud
-   - ```az cloud set --name AzureChinaCloud``` to point az cli to China cloud
-3. Terraform >= 1.0 installed  
-4. Existing Log Analytics workspace and resource group information. If your Log Analyics workspace lives in a different subscription, provide the subscription ID using the log_analytics_subscription_id parameter.
-5. Custom container containing Logstash and the Sentinel plugin (actual source here is supplied as **best effort**). You should build/use your own source. See the [README](./logstash-container-build/README.md) for instructions.  
-6. Log Analytics Custom Log tables for Microseg and Suricata logs. Use the two command lines provided below to create tables.  
-7. EntraID Service Principal: you can decide to use a pre-created Service Principal (default) or let the Terraform deployment create one for you.  
-   - By default, `use_existing_spn` is set to `true` so you have to provide values of an existing Service Principal ID (`client_app_id`), secret (`client_app_secret`), and tenant ID (`tenant_id`) in the `terraform.tfvars` file.  
-   - For the Terraform deployment to create the Service Principal automatically, override the `use_existing_spn` variable with value `false`. **You must have the "Application Administrator" or "Cloud Application Administrator" role in Azure Entra ID. These roles allow you to create and manage applications required and used by the Logstash plugin to push logs to Log Analytics.**
+1. **Azure CLI** installed and authenticated
+   - Public: `az cloud set --name AzureCloud && az login`
+   - China: `az cloud set --name AzureChinaCloud && az login`
 
-## Azure public or Azure China deployment
+2. **Terraform** >= 1.0
 
-You can deploy that log engine into a region part of Azure Public cloud or inside one of the Azure China regions by running terraform from the appropriate folder.
+3. **Log Analytics Workspace** — must already exist. Provide its name and resource group via variables. If it's in a different subscription, set `log_analytics_subscription_id`.
+
+4. **Container Image** with the Microsoft Sentinel Logstash output plugin installed. See [Container Image](#container-image) below.
+
+5. **Entra ID Service Principal** (one of):
+   - **Pre-created** (default, `use_existing_spn = true`): provide `client_app_id`, `client_app_secret`, `tenant_id` in tfvars
+   - **Auto-created** (`use_existing_spn = false`): requires "Application Administrator" or "Cloud Application Administrator" Entra ID role
+
+6. **Assembled Logstash config**:
+   ```bash
+   cd logstash-configs
+   ./scripts/assemble-config.sh azure-log-ingestion
+   ```
+
+## Container Image
+
+The Logstash container requires the [Microsoft Sentinel output plugin](https://github.com/Azure/Azure-Sentinel/tree/master/DataConnectors/microsoft-sentinel-log-analytics-logstash-output-plugin) pre-installed. The stock Elastic image does not include it.
+
+> In the future, Aviatrix plans to publish an official container image on GitHub Container Registry (ghcr.io). Until then, build your own using the instructions below.
+
+### Building the Container Image
+
+A Dockerfile and build script are provided in [`logstash-container-build/`](logstash-container-build/):
+
+```dockerfile
+FROM docker.elastic.co/logstash/logstash:8.16.2
+RUN logstash-plugin install microsoft-sentinel-log-analytics-logstash-output-plugin
+```
+
+**Option A: Interactive build script**
+```bash
+cd deployment-tf/azure-aci/logstash-container-build
+./build-and-push.sh
+```
+This creates the ACR (if needed), builds the image, and pushes it.
+
+**Option B: Manual steps**
+```bash
+# Set variables
+export ACR_NAME="yourregistryname"
+export RESOURCE_GROUP="your-acr-rg"
+export IMAGE="aviatrix-logstash-sentinel:latest"
+
+# Create ACR (if needed)
+az group create --name $RESOURCE_GROUP --location eastus
+az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku Standard
+az acr update --name $ACR_NAME --anonymous-pull-enabled true
+
+# Build and push
+az acr login --name $ACR_NAME
+az acr build --registry $ACR_NAME --image $IMAGE \
+  --file deployment-tf/azure-aci/logstash-container-build/Dockerfile \
+  deployment-tf/azure-aci/logstash-container-build/
+```
+
+After building, set `container_image` in your `terraform.tfvars`:
+```hcl
+container_image = "yourregistryname.azurecr.io/aviatrix-logstash-sentinel:latest"
+```
+
+See [`logstash-container-build/README.md`](logstash-container-build/README.md) for Azure China instructions.
+
+## Deployment
+
+### Azure Public or China
 
 | Cloud | Folder |
+|-------|--------|
+| Public | `deploy-public/` |
+| China | `deploy-china/` |
+
+### Steps
+
+```bash
+# 1. Assemble the Logstash config
+cd logstash-configs
+./scripts/assemble-config.sh azure-log-ingestion
+
+# 2. Deploy
+cd deployment-tf/azure-aci/deploy-public  # or deploy-china
+cp terraform.tfvars.sample terraform.tfvars
+# Edit terraform.tfvars with your values
+
+# 3. Validate, plan, apply
+../scripts/validate-deployment.sh
+terraform init
+terraform plan
+terraform apply
+```
+
+### Key Variables
+
+| Variable | Description |
 |----------|-------------|
-| Public | `deploy-public` |
-| China | `deploy-china` |
+| `container_image` | Full image path (e.g., `yourregistry.azurecr.io/aviatrix-logstash-sentinel:latest`) |
+| `container_protocol` | `TCP` (default, recommended) or `UDP` — must match Aviatrix syslog config |
+| `log_analytics_workspace_name` | Existing Log Analytics workspace name |
+| `log_analytics_resource_group_name` | Resource group of the workspace |
+| `log_analytics_subscription_id` | Workspace subscription (if different from deployment) |
+| `use_existing_spn` | `true` to provide existing SPN credentials, `false` to auto-create |
+| `client_app_id` / `client_app_secret` / `tenant_id` | SPN credentials (when `use_existing_spn = true`) |
+| `azure_cloud` | `AzureCloud`, `AzureChinaCloud`, or `AzureUSGovernment` |
 
-## Deployment Steps
+> Stream names (`azure_stream_*`) and DCR IDs (`azure_dcr_*_id`) are injected automatically by the module. Do not set them in `terraform.tfvars` or `environment_variables`.
 
-This is a first release that mixes Terraform code along with some Azure CLI commands as not everything was available in Terraform.
+### Post-Deployment Checklist
 
-### Custom log table creation example (not available through Terraform azurerm provider yet)
+After `terraform apply` completes, verify:
 
-#### AviatrixMicroseg_CL - L4 Microsegmentation and L7 MITM/TLS Inspection
+- [ ] Resource group exists with all child resources
+- [ ] Container group is running (`az container show --resource-group <your-rg> --name <container>-group --query provisioningState`)
+- [ ] 7 custom tables visible in Log Analytics workspace
+- [ ] 7 DCRs created in the resource group
+- [ ] SPN has "Monitoring Metrics Publisher" role on each DCR
+- [ ] Container logs show Logstash startup (`az container logs --resource-group <your-rg> --name <container>-group | tail -20`)
 
-This table stores both L4 microsegmentation logs and L7 MITM/TLS inspection logs.
+## Aviatrix Log Export Configuration
 
-```bash
-az monitor log-analytics workspace table create \
-    --resource-group <your-resource-group-name> \
-    --workspace-name <your-log-analytics-workspace-name> \
-    --name "AviatrixMicroseg_CL" \
-    --columns \
-        TimeGenerated=datetime \
-        Computer=string \
-        RawData=string \
-        action=string \
-        proto=string \
-        src_ip=string \
-        src_port=string \
-        dst_ip=string \
-        dst_port=string \
-        enforced=string \
-        uuid=string \
-        gw_ip=string \
-        src_mac=string \
-        dst_mac=string \
-        ip_size=string \
-        session_id=string \
-        session_event=string \
-        session_end_reason=string \
-        session_pkt_cnt=string \
-        session_byte_cnt=string \
-        session_dur=string \
-        direction=string \
-        mitm_sni_hostname=string \
-        mitm_url_parts=string \
-        mitm_decrypted_by=string \
-        gw_hostname=string \
-        message=string \
-        unix_time=long
-```
+Configure Aviatrix Copilot to export logs to the deployed container:
 
-**Field Descriptions:**
+1. Log in to Aviatrix Copilot
+2. Go to **Settings > Configuration > Logging services > Edit Profile** under Remote Syslog
+3. Configure:
+   - **Server**: Use the `container_group_fqdn` output from Terraform
+   - **Port**: `5000`
+   - **Protocol**: Match `container_protocol` (TCP or UDP)
+4. Save
 
-| Field | Type | Source | Description |
-|-------|------|--------|-------------|
-| `TimeGenerated` | datetime | All | Event timestamp (required by Azure) |
-| `action` | string | L4, MITM | PERMIT or DENY |
-| `proto` | string | L4, MITM | Protocol (TCP, UDP, ICMP) |
-| `src_ip`, `src_port` | string | L4, MITM | Source IP and port |
-| `dst_ip`, `dst_port` | string | L4, MITM | Destination IP and port |
-| `enforced` | string | L4, MITM | Enforcement status (true/false) |
-| `uuid` | string | L4, MITM | Rule UUID |
-| `session_*` | string | L4 | Session fields (8.2+): id, event, end_reason, pkt_cnt, byte_cnt, dur |
-| `mitm_sni_hostname` | string | MITM | SNI hostname from TLS handshake (e.g., "github.com") |
-| `mitm_url_parts` | string | MITM | Full URL if available |
-| `mitm_decrypted_by` | string | MITM | Gateway that decrypted the traffic |
+See the [Aviatrix Copilot logging documentation](https://docs.aviatrix.com/documentation/latest/platform-administration/copilot/aviatrix-logging-copilot.html#syslog-profiles) for details.
 
-#### AviatrixSuricata_CL - IDS/IPS Alerts
+## ASIM Parser Deployment (Optional)
+
+Three KQL ASIM parser files are provided for Sentinel integration in [`logstash-configs/outputs/azure-log-ingestion/asim-parsers/`](../../logstash-configs/outputs/azure-log-ingestion/asim-parsers/):
+
+| Parser | Schema | Table |
+|--------|--------|-------|
+| `vimNetworkSessionAviatrixGateway.kql` | NetworkSession | `AviatrixNetworkSession_CL` |
+| `vimWebSessionAviatrixGateway.kql` | WebSession | `AviatrixWebSession_CL` |
+| `vimNetworkSessionAviatrixSuricata.kql` | NetworkSession (IDS) | `AviatrixIDS_CL` |
+
+Deploy each parser as a saved function in your Log Analytics workspace. See the deployment instructions at the top of each `.kql` file.
+
+Once deployed, the parsers integrate with Sentinel's ASIM framework (`_Im_NetworkSession`, `_Im_WebSession`), enabling cross-vendor correlation and ASIM-based analytics rules.
+
+## Updating Configuration
+
+If you modify filters, patterns, or the output config:
 
 ```bash
-az monitor log-analytics workspace table create \
-   --resource-group <your-resource-group-name> \
-   --workspace-name <your-log-analytics-workspace-name> \
-   --name "AviatrixSuricata_CL" \
-   --columns \
-        TimeGenerated=datetime \
-        Computer=string \
-        RawData=string \
-        timestamp=string \
-        flow_id=long \
-        event_type=string \
-        src_ip=string \
-        src_port=int \
-        dest_ip=string \
-        dest_port=int \
-        proto=string \
-        alert_action=string \
-        alert_signature=string \
-        alert_category=string \
-        alert_severity=int \
-        alert_signature_id=int \
-        alert_rev=int \
-        alert_gid=int \
-        gw_hostname=string \
-        message=string \
-        unix_time=long
+# Reassemble
+cd logstash-configs
+./scripts/assemble-config.sh azure-log-ingestion
+
+# Re-deploy (updates the file share, container auto-reloads)
+cd deployment-tf/azure-aci/deploy-public
+terraform apply
 ```
 
-| Log Type | Stream Name | Custom Table | Description |
-|----------|-------------|--------------|-------------|
-| Suricata | `Custom-AviatrixSuricata_CL` | `AviatrixSuricata_CL` | Intrusion Detection System logs |
-| Microseg (L4) | `Custom-AviatrixMicroseg_CL` | `AviatrixMicroseg_CL` | Layer 4 microsegmentation logs |
-| MITM (L7) | `Custom-AviatrixMicroseg_CL` | `AviatrixMicroseg_CL` | Layer 7 TLS inspection logs with SNI hostname |
+The container has `CONFIG_RELOAD_AUTOMATIC=true`, so Logstash detects file changes and reloads without restart.
 
-#### Updating Existing Tables
+## Testing Without Live Aviatrix Gateways
 
-If you need to add fields to an existing table (e.g., adding MITM fields):
+Test tools are provided in `test-tools/sample-logs/` to verify the deployment end-to-end without requiring live Aviatrix infrastructure.
+
+### 1. Refresh Test Sample Timestamps
+
+The sample logs have hardcoded timestamps that need to be updated to the current time window (otherwise Log Analytics will reject them or they'll appear as stale data):
 
 ```bash
-az monitor log-analytics workspace table update \
-    --resource-group <your-resource-group-name> \
-    --workspace-name <your-log-analytics-workspace-name> \
-    --name "AviatrixMicroseg_CL" \
-    --columns <full-column-list-including-new-fields>
+cd test-tools/sample-logs
+./generate-current-samples.sh --overwrite
 ```
 
-**Note:** You must provide the complete column list when updating. See [AZURE_LOG_ANALYTICS_SETUP.md](../../AZURE_LOG_ANALYTICS_SETUP.md) for detailed schema documentation.
+### 2. Stream Test Logs
 
-Below is a screenshot showing the custom tables created in Log Analytics:
+Send the 44 sample log lines (covering all 8 log types) to the deployed container:
 
-![Custom Tables Example](images/loganalytics-custom-tables.png)
+```bash
+# Get the container FQDN from Terraform output
+cd deployment-tf/azure-aci/deploy-public
+FQDN=$(terraform output -raw container_group_fqdn)
 
-### Terraform deployment part
+# Stream all test samples
+cd test-tools/sample-logs
+./stream-logs.py --target $FQDN --tcp -v --delay 0.5
+```
 
-Duplicate the `terraform.tfvars.sample` to `terraform.tfvars` and provide values for each variable. If you rename the file with a different name, you will have to use the -var-file switch with the new name otherwise, do not use the switch : Terraform will pickup you variable file automatically.
+Useful options:
+```bash
+./stream-logs.py --list-types              # Show available log type filters
+./stream-logs.py --filter microseg -v      # Send only microseg logs
+./stream-logs.py --loop --delay 1          # Continuous replay
+```
 
-Once deployed, come back here to continue with SPN IAM role assignment
+### 3. Verify in Log Analytics
 
-1. **Go to folder containing TF config**:
+Wait 5-10 minutes for ingestion latency, then query each table. Use the workspace ID from your Log Analytics workspace.
 
-   ```bash
-   cd .\deployment-tf\azure-aci\deploy-public,china
-   ```
+```bash
+WORKSPACE_ID=$(az monitor log-analytics workspace show \
+  --resource-group <your-la-rg> --workspace-name <your-la-workspace> \
+  --query customerId -o tsv)
 
-2. **Validate Prerequisites**:
-   ```bash
-   ../scripts/validate-deployment.sh
-   ```
+# Check ASIM fields on security tables
+az monitor log-analytics query --workspace $WORKSPACE_ID \
+  --analytics-query "AviatrixNetworkSession_CL | project TimeGenerated, EventVendor, EventSchema, DvcAction, SrcIpAddr, DstIpAddr | take 5"
 
-3. **Initialize Terraform**:
-   ```bash
-   terraform init
-   ```
+az monitor log-analytics query --workspace $WORKSPACE_ID \
+  --analytics-query "AviatrixWebSession_CL | project TimeGenerated, EventSchema, DstFqdn, DvcAction | take 5"
 
-4. **Review the plan**:
-   ```bash
-   terraform plan [-var-file="terraform.tfvars"]
-   ```
+az monitor log-analytics query --workspace $WORKSPACE_ID \
+  --analytics-query "AviatrixIDS_CL | project TimeGenerated, EventType, ThreatName, ThreatId, EventSeverity | take 5"
+```
 
-5. **Apply the configuration**:
-   ```bash
-   terraform apply [-var-file="terraform.tfvars"]
-   ```
+![Log Analytics Query Results](images/log-analytics-query-results.png)
 
-6. **Get outputs**:
-   ```bash
-   terraform output
-   ```
+### Expected Results
 
-## Aviatrix Log export configuration
+From the 44 sample log lines, Logstash produces ~42 output events across 7 tables. FQDN events are parsed but not forwarded to Azure (no Azure output for that log type). One suricata "notice" event is dropped (alerts only).
 
-Configure Aviatrix Copilot to export logs to the newly deployed Azure Container Instance containing Logstash. Use the outputs of the previous terraform deployment.
+| Table | Expected Events | Key Fields to Verify |
+|-------|-----------------|----------------------|
+| `AviatrixNetworkSession_CL` | ~7 | `EventSchema=NetworkSession`, `DvcAction=Allow/Deny` |
+| `AviatrixWebSession_CL` | ~12 | `EventSchema=WebSession`, `DstFqdn` populated |
+| `AviatrixIDS_CL` | ~1 | `EventType=IDS`, `ThreatName` populated |
+| `AviatrixGwNetStats_CL` | ~7 | `total_rx_rate`, `total_tx_rate` fields |
+| `AviatrixGwSysStats_CL` | ~7 | `cpu_idle`, `memory_free` fields |
+| `AviatrixCmd_CL` | ~4 | `action`, `username` fields |
+| `AviatrixTunnelStatus_CL` | ~4 | `src_gw`, `dst_gw`, `new_state` fields |
 
-### Aviatrix Copilot Log Export Configuration
+### 4. Check Container Logs for Errors
 
-To export logs from Aviatrix Copilot to the Azure Container Instance running Logstash, follow these steps:
+```bash
+# View recent logs (replace with your actual resource group and container names)
+RG=$(terraform output -raw resource_group_name)
+CONTAINER=$(terraform output -raw container_group_name)
 
-1. **Access Copilot UI**: Log in to your Aviatrix Copilot dashboard.
-2. **Navigate to Log Export Settings**: Go to *Settings* > *Configuration* > *Logging services* > *Edit Profile* under Remote Syslog.
-3. **Configure Syslog Export**:
-   - **Profile**: Select a profile from 1 to 8 (not removing Copilot's profile)
-   - **Profile Name**: Give it a name
-   - **Server**: Use the `container_group_fqdn` output from Terraform.
-   - **Port**: Set to `5000` (or your configured port).
-   - **Protocol**: Select `TCP` (or `UDP` if configured).
-4. **Save**: Save the configuration.
+az container logs --resource-group $RG --name $CONTAINER | tail -20
 
-[See the Aviatrix Copilot documentation for more detailed instructions on configuring Syslog profiles.](https://docs.aviatrix.com/documentation/latest/platform-administration/copilot/aviatrix-logging-copilot.html#syslog-profiles)
-
-Logs from Copilot will now be forwarded to Logstash in the Azure Container Instance for processing. Upon messages recognition, logs will be sent to Azure Log Analytics via the Azure Log Ingestion API.
+# Check for successful posts
+az container logs --resource-group $RG --name $CONTAINER | grep "Successfully posted"
+```
 
 ## Clean Up
 
-To destroy the resources:
 ```bash
 terraform destroy
 ```
 
-You also have to delete the two custom tables that were created manually using Azure CLI.
-
-## Log Analytics output examples
-
-Below are sample screenshots of Log Analytics queries and dashboards using data ingested from Logstash:
-
-### Microseg Log Table Example
-
-![Microseg Log Table](images/loganalytics-microseg-example.png)
-
-### Suricata Log Table Example
-
-![Suricata Log Table](images/loganalytics-suricata-example.png)
+This removes all resources created by Terraform. The Log Analytics workspace (a prerequisite, not created by Terraform) is not affected. The ACR and container image (built separately) are also not affected.
 
 ## Troubleshooting
 
-### Accessing Logstash
+### Attach to Container Logs
 
-After deployment, Logstash will be accessible at:
-- **FQDN**: The output `container_group_fqdn` will provide the full domain name. That is what needs to be used to configure an additional  Copilot remote logging profil in addition to the one for Copilot. (Steps given below.)
-
-You can also attach to container to read ouput easily:
 ```bash
-# Attach to the running Logstash container in ACI
-az container attach \
-   --resource-group <your-resource-group> \
-   --name <your-container-group-name>
-```
-Replace `<your-resource-group>` and `<your-container-group-name>` with your actual resource group and container group names.
-
-### Logstash Configuration
-
-The deployment automatically uploads the following configuration files to the Azure File Share:
-
-- **Main Configuration**: `pipeline/logstash.conf` (from `../../logstash-configs/assembled/azure-log-ingestion-full.conf`)
-- **Patterns**: `patterns/avx.conf` (from `../../logstash-configs/patterns/avx.conf`)
-
-These files are mounted to the container at `/usr/share/logstash/pipeline` and `/usr/share/logstash/patterns` respectively.
-
-**IMPORTANT:** Before deploying, ensure you have assembled the config:
-```bash
-cd logstash-configs
-./scripts/assemble-config.sh azure-log-ingestion
+RG=$(terraform output -raw resource_group_name)
+CONTAINER=$(terraform output -raw container_group_name)
+az container attach --resource-group $RG --name $CONTAINER
 ```
 
-If you decide to change any filter or pattern, reassemble the config and re-apply Terraform to update the Azure File Share. The container is configured for auto reload using `CONFIG_RELOAD_AUTOMATIC=true`.
+### Query Log Analytics
+
+```kql
+AviatrixNetworkSession_CL | take 10
+AviatrixWebSession_CL | take 10
+AviatrixIDS_CL | take 10
+```
+
+### Common Issues
+
+- **Plugin not found**: Ensure you're using the custom container image with the Sentinel plugin, not the stock Elastic image.
+- **Config file not updating**: If `terraform apply` doesn't detect the file change, taint and re-apply: `terraform taint 'module.deployment.azurerm_storage_share_file.logstash_conf'`
+- **DCR ingestion errors**: Check that the SPN has "Monitoring Metrics Publisher" role on all DCRs. Verify with: `az role assignment list --assignee <spn-object-id> --scope <dcr-id>`
+- **No data in tables**: Verify the container is running and receiving syslog. Check `az container logs` for errors. Ensure timestamps in test data are within the last 24 hours (run `generate-current-samples.sh --overwrite` to refresh).
+- **FQDN events missing**: This is expected — FQDN events are parsed but not forwarded to Azure. Only 7 of the 8 log types have Azure outputs.

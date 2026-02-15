@@ -1,48 +1,71 @@
 # Custom Log Analytics Tables (managed via azapi)
 # These tables must exist BEFORE the DCRs that reference them.
 #
-# For existing deployments, import tables into state before first apply:
-#   terraform import 'module.deployment.azapi_resource.table_microseg' \
-#     '/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<ws>/tables/AviatrixMicroseg_CL'
-#   terraform import 'module.deployment.azapi_resource.table_suricata' \
-#     '/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<ws>/tables/AviatrixSuricata_CL'
+# Security tables use ASIM-normalized schemas:
+#   AviatrixNetworkSession_CL - L4 microseg (ASIM NetworkSession)
+#   AviatrixWebSession_CL     - L7 MITM/DCF (ASIM WebSession)
+#   AviatrixIDS_CL            - Suricata IDS (ASIM NetworkSession, EventType=IDS)
+#
+# For existing deployments migrating from old table names, import into state:
+#   terraform import 'module.deployment.azapi_resource.table_netsession' \
+#     '/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<ws>/tables/AviatrixNetworkSession_CL'
+#   terraform import 'module.deployment.azapi_resource.table_websession' \
+#     '/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<ws>/tables/AviatrixWebSession_CL'
+#   terraform import 'module.deployment.azapi_resource.table_ids' \
+#     '/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.OperationalInsights/workspaces/<ws>/tables/AviatrixIDS_CL'
 
-resource "azapi_resource" "table_microseg" {
+resource "azapi_resource" "table_netsession" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2022-10-01"
-  name      = "AviatrixMicroseg_CL"
+  name      = "AviatrixNetworkSession_CL"
   parent_id = var.log_analytics_workspace.id
 
   body = {
     properties = {
       schema = {
-        name = "AviatrixMicroseg_CL"
+        name = "AviatrixNetworkSession_CL"
         columns = [
+          # ASIM common fields
           { name = "TimeGenerated", type = "datetime" },
-          { name = "action", type = "string" },
-          { name = "dst_ip", type = "string" },
-          { name = "dst_mac", type = "string" },
-          { name = "dst_port", type = "int" },
+          { name = "EventVendor", type = "string" },
+          { name = "EventProduct", type = "string" },
+          { name = "EventSchema", type = "string" },
+          { name = "EventSchemaVersion", type = "string" },
+          { name = "EventType", type = "string" },
+          { name = "EventCount", type = "int" },
+          { name = "EventResult", type = "string" },
+          { name = "EventSeverity", type = "string" },
+          { name = "EventStartTime", type = "datetime" },
+          { name = "EventEndTime", type = "datetime" },
+          { name = "EventSubType", type = "string" },
+          # ASIM action fields
+          { name = "DvcAction", type = "string" },
+          { name = "DvcOriginalAction", type = "string" },
+          { name = "DvcHostname", type = "string" },
+          { name = "DvcIpAddr", type = "string" },
+          # ASIM network fields
+          { name = "SrcIpAddr", type = "string" },
+          { name = "DstIpAddr", type = "string" },
+          { name = "SrcPortNumber", type = "int" },
+          { name = "DstPortNumber", type = "int" },
+          { name = "SrcMacAddr", type = "string" },
+          { name = "DstMacAddr", type = "string" },
+          { name = "NetworkProtocol", type = "string" },
+          { name = "NetworkRuleName", type = "string" },
+          { name = "NetworkSessionId", type = "string" },
+          { name = "NetworkBytes", type = "long" },
+          { name = "NetworkDuration", type = "int" },
+          { name = "NetworkPackets", type = "long" },
+          # Aviatrix-specific fields preserved
           { name = "enforced", type = "boolean" },
-          { name = "gw_hostname", type = "string" },
-          { name = "gw_ip", type = "string" },
           { name = "ip_size", type = "int" },
-          { name = "ls_timestamp", type = "string" },
-          { name = "mitm_decrypted_by", type = "string" },
-          { name = "mitm_sni_hostname", type = "string" },
-          { name = "mitm_url_parts", type = "string" },
-          { name = "proto", type = "string" },
+          { name = "session_event", type = "int" },
+          { name = "session_end_reason", type = "int" },
+          { name = "session_pkt_cnt", type = "long" },
           { name = "session_byte_cnt", type = "long" },
           { name = "session_dur", type = "long" },
-          { name = "session_end_reason", type = "int" },
-          { name = "session_event", type = "int" },
           { name = "session_id", type = "long" },
-          { name = "session_pkt_cnt", type = "long" },
-          { name = "src_ip", type = "string" },
-          { name = "src_mac", type = "string" },
-          { name = "src_port", type = "int" },
           { name = "tags", type = "dynamic" },
           { name = "unix_time", type = "long" },
-          { name = "uuid", type = "string" },
         ]
       }
       retentionInDays      = 30
@@ -51,37 +74,121 @@ resource "azapi_resource" "table_microseg" {
   }
 }
 
-resource "azapi_resource" "table_suricata" {
+resource "azapi_resource" "table_websession" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2022-10-01"
-  name      = "AviatrixSuricata_CL"
+  name      = "AviatrixWebSession_CL"
   parent_id = var.log_analytics_workspace.id
 
   body = {
     properties = {
       schema = {
-        name = "AviatrixSuricata_CL"
+        name = "AviatrixWebSession_CL"
         columns = [
+          # ASIM common fields
           { name = "TimeGenerated", type = "datetime" },
-          { name = "Computer", type = "string" },
-          { name = "alert", type = "dynamic" },
-          { name = "app_proto", type = "string" },
-          { name = "dest_ip", type = "string" },
-          { name = "dest_port", type = "int" },
-          { name = "event_type", type = "string" },
-          { name = "files", type = "dynamic" },
-          { name = "flow", type = "dynamic" },
-          { name = "flow_id", type = "long" },
-          { name = "http", type = "dynamic" },
-          { name = "in_iface", type = "string" },
-          { name = "ls_timestamp", type = "string" },
-          { name = "ls_version", type = "string" },
-          { name = "proto", type = "string" },
-          { name = "src_ip", type = "string" },
-          { name = "src_port", type = "int" },
+          { name = "EventVendor", type = "string" },
+          { name = "EventProduct", type = "string" },
+          { name = "EventSchema", type = "string" },
+          { name = "EventSchemaVersion", type = "string" },
+          { name = "EventType", type = "string" },
+          { name = "EventCount", type = "int" },
+          { name = "EventResult", type = "string" },
+          { name = "EventSeverity", type = "string" },
+          { name = "EventStartTime", type = "datetime" },
+          { name = "EventEndTime", type = "datetime" },
+          # ASIM action fields
+          { name = "DvcAction", type = "string" },
+          { name = "DvcOriginalAction", type = "string" },
+          { name = "DvcHostname", type = "string" },
+          { name = "DvcIpAddr", type = "string" },
+          # ASIM network fields
+          { name = "SrcIpAddr", type = "string" },
+          { name = "DstIpAddr", type = "string" },
+          { name = "SrcPortNumber", type = "int" },
+          { name = "DstPortNumber", type = "int" },
+          { name = "NetworkProtocol", type = "string" },
+          { name = "NetworkRuleName", type = "string" },
+          # ASIM web session fields
+          { name = "DstFqdn", type = "string" },
+          { name = "DstHostname", type = "string" },
+          { name = "Url", type = "string" },
+          # Aviatrix-specific fields preserved
+          { name = "enforced", type = "boolean" },
+          { name = "mitm_sni_hostname", type = "string" },
+          { name = "mitm_url_parts", type = "string" },
+          { name = "mitm_decrypted_by", type = "string" },
           { name = "tags", type = "dynamic" },
-          { name = "timestamp", type = "string" },
-          { name = "tx_id", type = "int" },
           { name = "unix_time", type = "long" },
+        ]
+      }
+      retentionInDays      = 30
+      totalRetentionInDays = 30
+    }
+  }
+}
+
+resource "azapi_resource" "table_ids" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2022-10-01"
+  name      = "AviatrixIDS_CL"
+  parent_id = var.log_analytics_workspace.id
+
+  body = {
+    properties = {
+      schema = {
+        name = "AviatrixIDS_CL"
+        columns = [
+          # ASIM common fields
+          { name = "TimeGenerated", type = "datetime" },
+          { name = "EventVendor", type = "string" },
+          { name = "EventProduct", type = "string" },
+          { name = "EventSchema", type = "string" },
+          { name = "EventSchemaVersion", type = "string" },
+          { name = "EventType", type = "string" },
+          { name = "EventCount", type = "int" },
+          { name = "EventResult", type = "string" },
+          { name = "EventSeverity", type = "string" },
+          { name = "EventStartTime", type = "datetime" },
+          { name = "EventEndTime", type = "datetime" },
+          # ASIM action fields
+          { name = "DvcAction", type = "string" },
+          { name = "DvcOriginalAction", type = "string" },
+          { name = "DvcInboundInterface", type = "string" },
+          # ASIM network fields
+          { name = "SrcIpAddr", type = "string" },
+          { name = "DstIpAddr", type = "string" },
+          { name = "SrcPortNumber", type = "int" },
+          { name = "DstPortNumber", type = "int" },
+          { name = "NetworkProtocol", type = "string" },
+          { name = "NetworkApplicationProtocol", type = "string" },
+          { name = "NetworkRuleName", type = "string" },
+          { name = "NetworkRuleNumber", type = "int" },
+          { name = "NetworkSessionId", type = "string" },
+          { name = "SrcBytes", type = "long" },
+          { name = "DstBytes", type = "long" },
+          { name = "SrcPackets", type = "long" },
+          { name = "DstPackets", type = "long" },
+          # ASIM threat fields
+          { name = "ThreatName", type = "string" },
+          { name = "ThreatId", type = "string" },
+          { name = "ThreatCategory", type = "string" },
+          { name = "ThreatRiskLevel", type = "int" },
+          { name = "ThreatOriginalRiskLevel", type = "string" },
+          # Suricata-native / Aviatrix-specific fields preserved
+          { name = "alert", type = "dynamic" },
+          { name = "flow", type = "dynamic" },
+          { name = "http", type = "dynamic" },
+          { name = "tls", type = "dynamic" },
+          { name = "dns", type = "dynamic" },
+          { name = "tcp", type = "dynamic" },
+          { name = "event_type", type = "string" },
+          { name = "app_proto", type = "string" },
+          { name = "flow_id", type = "long" },
+          { name = "direction", type = "string" },
+          { name = "pkt_src", type = "string" },
+          { name = "tx_id", type = "int" },
+          { name = "tags", type = "dynamic" },
+          { name = "unix_time", type = "long" },
+          { name = "timestamp", type = "string" },
         ]
       }
       retentionInDays      = 30
