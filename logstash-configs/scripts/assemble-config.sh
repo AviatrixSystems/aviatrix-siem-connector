@@ -9,6 +9,9 @@
 # Available output types:
 #   splunk-hec          - Splunk HTTP Event Collector
 #   azure-log-ingestion - Azure Log Analytics via DCR
+#   dynatrace-metrics   - Dynatrace Metrics Ingest (MINT protocol)
+#   dynatrace-logs      - Dynatrace Logs Ingest (JSON)
+#   dynatrace           - Dynatrace Combined (metrics + logs)
 
 set -e
 
@@ -30,9 +33,13 @@ print_usage() {
     echo "Available output types:"
     echo "  splunk-hec          - Splunk HTTP Event Collector"
     echo "  azure-log-ingestion - Azure Log Analytics via DCR"
+    echo "  dynatrace-metrics   - Dynatrace Metrics Ingest (MINT protocol)"
+    echo "  dynatrace-logs      - Dynatrace Logs Ingest (JSON)"
+    echo "  dynatrace           - Dynatrace Combined (metrics + logs)"
     echo ""
     echo "Examples:"
     echo "  $0 splunk-hec"
+    echo "  $0 dynatrace"
     echo "  $0 azure-log-ingestion ./custom-output.conf"
 }
 
