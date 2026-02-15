@@ -11,14 +11,26 @@ docker run -d --restart=always \
   -e client_app_secret="${client_app_secret}" \
   -e tenant_id="${tenant_id}" \
   -e data_collection_endpoint="${data_collection_endpoint}" \
-  -e azure_dcr_suricata_id="${azure_dcr_suricata_id}" \
-  -e azure_dcr_microseg_id="${azure_dcr_microseg_id}" \
-  -e azure_stream_suricata="${azure_stream_suricata}" \
-  -e azure_stream_microseg="${azure_stream_microseg}" \
+  -e azure_dcr_netsession_id="${azure_dcr_netsession_id}" \
+  -e azure_dcr_websession_id="${azure_dcr_websession_id}" \
+  -e azure_dcr_ids_id="${azure_dcr_ids_id}" \
+  -e azure_dcr_gw_net_stats_id="${azure_dcr_gw_net_stats_id}" \
+  -e azure_dcr_gw_sys_stats_id="${azure_dcr_gw_sys_stats_id}" \
+  -e azure_dcr_cmd_id="${azure_dcr_cmd_id}" \
+  -e azure_dcr_tunnel_status_id="${azure_dcr_tunnel_status_id}" \
+  -e azure_stream_netsession="${azure_stream_netsession}" \
+  -e azure_stream_websession="${azure_stream_websession}" \
+  -e azure_stream_ids="${azure_stream_ids}" \
+  -e azure_stream_gw_net_stats="${azure_stream_gw_net_stats}" \
+  -e azure_stream_gw_sys_stats="${azure_stream_gw_sys_stats}" \
+  -e azure_stream_cmd="${azure_stream_cmd}" \
+  -e azure_stream_tunnel_status="${azure_stream_tunnel_status}" \
   -e azure_cloud="${azure_cloud}" \
   -e XPACK_MONITORING_ENABLED=false \
   -e CONFIG_RELOAD_AUTOMATIC=true \
   -e LS_JAVA_OPTS="-Xmx1g -Xms1g" \
-  docker.elastic.co/logstash/logstash:8.16.2
+  your-registry.azurecr.io/aviatrix-logstash-sentinel:latest
+  # IMPORTANT: The stock Elastic image does NOT include the Sentinel plugin.
+  # You must build a custom image. See deployment-tf/azure-aci/logstash-container-build/README.md
 
-# Note: Use 'public' or 'china' for azure_cloud (not 'AzureCloud' or 'AzureChinaCloud')
+# Note: Use 'AzureCloud', 'AzureChinaCloud', or 'AzureUSGovernment' for azure_cloud

@@ -1,0 +1,63 @@
+// ASIM WebSession parser for Aviatrix Distributed Cloud Firewall (L7/MITM TLS inspection)
+// Deploy as a saved function named: vimWebSessionAviatrixGateway
+//
+// Usage:
+//   vimWebSessionAviatrixGateway()
+//   _Im_WebSession | where EventVendor == "Aviatrix"
+//
+// Deployment (Azure CLI):
+//   az monitor log-analytics workspace saved-search create \
+//     --resource-group <rg> --workspace-name <ws> \
+//     --name "vimWebSessionAviatrixGateway" \
+//     --display-name "ASIM WebSession parser for Aviatrix Gateway" \
+//     --category "ASIM" \
+//     --function-alias "vimWebSessionAviatrixGateway" \
+//     --function-parameters "starttime:datetime=datetime(null),endtime:datetime=datetime(null),srcipaddr_has_any_prefix:dynamic=dynamic([]),ipaddr_has_any_prefix:dynamic=dynamic([]),url_has_any:dynamic=dynamic([]),httpuseragent_has_any:dynamic=dynamic([]),eventresultdetails_in:dynamic=dynamic([]),eventresult:string='*',disabled:bool=false" \
+//     --saved-query @vimWebSessionAviatrixGateway.kql
+
+let parser = (
+    starttime:datetime=datetime(null),
+    endtime:datetime=datetime(null),
+    srcipaddr_has_any_prefix:dynamic=dynamic([]),
+    ipaddr_has_any_prefix:dynamic=dynamic([]),
+    url_has_any:dynamic=dynamic([]),
+    httpuseragent_has_any:dynamic=dynamic([]),
+    eventresultdetails_in:dynamic=dynamic([]),
+    eventresult:string='*',
+    disabled:bool=false
+) {
+    AviatrixWebSession_CL
+    | where not(disabled)
+    | where (isnull(starttime) or TimeGenerated >= starttime)
+        and (isnull(endtime) or TimeGenerated <= endtime)
+    // Pre-filter optimizations
+    | where (array_length(srcipaddr_has_any_prefix) == 0 or has_any_ipv4_prefix(SrcIpAddr, srcipaddr_has_any_prefix))
+    | where (array_length(ipaddr_has_any_prefix) == 0
+        or has_any_ipv4_prefix(SrcIpAddr, ipaddr_has_any_prefix)
+        or has_any_ipv4_prefix(DstIpAddr, ipaddr_has_any_prefix))
+    | where (array_length(url_has_any) == 0
+        or Url has_any (url_has_any)
+        or DstFqdn has_any (url_has_any))
+    // httpuseragent_has_any not applicable (no user agent in MITM logs)
+    // eventresultdetails_in not applicable (no HTTP status codes in MITM logs)
+    | where (eventresult == '*' or EventResult == eventresult)
+    // ASIM aliases
+    | extend
+        EventUid = tostring(_ItemId),
+        Dvc = DvcHostname,
+        Src = SrcIpAddr,
+        Dst = DstIpAddr,
+        IpAddr = SrcIpAddr,
+        Rule = NetworkRuleName
+};
+parser(
+    starttime=starttime,
+    endtime=endtime,
+    srcipaddr_has_any_prefix=srcipaddr_has_any_prefix,
+    ipaddr_has_any_prefix=ipaddr_has_any_prefix,
+    url_has_any=url_has_any,
+    httpuseragent_has_any=httpuseragent_has_any,
+    eventresultdetails_in=eventresultdetails_in,
+    eventresult=eventresult,
+    disabled=disabled
+)

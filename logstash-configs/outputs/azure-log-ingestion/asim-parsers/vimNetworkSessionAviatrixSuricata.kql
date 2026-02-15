@@ -1,0 +1,67 @@
+// ASIM NetworkSession parser for Aviatrix Suricata IDS (EventType=IDS)
+// Deploy as a saved function named: vimNetworkSessionAviatrixSuricata
+//
+// Usage:
+//   vimNetworkSessionAviatrixSuricata()
+//   _Im_NetworkSession | where EventVendor == "Aviatrix" and EventProduct == "Suricata IDS"
+//
+// Deployment (Azure CLI):
+//   az monitor log-analytics workspace saved-search create \
+//     --resource-group <rg> --workspace-name <ws> \
+//     --name "vimNetworkSessionAviatrixSuricata" \
+//     --display-name "ASIM NetworkSession parser for Aviatrix Suricata IDS" \
+//     --category "ASIM" \
+//     --function-alias "vimNetworkSessionAviatrixSuricata" \
+//     --function-parameters "starttime:datetime=datetime(null),endtime:datetime=datetime(null),srcipaddr_has_any_prefix:dynamic=dynamic([]),dstipaddr_has_any_prefix:dynamic=dynamic([]),ipaddr_has_any_prefix:dynamic=dynamic([]),dstportnumber:int=int(null),hostname_has_any:dynamic=dynamic([]),dvcaction:dynamic=dynamic([]),eventresult:string='*',disabled:bool=false" \
+//     --saved-query @vimNetworkSessionAviatrixSuricata.kql
+
+let parser = (
+    starttime:datetime=datetime(null),
+    endtime:datetime=datetime(null),
+    srcipaddr_has_any_prefix:dynamic=dynamic([]),
+    dstipaddr_has_any_prefix:dynamic=dynamic([]),
+    ipaddr_has_any_prefix:dynamic=dynamic([]),
+    dstportnumber:int=int(null),
+    hostname_has_any:dynamic=dynamic([]),
+    dvcaction:dynamic=dynamic([]),
+    eventresult:string='*',
+    disabled:bool=false
+) {
+    AviatrixIDS_CL
+    | where not(disabled)
+    | where (isnull(starttime) or TimeGenerated >= starttime)
+        and (isnull(endtime) or TimeGenerated <= endtime)
+    // Pre-filter optimizations
+    | where (array_length(srcipaddr_has_any_prefix) == 0 or has_any_ipv4_prefix(SrcIpAddr, srcipaddr_has_any_prefix))
+    | where (array_length(dstipaddr_has_any_prefix) == 0 or has_any_ipv4_prefix(DstIpAddr, dstipaddr_has_any_prefix))
+    | where (array_length(ipaddr_has_any_prefix) == 0
+        or has_any_ipv4_prefix(SrcIpAddr, ipaddr_has_any_prefix)
+        or has_any_ipv4_prefix(DstIpAddr, ipaddr_has_any_prefix))
+    | where (isnull(dstportnumber) or DstPortNumber == dstportnumber)
+    | where (array_length(dvcaction) == 0 or DvcAction has_any (dvcaction))
+    | where (eventresult == '*' or EventResult == eventresult)
+    // ASIM aliases
+    | extend
+        EventUid = tostring(_ItemId),
+        Src = SrcIpAddr,
+        Dst = DstIpAddr,
+        IpAddr = SrcIpAddr,
+        Rule = NetworkRuleName,
+        SessionId = NetworkSessionId,
+        ThreatField = "ThreatName",
+        // Compute total bytes/packets from directional fields
+        NetworkBytes = iff(isnotnull(SrcBytes) and isnotnull(DstBytes), SrcBytes + DstBytes, long(null)),
+        NetworkPackets = iff(isnotnull(SrcPackets) and isnotnull(DstPackets), SrcPackets + DstPackets, long(null))
+};
+parser(
+    starttime=starttime,
+    endtime=endtime,
+    srcipaddr_has_any_prefix=srcipaddr_has_any_prefix,
+    dstipaddr_has_any_prefix=dstipaddr_has_any_prefix,
+    ipaddr_has_any_prefix=ipaddr_has_any_prefix,
+    dstportnumber=dstportnumber,
+    hostname_has_any=hostname_has_any,
+    dvcaction=dvcaction,
+    eventresult=eventresult,
+    disabled=disabled
+)

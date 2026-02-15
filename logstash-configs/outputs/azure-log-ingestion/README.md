@@ -2,6 +2,8 @@
 
 This output configuration sends parsed Aviatrix logs to Azure Log Analytics via the Data Collection Rules (DCR) API using the Microsoft Sentinel Logstash plugin.
 
+Security log types (L4 microseg, L7 MITM, Suricata IDS) are ASIM-normalized in the output config. Non-security types pass through unchanged.
+
 ## Quick Start
 
 ### 1. Build the Configuration
@@ -21,11 +23,22 @@ This creates `assembled/azure-log-ingestion-full.conf`.
 | `client_app_secret` | Azure AD application secret |
 | `tenant_id` | Azure AD tenant ID |
 | `data_collection_endpoint` | Data Collection Endpoint URL |
-| `azure_dcr_suricata_id` | DCR immutable ID for Suricata logs |
-| `azure_stream_suricata` | Stream name for Suricata (e.g., `Custom-AviatrixSuricata_CL`) |
-| `azure_dcr_microseg_id` | DCR immutable ID for Microseg logs |
-| `azure_stream_microseg` | Stream name for Microseg (e.g., `Custom-AviatrixMicroseg_CL`) |
-| `azure_cloud` | `public` or `china` |
+| `azure_dcr_netsession_id` | DCR immutable ID for L4 Network Session (ASIM) |
+| `azure_stream_netsession` | Stream name (e.g., `Custom-AviatrixNetworkSession_CL`) |
+| `azure_dcr_websession_id` | DCR immutable ID for L7 Web Session (ASIM) |
+| `azure_stream_websession` | Stream name (e.g., `Custom-AviatrixWebSession_CL`) |
+| `azure_dcr_ids_id` | DCR immutable ID for IDS/Suricata (ASIM) |
+| `azure_stream_ids` | Stream name (e.g., `Custom-AviatrixIDS_CL`) |
+| `azure_dcr_gw_net_stats_id` | DCR immutable ID for Gateway Network Stats |
+| `azure_stream_gw_net_stats` | Stream name (e.g., `Custom-AviatrixGwNetStats_CL`) |
+| `azure_dcr_gw_sys_stats_id` | DCR immutable ID for Gateway System Stats |
+| `azure_stream_gw_sys_stats` | Stream name (e.g., `Custom-AviatrixGwSysStats_CL`) |
+| `azure_dcr_cmd_id` | DCR immutable ID for Controller CMD/API |
+| `azure_stream_cmd` | Stream name (e.g., `Custom-AviatrixCmd_CL`) |
+| `azure_dcr_tunnel_status_id` | DCR immutable ID for Tunnel Status |
+| `azure_stream_tunnel_status` | Stream name (e.g., `Custom-AviatrixTunnelStatus_CL`) |
+| `azure_cloud` | `AzureCloud`, `AzureChinaCloud`, or `AzureUSGovernment` |
+| `LOG_PROFILE` | Log profile filter: `all` (default), `security`, or `networking` |
 
 ### 3. Run Logstash
 
@@ -38,54 +51,75 @@ docker run -d --restart=always \
   -e client_app_secret=your-app-secret \
   -e tenant_id=your-tenant-id \
   -e data_collection_endpoint=https://your-dce.ingest.monitor.azure.com \
-  -e azure_dcr_suricata_id=dcr-xxxxx \
-  -e azure_stream_suricata=Custom-AviatrixSuricata_CL \
-  -e azure_dcr_microseg_id=dcr-yyyyy \
-  -e azure_stream_microseg=Custom-AviatrixMicroseg_CL \
-  -e azure_cloud=public \
+  -e azure_dcr_netsession_id=dcr-xxxxx \
+  -e azure_stream_netsession=Custom-AviatrixNetworkSession_CL \
+  -e azure_dcr_websession_id=dcr-yyyyy \
+  -e azure_stream_websession=Custom-AviatrixWebSession_CL \
+  -e azure_dcr_ids_id=dcr-zzzzz \
+  -e azure_stream_ids=Custom-AviatrixIDS_CL \
+  -e azure_cloud=AzureCloud \
+  -e LOG_PROFILE=all \
   -e XPACK_MONITORING_ENABLED=false \
   -p 5000:5000/tcp \
   -p 5000:5000/udp \
-  docker.elastic.co/logstash/logstash:8.16.2
+  your-registry.azurecr.io/aviatrix-logstash-sentinel:latest
+# IMPORTANT: The stock Elastic image does NOT include the Sentinel plugin.
+# You must build a custom image. See deployment-tf/azure-aci/logstash-container-build/README.md
 ```
 
 ## Prerequisites
 
 ### 1. Create Custom Log Analytics Tables
 
-```bash
-# Microseg table
-az monitor log-analytics workspace table create \
-    --resource-group <rg> \
-    --workspace-name <workspace> \
-    --name "AviatrixMicroseg_CL" \
-    --columns \
-        TimeGenerated=datetime \
-        action=string \
-        src_ip=string \
-        dst_ip=string \
-        src_port=int \
-        dst_port=int \
-        proto=string \
-        uuid=string \
-        enforced=boolean \
-        gw_hostname=string
+Tables are auto-created by Terraform. For manual creation:
 
-# Suricata table
+```bash
+# L4 Network Session table (ASIM NetworkSession)
 az monitor log-analytics workspace table create \
     --resource-group <rg> \
     --workspace-name <workspace> \
-    --name "AviatrixSuricata_CL" \
+    --name "AviatrixNetworkSession_CL" \
     --columns \
         TimeGenerated=datetime \
-        src_ip=string \
-        dest_ip=string \
-        src_port=int \
-        dest_port=int \
-        proto=string \
-        alert=dynamic \
-        event_type=string \
-        gw_hostname=string
+        EventVendor=string \
+        EventProduct=string \
+        EventSchema=string \
+        SrcIpAddr=string \
+        DstIpAddr=string \
+        SrcPortNumber=int \
+        DstPortNumber=int \
+        NetworkProtocol=string \
+        DvcAction=string \
+        EventResult=string
+
+# L7 Web Session table (ASIM WebSession)
+az monitor log-analytics workspace table create \
+    --resource-group <rg> \
+    --workspace-name <workspace> \
+    --name "AviatrixWebSession_CL" \
+    --columns \
+        TimeGenerated=datetime \
+        EventVendor=string \
+        DstFqdn=string \
+        Url=string \
+        SrcIpAddr=string \
+        DstIpAddr=string \
+        DvcAction=string
+
+# IDS table (ASIM NetworkSession, EventType=IDS)
+az monitor log-analytics workspace table create \
+    --resource-group <rg> \
+    --workspace-name <workspace> \
+    --name "AviatrixIDS_CL" \
+    --columns \
+        TimeGenerated=datetime \
+        EventVendor=string \
+        ThreatName=string \
+        ThreatId=string \
+        ThreatCategory=string \
+        SrcIpAddr=string \
+        DstIpAddr=string \
+        alert=dynamic
 ```
 
 ### 2. Create Data Collection Endpoint (DCE)
@@ -112,9 +146,24 @@ Grant the service principal access to the DCRs.
 
 ## Supported Log Types
 
-Currently, this output supports:
-- **Suricata IDS** - Sent to `AviatrixSuricata_CL`
-- **L4 Microsegmentation** - Sent to `AviatrixMicroseg_CL`
+| Log Type | Azure Table | ASIM Schema |
+|---|---|---|
+| L4 Microsegmentation | `AviatrixNetworkSession_CL` | NetworkSession |
+| L7 MITM/TLS Inspection | `AviatrixWebSession_CL` | WebSession |
+| Suricata IDS | `AviatrixIDS_CL` | NetworkSession (IDS) |
+| Gateway Network Stats | `AviatrixGwNetStats_CL` | (none) |
+| Gateway System Stats | `AviatrixGwSysStats_CL` | (none) |
+| Controller CMD/API | `AviatrixCmd_CL` | (none) |
+| Tunnel Status | `AviatrixTunnelStatus_CL` | (none) |
+
+## ASIM Parsers
+
+KQL parser files for Sentinel ASIM integration are in `asim-parsers/`:
+- `vimNetworkSessionAviatrixGateway.kql` - L4 microseg
+- `vimWebSessionAviatrixGateway.kql` - L7 MITM
+- `vimNetworkSessionAviatrixSuricata.kql` - Suricata IDS
+
+See deployment instructions in each `.kql` file.
 
 ## Sample Output Files
 
