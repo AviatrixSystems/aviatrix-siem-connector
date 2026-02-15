@@ -35,10 +35,10 @@ syslog_port = "5000"
 syslog_protocol = "tcp"
 
 # Log Profile - which log types to forward
-# Options: "all" (default), "security", "operations"
+# Options: "all" (default), "security", "networking"
 #   - all: Forward all log types
 #   - security: suricata, mitm, microseg, fqdn, cmd (firewall/IDS/audit logs)
-#   - operations: gw_net_stats, gw_sys_stats, tunnel_status (infrastructure monitoring)
+#   - networking: gw_net_stats, gw_sys_stats, tunnel_status (infrastructure monitoring)
 log_profile = "all"
 
 # Logstash Config Paths

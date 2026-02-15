@@ -155,7 +155,7 @@ All output types support the `LOG_PROFILE` environment variable to control which
 |---------|-------------|-------------------|
 | `all` | Forward all log types (default) | All 8 log types |
 | `security` | Security and firewall events | suricata, mitm, microseg, fqdn, cmd |
-| `operations` | Infrastructure monitoring | gw_net_stats, gw_sys_stats, tunnel_status |
+| `networking` | Network & infrastructure monitoring | gw_net_stats, gw_sys_stats, tunnel_status |
 
 ### Profile Contents
 
@@ -166,7 +166,7 @@ All output types support the `LOG_PROFILE` environment variable to control which
 - `fqdn` - FQDN firewall rules
 - `cmd` - Controller API audit trail
 
-**Operations Profile** - Gateway health and connectivity:
+**Networking Profile** - Gateway health and connectivity:
 - `gw_net_stats` - Gateway network throughput metrics
 - `gw_sys_stats` - Gateway CPU/memory/disk metrics
 - `tunnel_status` - Tunnel state change events
@@ -179,8 +179,8 @@ Set the `LOG_PROFILE` environment variable when running Logstash:
 # Docker - forward only security logs
 docker run -e LOG_PROFILE=security ...
 
-# Docker - forward only operations logs
-docker run -e LOG_PROFILE=operations ...
+# Docker - forward only networking logs
+docker run -e LOG_PROFILE=networking ...
 
 # Docker - forward all logs (default)
 docker run -e LOG_PROFILE=all ...
@@ -198,8 +198,8 @@ output {
         # output config
     }
 
-    # Operations logs - check for "all" or "operations" profile
-    else if "gw_net_stats" in [tags] and ("${LOG_PROFILE:all}" == "all" or "${LOG_PROFILE:all}" == "operations") {
+    # Networking logs - check for "all" or "networking" profile
+    else if "gw_net_stats" in [tags] and ("${LOG_PROFILE:all}" == "all" or "${LOG_PROFILE:all}" == "networking") {
         # output config
     }
 }

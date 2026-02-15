@@ -97,12 +97,12 @@ variable "tags" {
 }
 
 variable "log_profile" {
-    description = "Which log types to forward: all (default), security (suricata, mitm, microseg, fqdn, cmd), or operations (gw_net_stats, gw_sys_stats, tunnel_status)"
+    description = "Which log types to forward: all (default), security (suricata, mitm, microseg, fqdn, cmd), or networking (gw_net_stats, gw_sys_stats, tunnel_status)"
     type        = string
     default     = "all"
     validation {
-        condition     = contains(["all", "security", "operations"], var.log_profile)
-        error_message = "log_profile must be one of: all, security, operations"
+        condition     = contains(["all", "security", "networking"], var.log_profile)
+        error_message = "log_profile must be one of: all, security, networking"
     }
 }
 

@@ -21,7 +21,7 @@ export DT_API_TOKEN="dt0c01.ABC123..."     # API token with metrics.ingest scope
 
 # Optional
 export DT_REGION="live"                     # Region: live (default), apps, or custom
-export LOG_PROFILE="operations"             # Filter: all (default) or operations
+export LOG_PROFILE="networking"              # Filter: all (default) or networking
 ```
 
 ## Metrics Generated
@@ -85,7 +85,7 @@ docker run -d \
   -e DT_ENVIRONMENT_ID="abc12345" \
   -e DT_API_TOKEN="dt0c01.ABC123..." \
   -e DT_REGION="live" \
-  -e LOG_PROFILE="operations" \
+  -e LOG_PROFILE="networking" \
   -v $(pwd)/logstash-configs/assembled/dynatrace-metrics-full.conf:/usr/share/logstash/pipeline/logstash.conf:ro \
   -v $(pwd)/logstash-configs/patterns:/usr/share/logstash/patterns:ro \
   docker.elastic.co/logstash/logstash:8.11.0
@@ -188,5 +188,5 @@ All metrics are sent with minimal overhead using the MINT text protocol.
 ### Rate limiting
 
 Dynatrace has rate limits on metrics ingest. If you have 100+ gateways:
-- Use `LOG_PROFILE=operations` to reduce volume
+- Use `LOG_PROFILE=networking` to reduce volume
 - Consider batching or sampling strategies
