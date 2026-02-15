@@ -120,6 +120,14 @@ echo "" >> "$DEST"
 
 cat "$CONFIG_DIR/outputs/$OUTPUT_TYPE/output.conf" >> "$DEST"
 
+# Copy docker_run.tftpl to assembled directory (needed by Terraform deployments)
+DEST_DIR="$(dirname "$DEST")"
+if [[ -f "$CONFIG_DIR/outputs/$OUTPUT_TYPE/docker_run.tftpl" ]]; then
+    echo -e "${GREEN}Copying docker_run.tftpl...${NC}"
+    cp "$CONFIG_DIR/outputs/$OUTPUT_TYPE/docker_run.tftpl" "$DEST_DIR/docker_run.tftpl"
+    echo "  - docker_run.tftpl → $DEST_DIR/docker_run.tftpl"
+fi
+
 echo ""
 echo -e "${GREEN}Assembly complete!${NC}"
 echo "Output written to: $DEST"

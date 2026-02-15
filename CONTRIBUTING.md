@@ -130,8 +130,54 @@ index=* sourcetype=aviatrix:* | stats count by sourcetype
 ## Adding a New Output Type
 
 1. Create `outputs/<new-type>/output.conf` with the output block.
-2. Run `./scripts/assemble-config.sh <new-type>` to generate the full config.
-3. Test with `--config.test_and_exit` for syntax, then functionally test with sample logs.
+2. **Implement `LOG_PROFILE` filtering** on each output block (see Log Profiles below).
+3. Run `./scripts/assemble-config.sh <new-type>` to generate the full config.
+4. Test with `--config.test_and_exit` for syntax, then functionally test with sample logs.
+
+## Log Profiles
+
+All output types should support the `LOG_PROFILE` environment variable for selective log forwarding. This is a preferred architectural pattern — not every output needs every log type, and customers use profiles to control SIEM ingestion costs.
+
+### Standard Profiles
+
+| Profile | Log Types | Use Case |
+|---------|-----------|----------|
+| `all` (default) | All 8 log types | Full visibility |
+| `security` | fqdn, cmd, microseg, mitm, suricata | Firewall, IDS/IPS, audit — SIEM/SOC |
+| `networking` | gw_net_stats, gw_sys_stats, tunnel_status | Gateway health, performance, availability — NOC/observability |
+
+### Log Type to Profile Mapping
+
+| Tag | Profile |
+|-----|---------|
+| `fqdn` | security |
+| `cmd` | security |
+| `microseg` | security |
+| `mitm` | security |
+| `suricata` | security |
+| `gw_net_stats` | networking |
+| `gw_sys_stats` | networking |
+| `tunnel_status` | networking |
+
+### Implementation Pattern
+
+Gate each output block on both the event tag and the `LOG_PROFILE` environment variable:
+
+```ruby
+output {
+    # Security logs — gate on "security" profile
+    if "suricata" in [tags] and ("${LOG_PROFILE:all}" == "all" or "${LOG_PROFILE:all}" == "security") {
+        # ...
+    }
+
+    # Networking logs — gate on "networking" profile
+    else if "gw_net_stats" in [tags] and ("${LOG_PROFILE:all}" == "all" or "${LOG_PROFILE:all}" == "networking") {
+        # ...
+    }
+}
+```
+
+The `${LOG_PROFILE:all}` syntax defaults to `all` when the variable is unset, ensuring backward compatibility. An output that only handles a subset of log types (e.g., Dynatrace only consumes `networking` logs) still benefits from supporting the profile variable for consistency.
 
 ## Filter Ordering
 

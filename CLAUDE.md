@@ -50,6 +50,7 @@ Aviatrix Gateways/Controllers
 - **Metadata fields**: Uses `[@metadata]` namespace for intermediate processing
 - **Microseg throttling**: Max 2 logs/minute per connection (configurable via throttle filter)
 - **MITM cloning**: MITM events are cloned to generate both microseg and FQDN events
+- **Log profiles**: Output blocks are gated by `LOG_PROFILE` env var (`all`/`security`/`networking`) to control which log types are forwarded. See CONTRIBUTING.md for the full profile specification and implementation pattern
 
 ## Directory Structure
 
@@ -76,8 +77,12 @@ logstash-configs/
 │   │   ├── docker_run.tftpl             # Docker run template
 │   │   └── README.md                    # Splunk setup instructions
 │   └── azure-log-ingestion/
-│       ├── output.conf                  # Azure Log Analytics output
+│       ├── output.conf                  # Azure Log Analytics output (ASIM-normalized)
 │       ├── docker_run.tftpl             # Docker run template
+│       ├── asim-parsers/                # KQL ASIM parser files for Sentinel
+│       │   ├── vimNetworkSessionAviatrixGateway.kql   # L4 microseg parser
+│       │   ├── vimWebSessionAviatrixGateway.kql       # L7 MITM parser
+│       │   └── vimNetworkSessionAviatrixSuricata.kql  # Suricata IDS parser
 │       └── _sample*.json                # Sample output files for testing
 ├── patterns/
 │   └── avx.conf                         # Enhanced grok patterns
@@ -149,6 +154,9 @@ Configs reference patterns at `/usr/share/logstash/patterns` (deployment). Custo
 
 ### Environment Variables
 
+All output types use:
+- `LOG_PROFILE` - Which log types to forward: `all` (default), `security`, or `networking`
+
 Splunk configs use:
 - `SPLUNK_ADDRESS` - Splunk server hostname/IP
 - `SPLUNK_PORT` - HEC port (default: 8088)
@@ -157,9 +165,50 @@ Splunk configs use:
 Azure configs use:
 - `client_app_id`, `client_app_secret`, `tenant_id` - Service principal credentials
 - `data_collection_endpoint` - DCE endpoint URL
-- `azure_dcr_*_id` - DCR immutable IDs per stream
-- `azure_stream_*` - Stream names
-- `azure_cloud` - "public" or "china"
+- `azure_dcr_netsession_id` - DCR for L4 microseg (ASIM NetworkSession)
+- `azure_dcr_websession_id` - DCR for L7 MITM (ASIM WebSession)
+- `azure_dcr_ids_id` - DCR for Suricata IDS (ASIM NetworkSession)
+- `azure_dcr_gw_net_stats_id`, `azure_dcr_gw_sys_stats_id`, `azure_dcr_cmd_id`, `azure_dcr_tunnel_status_id` - DCRs for non-security log types
+- `azure_stream_netsession`, `azure_stream_websession`, `azure_stream_ids` - ASIM stream names
+- `azure_stream_gw_net_stats`, `azure_stream_gw_sys_stats`, `azure_stream_cmd`, `azure_stream_tunnel_status` - Non-security stream names
+- `azure_cloud` - "AzureCloud", "AzureChinaCloud", or "AzureUSGovernment"
+
+## ASIM Normalization (Azure Only)
+
+The 3 security log types are ASIM-normalized for Azure Sentinel integration. ASIM field mapping is performed in Logstash (in the Azure output config), not in KQL transforms.
+
+### Azure Table Mapping
+
+| Log Type | Azure Table | ASIM Schema | EventType |
+|---|---|---|---|
+| L4 Microseg | `AviatrixNetworkSession_CL` | NetworkSession | `NetworkSession` |
+| L7 MITM/DCF | `AviatrixWebSession_CL` | WebSession | `HTTPsession` |
+| Suricata IDS | `AviatrixIDS_CL` | NetworkSession | `IDS` |
+| GwNetStats | `AviatrixGwNetStats_CL` | (none) | - |
+| GwSysStats | `AviatrixGwSysStats_CL` | (none) | - |
+| Cmd | `AviatrixCmd_CL` | (none) | - |
+| TunnelStatus | `AviatrixTunnelStatus_CL` | (none) | - |
+
+### ASIM Field Patterns
+
+All ASIM-normalized events include:
+- `EventVendor` = "Aviatrix", `EventProduct` = "Distributed Cloud Firewall" or "Suricata IDS"
+- `EventSchema`, `EventSchemaVersion` ("0.2.7"), `EventType`, `EventCount`
+- `DvcAction` (Allow/Deny/Drop), `DvcOriginalAction`, `EventResult` (Success/Failure)
+- `SrcIpAddr`, `DstIpAddr`, `SrcPortNumber`, `DstPortNumber`, `NetworkProtocol`
+
+Suricata IDS additionally includes threat fields: `ThreatName`, `ThreatId`, `ThreatCategory`, `ThreatRiskLevel`
+
+Original Aviatrix-specific fields are preserved alongside ASIM fields.
+
+### KQL ASIM Parsers
+
+Three parser files in `logstash-configs/outputs/azure-log-ingestion/asim-parsers/`:
+- `vimNetworkSessionAviatrixGateway.kql` - L4 microseg → `_Im_NetworkSession`
+- `vimWebSessionAviatrixGateway.kql` - L7 MITM → `_Im_WebSession`
+- `vimNetworkSessionAviatrixSuricata.kql` - Suricata IDS → `_Im_NetworkSession`
+
+Deploy as saved functions via Azure CLI (see deployment instructions in each .kql file).
 
 ## Terraform Deployments
 
@@ -177,17 +226,22 @@ Config changes trigger rolling instance refresh via S3 bucket updates.
 ### Azure ACI Deployment
 
 Prerequisites:
-1. Create custom Log Analytics tables:
+1. Tables are auto-created by Terraform (`3-log-analytics-tables.tf`). For manual creation:
 ```bash
 az monitor log-analytics workspace table create \
     --resource-group <rg> --workspace-name <ws> \
-    --name "AviatrixMicroseg_CL" \
-    --columns TimeGenerated=datetime action=string dst_ip=string ...
+    --name "AviatrixNetworkSession_CL" \
+    --columns TimeGenerated=datetime EventVendor=string SrcIpAddr=string DstIpAddr=string ...
 
 az monitor log-analytics workspace table create \
     --resource-group <rg> --workspace-name <ws> \
-    --name "AviatrixSuricata_CL" \
-    --columns TimeGenerated=datetime Computer=string alert=dynamic ...
+    --name "AviatrixWebSession_CL" \
+    --columns TimeGenerated=datetime EventVendor=string DstFqdn=string Url=string ...
+
+az monitor log-analytics workspace table create \
+    --resource-group <rg> --workspace-name <ws> \
+    --name "AviatrixIDS_CL" \
+    --columns TimeGenerated=datetime EventVendor=string ThreatName=string alert=dynamic ...
 ```
 
 2. Deploy:
