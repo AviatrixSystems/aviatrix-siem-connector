@@ -7,21 +7,22 @@ Sends both gateway metrics and event logs to Dynatrace from a single Logstash in
 
 ## Prerequisites
 
-1. **Dynatrace Environment** with both metrics and logs ingest endpoints
-2. **Two API Tokens** (recommended) or one token with both scopes:
-   - Token 1: `metrics.ingest` scope for metrics
-   - Token 2: `logs.ingest` scope for logs
+1. **Dynatrace Environment** with metrics and logs ingest endpoints
+2. **Platform token(s)** (`dt0s16.*`) with `storage:metrics:write` and `storage:logs:write` scopes
+3. **IAM policy** bound to the token's user group granting write permissions
+
+See the [Dynatrace Setup Guide](../../../docs/DYNATRACE_SETUP.md) for step-by-step token, IAM policy, and URL configuration.
 
 ## Environment Variables
 
 ```bash
 # Metrics (required)
-export DT_METRICS_URL="https://abc12345.live.dynatrace.com/api/v2/metrics/ingest"
-export DT_API_TOKEN="dt0c01.METRICS_TOKEN..."
+export DT_METRICS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest"
+export DT_API_TOKEN="dt0s16.METRICS_TOKEN..."
 
 # Logs (required)
-export DT_LOGS_URL="https://abc12345.live.dynatrace.com/api/v2/logs/ingest"
-export DT_LOGS_TOKEN="dt0c01.LOGS_TOKEN..."
+export DT_LOGS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest"
+export DT_LOGS_TOKEN="dt0s16.LOGS_TOKEN..."
 
 # Shared (optional)
 export DT_METRIC_SOURCE="aviatrix"   # Source dimension for metrics (default: aviatrix)
@@ -103,14 +104,19 @@ Example dashboard layout:
 ### Only metrics arriving (no logs)
 
 1. Verify `DT_LOGS_URL` and `DT_LOGS_TOKEN` are set
-2. Verify token has `logs.ingest` scope
+2. Verify token has `storage:logs:write` scope and IAM policy is bound
 3. Check LOG_PROFILE includes the desired log types
 
 ### Only logs arriving (no metrics)
 
 1. Verify `DT_METRICS_URL` and `DT_API_TOKEN` are set
-2. Verify filter 94 (`94-save-raw-net-rates.conf`) is present for accurate rate conversion
-3. Check LOG_PROFILE allows `networking` or `all`
+2. Verify token has `storage:metrics:write` scope and IAM policy is bound
+3. Verify filter 94 (`94-save-raw-net-rates.conf`) is present for accurate rate conversion
+4. Check LOG_PROFILE allows `networking` or `all`
+
+### 401/403/404 errors
+
+See the [troubleshooting matrix](../../../docs/DYNATRACE_SETUP.md#7-troubleshooting) in the setup guide.
 
 ### Splitting into separate deployments
 

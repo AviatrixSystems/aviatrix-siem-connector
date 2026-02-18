@@ -5,15 +5,17 @@ Sends Aviatrix event logs to Dynatrace Logs Ingest API v2 as structured JSON wit
 ## Prerequisites
 
 1. **Dynatrace Environment** with a logs ingest endpoint URL
-2. **API Token** with `logs.ingest` scope
-   - Create at: Access Tokens > Generate new token > Enable "Ingest logs"
+2. **Platform token** (`dt0s16.*`) with `storage:logs:write` scope
+3. **IAM policy** bound to the token's user group granting write permissions
+
+See the [Dynatrace Setup Guide](../../../docs/DYNATRACE_SETUP.md) for step-by-step token, IAM policy, and URL configuration.
 
 ## Environment Variables
 
 ```bash
 # Required
-export DT_LOGS_URL="https://abc12345.live.dynatrace.com/api/v2/logs/ingest"
-export DT_LOGS_TOKEN="dt0c01.ABC123..."     # API token with logs.ingest scope
+export DT_LOGS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest"
+export DT_LOGS_TOKEN="dt0s16.ABC123..."     # Platform token with storage:logs:write scope
 
 # Optional
 export DT_LOG_SOURCE="aviatrix"              # log.source attribute (default: aviatrix)
@@ -205,16 +207,17 @@ fetch logs
 
 ### No logs in Dynatrace
 
-1. Verify API token has `logs.ingest` scope
+1. Verify platform token has `storage:logs:write` scope and IAM policy is bound
 2. Check Logstash logs: `docker logs <container>`
-3. Test API:
+3. Test API directly:
    ```bash
-   curl -X POST "${DT_LOGS_URL}" \
-     -H "Authorization: Api-Token ${DT_LOGS_TOKEN}" \
+   curl -s -o /dev/null -w "%{http_code}" -X POST "${DT_LOGS_URL}" \
+     -H "Authorization: Bearer ${DT_LOGS_TOKEN}" \
      -H "Content-Type: application/json; charset=utf-8" \
      -d '[{"content":"test log","severity":"INFORMATIONAL","log.source":"aviatrix"}]'
-   # Expect: 204 No Content
+   # Expect: 204
    ```
+4. For 401/403/404 errors, see the [troubleshooting matrix](../../../docs/DYNATRACE_SETUP.md#7-troubleshooting) in the setup guide
 
 ### Events missing attributes
 

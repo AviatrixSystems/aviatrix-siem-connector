@@ -5,15 +5,17 @@ Sends Aviatrix gateway metrics to Dynatrace Metrics Ingest API v2 using the MINT
 ## Prerequisites
 
 1. **Dynatrace Environment** with a metrics ingest endpoint URL
-2. **API Token** with `metrics.ingest` scope
-   - Create at: Access Tokens > Generate new token > Enable "Ingest metrics"
+2. **Platform token** (`dt0s16.*`) with `storage:metrics:write` scope
+3. **IAM policy** bound to the token's user group granting write permissions
+
+See the [Dynatrace Setup Guide](../../../docs/DYNATRACE_SETUP.md) for step-by-step token, IAM policy, and URL configuration.
 
 ## Environment Variables
 
 ```bash
 # Required
-export DT_METRICS_URL="https://abc12345.live.dynatrace.com/api/v2/metrics/ingest"
-export DT_API_TOKEN="dt0c01.ABC123..."     # API token with metrics.ingest scope
+export DT_METRICS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest"
+export DT_API_TOKEN="dt0s16.ABC123..."     # Platform token with storage:metrics:write scope
 
 # Optional
 export DT_METRIC_SOURCE="aviatrix"          # Source dimension value (default: aviatrix)
@@ -162,15 +164,17 @@ timeseries max(aviatrix.gateway.net.conntrack.usage), by:{gateway}
 
 ### No metrics in Dynatrace
 
-1. Verify API token has `metrics.ingest` scope
+1. Verify platform token has `storage:metrics:write` scope and IAM policy is bound
 2. Check Logstash logs: `docker logs <container>`
-3. Test API:
+3. Test API directly:
    ```bash
-   curl -X POST "${DT_METRICS_URL}" \
-     -H "Authorization: Api-Token ${DT_API_TOKEN}" \
+   curl -s -o /dev/null -w "%{http_code}" -X POST "${DT_METRICS_URL}" \
+     -H "Authorization: Bearer ${DT_API_TOKEN}" \
      -H "Content-Type: text/plain" \
      -d "test.metric,gateway=\"test\" gauge,42 $(date +%s)000"
+   # Expect: 202
    ```
+4. For 401/403/404 errors, see the [troubleshooting matrix](../../../docs/DYNATRACE_SETUP.md#7-troubleshooting) in the setup guide
 
 ### Rate values are wrong (truncated integers)
 
