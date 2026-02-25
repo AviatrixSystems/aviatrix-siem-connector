@@ -1,2 +1,13 @@
 # DOCKER RUN FOR SPLUNK HEC OUTPUT
-sudo docker run -d --restart=always -v /logstash/pipeline/:/usr/share/logstash/pipeline/ -v /logstash/patterns:/usr/share/logstash/patterns -e LOG_PROFILE=${log_profile} -e SPLUNK_HEC_AUTH=${splunk_hec_auth} -e SPLUNK_ADDRESS=${splunk_address} -e SPLUNK_PORT=${splunk_port} -e FLATTEN_SURICATA=true -e XPACK_MONITORING_ENABLED=false -p 5000:5000 docker.elastic.co/logstash/logstash:8.16.2
+docker run -d --restart=always \
+  -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
+  -v /logstash/patterns:/usr/share/logstash/patterns \
+  -p 5000:5000/tcp \
+  -p 5000:5000/udp \
+  -e LOG_PROFILE=${log_profile} \
+  -e SPLUNK_HEC_AUTH=${splunk_hec_auth} \
+  -e SPLUNK_ADDRESS=${splunk_address} \
+  -e SPLUNK_PORT=${splunk_port} \
+  -e FLATTEN_SURICATA=true \
+  -e XPACK_MONITORING_ENABLED=false \
+  docker.elastic.co/logstash/logstash:8.16.2

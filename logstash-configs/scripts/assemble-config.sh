@@ -12,6 +12,7 @@
 #   dynatrace-metrics   - Dynatrace Metrics Ingest (MINT protocol)
 #   dynatrace-logs      - Dynatrace Logs Ingest (JSON)
 #   dynatrace           - Dynatrace Combined (metrics + logs)
+#   zabbix              - Zabbix Trapper (Dependent Items pattern)
 
 set -e
 
@@ -36,6 +37,7 @@ print_usage() {
     echo "  dynatrace-metrics   - Dynatrace Metrics Ingest (MINT protocol)"
     echo "  dynatrace-logs      - Dynatrace Logs Ingest (JSON)"
     echo "  dynatrace           - Dynatrace Combined (metrics + logs)"
+    echo "  zabbix              - Zabbix Trapper (Dependent Items pattern)"
     echo ""
     echo "Examples:"
     echo "  $0 splunk-hec"

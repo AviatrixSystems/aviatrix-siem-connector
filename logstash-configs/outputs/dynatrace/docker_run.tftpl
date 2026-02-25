@@ -1,2 +1,15 @@
 # DOCKER RUN FOR DYNATRACE COMBINED OUTPUT (METRICS + LOGS)
-sudo docker run -d --restart=always -v /logstash/pipeline/:/usr/share/logstash/pipeline/ -v /logstash/patterns:/usr/share/logstash/patterns -e LOG_PROFILE=${log_profile} -e DT_METRICS_URL=https://${dt_environment_id}.${dt_region}.dynatrace.com/api/v2/metrics/ingest -e DT_API_TOKEN=${dt_api_token} -e DT_METRIC_SOURCE=${dt_metric_source} -e DT_LOGS_URL=https://${dt_environment_id}.${dt_region}.dynatrace.com/api/v2/logs/ingest -e DT_LOGS_TOKEN=${dt_logs_token} -e DT_LOG_SOURCE=${dt_log_source} -e XPACK_MONITORING_ENABLED=false -p 5000:5000 docker.elastic.co/logstash/logstash:8.16.2
+docker run -d --restart=always \
+  -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
+  -v /logstash/patterns:/usr/share/logstash/patterns \
+  -p 5000:5000/tcp \
+  -p 5000:5000/udp \
+  -e LOG_PROFILE=${log_profile} \
+  -e DT_METRICS_URL=https://${dt_environment_id}.${dt_region}.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest \
+  -e DT_API_TOKEN=${dt_api_token} \
+  -e DT_METRIC_SOURCE=${dt_metric_source} \
+  -e DT_LOGS_URL=https://${dt_environment_id}.${dt_region}.dynatrace.com/platform/classic/environment-api/v2/logs/ingest \
+  -e DT_LOGS_TOKEN=${dt_logs_token} \
+  -e DT_LOG_SOURCE=${dt_log_source} \
+  -e XPACK_MONITORING_ENABLED=false \
+  docker.elastic.co/logstash/logstash:8.16.2

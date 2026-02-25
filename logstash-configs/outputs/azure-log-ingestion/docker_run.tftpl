@@ -1,12 +1,12 @@
-# Docker Run Template for Azure Log Ingestion
-# This template is for reference only - the ACI deployment uses Terraform directly
-# For manual Docker deployment, use this command:
-
+# DOCKER RUN FOR AZURE LOG INGESTION OUTPUT
+# NOTE: The stock Elastic image does NOT include the Sentinel plugin.
+# You must build a custom image. See deployments/azure-aci/logstash-container-build/README.md
 docker run -d --restart=always \
   -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
   -v /logstash/patterns:/usr/share/logstash/patterns \
   -p 5000:5000/tcp \
   -p 5000:5000/udp \
+  -e LOG_PROFILE=${log_profile} \
   -e client_app_id="${client_app_id}" \
   -e client_app_secret="${client_app_secret}" \
   -e tenant_id="${tenant_id}" \
@@ -30,7 +30,5 @@ docker run -d --restart=always \
   -e CONFIG_RELOAD_AUTOMATIC=true \
   -e LS_JAVA_OPTS="-Xmx1g -Xms1g" \
   your-registry.azurecr.io/aviatrix-logstash-sentinel:latest
-  # IMPORTANT: The stock Elastic image does NOT include the Sentinel plugin.
-  # You must build a custom image. See deployment-tf/azure-aci/logstash-container-build/README.md
 
 # Note: Use 'AzureCloud', 'AzureChinaCloud', or 'AzureUSGovernment' for azure_cloud
