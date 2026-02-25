@@ -12,15 +12,21 @@ See the [Dynatrace Setup Guide](../../../docs/DYNATRACE_SETUP.md) for step-by-st
 
 ## Environment Variables
 
-```bash
-# Required
-export DT_METRICS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest"
-export DT_API_TOKEN="dt0s16.ABC123..."     # Platform token with storage:metrics:write scope
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DT_METRICS_URL` | Yes | — | Metrics ingest endpoint (e.g., `https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest`) |
+| `DT_API_TOKEN` | Yes | — | Platform token with `storage:metrics:write` scope |
+| `DT_METRIC_SOURCE` | No | `aviatrix` | Source dimension value |
+| `LOG_PROFILE` | No | `all` | Log type filter: `all` or `networking` |
 
-# Optional
-export DT_METRIC_SOURCE="aviatrix"          # Source dimension value (default: aviatrix)
-export LOG_PROFILE="networking"              # Filter: all (default) or networking
+## Quick Start
+
+```bash
+cd logstash-configs
+./scripts/assemble-config.sh dynatrace-metrics
 ```
+
+This creates `assembled/dynatrace-metrics-full.conf`.
 
 ## Metrics
 
@@ -85,11 +91,22 @@ Raw syslog values use human-readable units ("54.07Kb", "2.49GB"). The MINT build
 
 Filter 94 (`94-save-raw-net-rates.conf`) saves the original string values to `[@metadata]` before filter 95 converts them to truncated integers.
 
-## Building the Configuration
+## Dynatrace Query Examples
 
-```bash
-cd logstash-configs
-./scripts/assemble-config.sh dynatrace-metrics
+```
+# Gateway CPU utilization over time
+timeseries avg(aviatrix.gateway.cpu.usage), by:{gateway}
+
+# Per-core CPU hotspots
+timeseries max(aviatrix.gateway.cpu.usage), by:{gateway, core}
+| filter core != "aggregate"
+
+# Network throughput
+timeseries avg(aviatrix.gateway.net.bytes_rx), by:{gateway, interface}
+
+# Conntrack usage approaching limit
+timeseries max(aviatrix.gateway.net.conntrack.usage), by:{gateway}
+| filter value > 80
 ```
 
 ## Local Testing
@@ -141,24 +158,6 @@ cd logstash-configs
 | `total_rx_rate=54.07Kb` | `aviatrix.gateway.net.bytes_rx gauge,55367.68` |
 | `memory_available=6762800` (kB) | `aviatrix.gateway.memory.avail gauge,6925107200` |
 | `conntrack_usage_rate=0.05` | `aviatrix.gateway.net.conntrack.usage gauge,5.0` |
-
-## Dynatrace Query Examples
-
-```
-# Gateway CPU utilization over time
-timeseries avg(aviatrix.gateway.cpu.usage), by:{gateway}
-
-# Per-core CPU hotspots
-timeseries max(aviatrix.gateway.cpu.usage), by:{gateway, core}
-| filter core != "aggregate"
-
-# Network throughput
-timeseries avg(aviatrix.gateway.net.bytes_rx), by:{gateway, interface}
-
-# Conntrack usage approaching limit
-timeseries max(aviatrix.gateway.net.conntrack.usage), by:{gateway}
-| filter value > 80
-```
 
 ## Troubleshooting
 

@@ -15,20 +15,24 @@ See the [Dynatrace Setup Guide](../../../docs/DYNATRACE_SETUP.md) for step-by-st
 
 ## Environment Variables
 
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DT_METRICS_URL` | Yes | — | Metrics ingest endpoint (e.g., `https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest`) |
+| `DT_API_TOKEN` | Yes | — | Platform token with `storage:metrics:write` scope |
+| `DT_LOGS_URL` | Yes | — | Logs ingest endpoint (e.g., `https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest`) |
+| `DT_LOGS_TOKEN` | Yes | — | Platform token with `storage:logs:write` scope |
+| `DT_METRIC_SOURCE` | No | `aviatrix` | Source dimension for metrics |
+| `DT_LOG_SOURCE` | No | (falls back to `DT_METRIC_SOURCE`) | `log.source` attribute for logs |
+| `LOG_PROFILE` | No | `all` | Log type filter: `all`, `security`, or `networking` |
+
+## Quick Start
+
 ```bash
-# Metrics (required)
-export DT_METRICS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest"
-export DT_API_TOKEN="dt0s16.METRICS_TOKEN..."
-
-# Logs (required)
-export DT_LOGS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest"
-export DT_LOGS_TOKEN="dt0s16.LOGS_TOKEN..."
-
-# Shared (optional)
-export DT_METRIC_SOURCE="aviatrix"   # Source dimension for metrics (default: aviatrix)
-export DT_LOG_SOURCE="aviatrix"      # log.source for logs (default: falls back to DT_METRIC_SOURCE)
-export LOG_PROFILE="all"             # all (default), security, or networking
+cd logstash-configs
+./scripts/assemble-config.sh dynatrace
 ```
+
+This creates `assembled/dynatrace-full.conf`.
 
 ## Data Flow
 
@@ -75,13 +79,6 @@ See [dynatrace-logs README](../dynatrace-logs/README.md) for the full attribute 
 | `all` | gw_sys_stats, gw_net_stats | All 6 event types |
 | `networking` | gw_sys_stats, gw_net_stats | tunnel_status only |
 | `security` | (none) | suricata, mitm, microseg, fqdn, cmd |
-
-## Building the Configuration
-
-```bash
-cd logstash-configs
-./scripts/assemble-config.sh dynatrace
-```
 
 ## Correlation Between Metrics and Logs
 

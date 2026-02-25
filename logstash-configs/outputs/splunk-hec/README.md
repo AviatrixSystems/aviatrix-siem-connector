@@ -2,6 +2,25 @@
 
 This output configuration sends parsed Aviatrix logs to Splunk via the HTTP Event Collector (HEC).
 
+## Prerequisites
+
+1. From the Splunk dashboard, go to **Settings > Data Inputs > HTTP Event Collector**
+2. Click **New Token** to create a token for Aviatrix
+3. Configure the token:
+   - Name: `aviatrix-logs`
+   - Source type: `_json` (or create custom sourcetypes)
+   - Index: Select your target index
+4. Copy the token value and use it as `SPLUNK_HEC_AUTH`
+
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SPLUNK_ADDRESS` | Yes | — | Splunk server hostname/IP (include protocol, e.g., `https://splunk.example.com`) |
+| `SPLUNK_PORT` | No | `8088` | HEC port |
+| `SPLUNK_HEC_AUTH` | Yes | — | HEC authentication token |
+| `LOG_PROFILE` | No | `all` | Log type filter: `all`, `security`, or `networking` |
+
 ## Quick Start
 
 ### 1. Build the Configuration
@@ -13,15 +32,7 @@ cd logstash-configs
 
 This creates `assembled/splunk-hec-full.conf`.
 
-### 2. Configure Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPLUNK_ADDRESS` | Splunk server hostname/IP (include protocol, e.g., `https://splunk.example.com`) | (required) |
-| `SPLUNK_PORT` | HEC port | 8088 |
-| `SPLUNK_HEC_AUTH` | HEC authentication token | (required) |
-
-### 3. Run Logstash
+### 2. Run Logstash
 
 ```bash
 docker run -d --restart=always \
@@ -36,16 +47,6 @@ docker run -d --restart=always \
   -p 5000:5000/udp \
   docker.elastic.co/logstash/logstash:8.16.2
 ```
-
-## Configuring Splunk HEC
-
-1. From the Splunk dashboard, go to **Settings > Data Inputs > HTTP Event Collector**
-2. Click **New Token** to create a token for Aviatrix
-3. Configure the token:
-   - Name: `aviatrix-logs`
-   - Source type: `_json` (or create custom sourcetypes)
-   - Index: Select your target index
-4. Copy the token value and use it as `SPLUNK_HEC_AUTH`
 
 ## Source Types
 

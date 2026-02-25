@@ -12,15 +12,21 @@ See the [Dynatrace Setup Guide](../../../docs/DYNATRACE_SETUP.md) for step-by-st
 
 ## Environment Variables
 
-```bash
-# Required
-export DT_LOGS_URL="https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest"
-export DT_LOGS_TOKEN="dt0s16.ABC123..."     # Platform token with storage:logs:write scope
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DT_LOGS_URL` | Yes | — | Logs ingest endpoint (e.g., `https://<env-id>.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest`) |
+| `DT_LOGS_TOKEN` | Yes | — | Platform token with `storage:logs:write` scope |
+| `DT_LOG_SOURCE` | No | `aviatrix` | `log.source` attribute value |
+| `LOG_PROFILE` | No | `all` | Log type filter: `all`, `security`, or `networking` |
 
-# Optional
-export DT_LOG_SOURCE="aviatrix"              # log.source attribute (default: aviatrix)
-export LOG_PROFILE="all"                     # Filter: all (default), security, or networking
+## Quick Start
+
+```bash
+cd logstash-configs
+./scripts/assemble-config.sh dynatrace-logs
 ```
+
+This creates `assembled/dynatrace-logs-full.conf`.
 
 ## Log Types
 
@@ -119,49 +125,6 @@ export LOG_PROFILE="all"                     # Filter: all (default), security, 
 | `aviatrix.controller.username` | User who performed action |
 | `aviatrix.controller.reason` | Failure reason (if any) |
 
-## Building the Configuration
-
-```bash
-cd logstash-configs
-./scripts/assemble-config.sh dynatrace-logs
-```
-
-## Local Testing
-
-1. **Start webhook viewer**:
-   ```bash
-   cd test-tools/webhook-viewer/local && ./run.sh
-   ```
-
-2. **Create a webhook session** in the UI at http://localhost:8080
-
-3. **Assemble and run Logstash**:
-   ```bash
-   cd logstash-configs
-   ./scripts/assemble-config.sh dynatrace-logs
-
-   docker run --rm \
-     -v $(pwd)/assembled:/config \
-     -v $(pwd)/patterns:/usr/share/logstash/patterns \
-     -e DT_LOGS_URL=http://host.docker.internal:8080/<session-id> \
-     -e DT_LOGS_TOKEN=test \
-     -e DT_LOG_SOURCE=aviatrix \
-     -e LOG_PROFILE=all \
-     -e XPACK_MONITORING_ENABLED=false \
-     -p 5002:5000 \
-     docker.elastic.co/logstash/logstash:8.16.2 \
-     logstash -f /config/dynatrace-logs-full.conf
-   ```
-
-4. **Stream test logs**:
-   ```bash
-   cd test-tools/sample-logs
-   ./generate-current-samples.sh --overwrite
-   ./stream-logs.py --port 5002 -v
-   ```
-
-5. **Inspect output** in the webhook viewer. Each POST body should be a JSON array containing one log event object with `timestamp`, `severity`, `content`, and `aviatrix.*` attributes.
-
 ## DQL Query Examples
 
 ```
@@ -202,6 +165,42 @@ fetch logs
 | summarize count(), by:{aviatrix.event.type, loglevel}
 | sort count desc
 ```
+
+## Local Testing
+
+1. **Start webhook viewer**:
+   ```bash
+   cd test-tools/webhook-viewer/local && ./run.sh
+   ```
+
+2. **Create a webhook session** in the UI at http://localhost:8080
+
+3. **Assemble and run Logstash**:
+   ```bash
+   cd logstash-configs
+   ./scripts/assemble-config.sh dynatrace-logs
+
+   docker run --rm \
+     -v $(pwd)/assembled:/config \
+     -v $(pwd)/patterns:/usr/share/logstash/patterns \
+     -e DT_LOGS_URL=http://host.docker.internal:8080/<session-id> \
+     -e DT_LOGS_TOKEN=test \
+     -e DT_LOG_SOURCE=aviatrix \
+     -e LOG_PROFILE=all \
+     -e XPACK_MONITORING_ENABLED=false \
+     -p 5002:5000 \
+     docker.elastic.co/logstash/logstash:8.16.2 \
+     logstash -f /config/dynatrace-logs-full.conf
+   ```
+
+4. **Stream test logs**:
+   ```bash
+   cd test-tools/sample-logs
+   ./generate-current-samples.sh --overwrite
+   ./stream-logs.py --port 5002 -v
+   ```
+
+5. **Inspect output** in the webhook viewer. Each POST body should be a JSON array containing one log event object with `timestamp`, `severity`, `content`, and `aviatrix.*` attributes.
 
 ## Troubleshooting
 
