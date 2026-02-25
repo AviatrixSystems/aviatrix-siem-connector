@@ -1,0 +1,25 @@
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.16.2
+    ports:
+      - "5000:5000/udp"
+      - "5000:5000/tcp"
+      - "9600:9600"
+    volumes:
+      - ../logstash-configs/assembled:/config
+      - ../logstash-configs/patterns:/usr/share/logstash/patterns
+    command: logstash -f /config/webhook-test-full.conf
+    environment:
+      - WEBHOOK_URL=http://host.docker.internal:8080
+      - LOG_PROFILE=all
+      - LS_JAVA_OPTS=-Xmx512m -Xms256m
+
+  sidecar:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      LOGSTASH_API_URL: http://logstash:9600
+      LOG_PROFILE: all
+    depends_on:
+      - logstash

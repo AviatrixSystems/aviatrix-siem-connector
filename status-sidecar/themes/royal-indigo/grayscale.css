@@ -1,0 +1,16 @@
+:root {
+  --Grayscale-900: rgba(32, 30, 40, 1);
+  --Grayscale-850: rgba(43, 41, 49, 1);
+  --Grayscale-800: rgba(54, 52, 61, 1);
+  --Grayscale-750: rgba(65, 62, 70, 1);
+  --Grayscale-700: rgba(76, 74, 84, 1);
+  --Grayscale-600: rgba(98, 95, 104, 1);
+  --Grayscale-500: rgba(121, 119, 127, 1);
+  --Grayscale-400: rgba(143, 141, 150, 1);
+  --Grayscale-200: rgba(187, 185, 195, 1);
+  --Grayscale-100: rgba(210, 208, 217, 1);
+  --Grayscale-075: rgba(232, 230, 235, 1);
+  --Grayscale-066: rgba(237, 236, 239, 1);
+  --Grayscale-050: rgba(243, 242, 246, 1);
+  --Grayscale-000: rgba(255, 255, 255, 1);
+}

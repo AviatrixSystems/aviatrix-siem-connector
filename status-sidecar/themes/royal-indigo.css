@@ -1,0 +1,242 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&family=Inconsolata:wght@400;600&display=swap');
+
+@import 'tailwindcss';
+@source '../ui';
+@source '../components';
+@source '../app';
+
+@import './royal-indigo/mode-light.css';
+@import './royal-indigo/mode-dark.css';
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --spacing: 0.25rem; /* 4px */
+
+  --font-sans: 'Source Sans 3', sans-serif;
+  --font-mono: 'Inconsolata', monospace;
+
+  /* Font sizes (canonical - align with Tailwind naming) */
+  --text-2xs: 0.5rem; /* 8px */
+  --text-xs: 0.625rem; /* 10px */
+  --text-sm: 0.75rem; /* 12px - NOT Tailwind's default 14px */
+  --text-base: 0.875rem; /* 14px - NOT Tailwind's default 16px */
+  --text-md: 1rem; /* 16px */
+  --text-lg: 1.25rem; /* 20px */
+  --text-xl: 1.5rem; /* 24px */
+  --text-2xl: 2rem; /* 32px */
+  --text-3xl: 2.25rem; /* 36px */
+  --text-4xl: 2.5rem; /* 40px */
+
+  /* Typography helpers (derived from Figma variables) */
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --tracking-normal: 0; /* default */
+
+  /* Line height tokens for Tailwind utilities (leading-base, leading-lg) */
+  --line-height-base: 20px;
+  --line-height-lg: 24px;
+
+  /* Base radius token (used by utilities) */
+  --radius: 0.5rem; /* 8px - matches --radius-sm */
+
+  /* Border radius tokens (renamed from --border-* for clarity) */
+  --radius-2xs: 2px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Pill-shaped radius tokens (custom values for circular elements) */
+  --border-round-sm: 6px;
+  --border-round-md: 10px;
+
+  /* Tailwind utilities for pill-shaped radius */
+  --radius-round-sm: 6px;
+  --radius-round-md: 10px;
+
+  --toggle-width: 24px;
+
+  /* Width tokens for Tailwind utilities (w-surface-2xs, w-surface-xs, etc.) */
+  --width-surface-2xs: 240px;
+  --width-surface-xs: 320px;
+  --width-surface-sm: 400px;
+  --width-surface-md: 480px;
+  --width-surface-lg: 560px;
+  --width-surface-xl: 720px;
+  --width-surface-2xl: 960px;
+
+  /* Max-width tokens for Tailwind utilities (max-w-surface-xs, etc.) */
+  --max-width-surface-2xs: 240px;
+  --max-width-surface-xs: 320px;
+  --max-width-surface-sm: 400px;
+  --max-width-surface-md: 480px;
+  --max-width-surface-lg: 560px;
+  --max-width-surface-xl: 720px;
+  --max-width-surface-2xl: 960px;
+
+  /* Spacing tokens for Tailwind utilities (gap-xs, p-md, m-lg, etc.) */
+  --spacing-s-xs: 2px;
+  --spacing-s-sm: 4px;
+  --spacing-s-md: 6px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 40px;
+
+  /* Icon stroke token (used by components via getComputedStyle) */
+  --icon-stroke: 1.5; /* lucide default stroke width */
+
+  /* Size tokens for Tailwind utilities (size-icon-sm, size-2xs, size-md, etc.) */
+  --size-icon-sm: 12px;
+  --size-icon-md: 16px;
+  --size-icon-lg: 20px;
+  --size-icon-xl: 24px;
+  --size-2xs: 12px;
+  --size-xs: 16px;
+  --size-sm: 20px;
+  --size-md: 24px;
+  --size-lg: 32px;
+  --size-xl: 40px;
+  --size-2xl: 48px;
+  --size-3xl: 60px;
+  --size-toggle: 24px;
+  --width-toggle: 24px;
+
+  /* Height tokens for h-* utilities (h-2xs, h-md, h-icon-sm, etc.) */
+  --height-icon-sm: 12px;
+  --height-icon-md: 16px;
+  --height-icon-lg: 20px;
+  --height-icon-xl: 24px;
+  --height-2xs: 12px;
+  --height-xs: 16px;
+  --height-sm: 20px;
+  --height-md: 24px;
+  --height-lg: 32px;
+  --height-xl: 40px;
+  --height-2xl: 48px;
+  --height-3xl: 60px;
+
+  /* Width tokens for w-* utilities (w-2xs, w-md, etc.) */
+  --width-2xs: 12px;
+  --width-xs: 16px;
+  --width-sm: 20px;
+  --width-md: 24px;
+  --width-lg: 32px;
+  --width-xl: 40px;
+  --width-2xl: 48px;
+  --width-3xl: 60px;
+
+  /* Ring and border width tokens */
+  --ring-width-sm: 1px;
+  --ring-width-md: 2px;
+  --ring-width-lg: 3px;
+  --border-width-default: 1px;
+
+  --color-card: var(--Background-Light);
+  --color-card-foreground: var(--Text-Default);
+
+  --color-popover: var(--Background-Light);
+  --color-popover-foreground: var(--Text-Default);
+
+  --color-primary: var(--Primary-Default);
+  --color-primary-medium: var(--Primary-Medium);
+  --color-primary-dark: var(--Primary-Dark);
+  --color-primary-light: var(--Primary-Light);
+  --color-primary-disabled: var(--Primary-Disabled);
+  --color-primary-transparent: var(--Primary-Transparent);
+  --color-primary-foreground: var(--Text-Default-Inverse);
+
+  --color-error: var(--Error-Default);
+  --color-error-medium: var(--Error-Medium);
+  --color-error-dark: var(--Error-Dark);
+  --color-error-light: var(--Error-Light);
+  --color-error-disabled: var(--Error-Disabled);
+  --color-error-transparent: var(--Error-Transparent);
+  --color-error-foreground: var(--Text-Default-Inverse);
+
+  --color-warning: var(--Warning-Default);
+  --color-warning-medium: var(--Warning-Medium);
+  --color-warning-dark: var(--Warning-Dark);
+  --color-warning-light: var(--Warning-Light);
+  --color-warning-disabled: var(--Warning-Disabled);
+  --color-warning-transparent: var(--Warning-Transparent);
+  --color-warning-foreground: var(--Text-Default-Inverse);
+
+  --color-success: var(--Success-Default);
+  --color-success-medium: var(--Success-Medium);
+  --color-success-dark: var(--Success-Dark);
+  --color-success-light: var(--Success-Light);
+  --color-success-disabled: var(--Success-Disabled);
+  --color-success-transparent: var(--Success-Transparent);
+  --color-success-foreground: var(--Text-Default-Inverse);
+
+  --color-text-dark: var(--Text-Dark);
+  --color-text-medium: var(--Text-Medium);
+  --color-text-light: var(--Text-Light);
+  --color-text-dark-inverse: var(--Text-Dark-Inverse);
+  --color-text-default-inverse: var(--Text-Default-Inverse);
+  --color-text-light-inverse: var(--Text-Light-Inverse);
+
+  --color-border-default: var(--Border-Default);
+  --color-border: var(--Border-Default);
+  --color-border-medium: var(--Border-Medium);
+  --color-border-dark: var(--Border-Dark);
+  --color-border-light: var(--Border-Light);
+
+  --color-background-default: var(--Background-Default);
+  --color-background-medium: var(--Background-Medium);
+  --color-background-dark: var(--Background-Dark);
+  --color-background-light: var(--Background-Light);
+  --color-background: var(--Background-Light);
+  --color-background-disabled: var(--Background-Disabled);
+  --color-background-transparent: var(--Background-Transparent);
+  --color-background-overlay: var(--Background-Overlay);
+  --color-foreground: var(--Text-Default);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--Background-Default);
+  --color-muted-foreground: var(--Text-Default);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-input: var(--Border-Default);
+  --color-ring: var(--Primary-Default);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Theme colors (brand/accent colors for UI elements) */
+  --color-theme-default: var(--Theme-Default);
+  --color-theme-medium: var(--Theme-Medium);
+  --color-theme-dark: var(--Theme-Dark);
+  --color-theme-light: var(--Theme-Light);
+  --color-theme-transparent: var(--Theme-Transparent);
+
+  /* Map shadow tokens to Tailwind utilities */
+  --box-shadow-xs: var(--Shadow-XS);
+  --box-shadow-sm: var(--Shadow-SM);
+  --box-shadow-md: var(--Shadow-MD);
+  --box-shadow-lg: var(--Shadow-LG);
+
+  /* Enable Tailwind utilities for all --color-* variables */
+  --color*: initial;
+}
+
+@import './royal-indigo/utilities.css';
