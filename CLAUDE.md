@@ -93,7 +93,9 @@ logstash-configs/
 │   └── assemble-config.sh               # Config assembly script
 └── output_loganalytics_sentinel_dcr/    # Azure Sentinel DCR templates
 
-deployment-tf/
+deployments/
+├── modules/
+│   └── aws-logstash/                    # Shared AWS module (S3, IAM, SG, AMI, user_data)
 ├── aws-ec2-single-instance/             # Single EC2 + S3 config bucket
 ├── aws-ec2-autoscale/                   # NLB + ASG with rolling updates
 └── azure-aci/                           # Azure Container Instance deployment
@@ -215,7 +217,7 @@ Deploy as saved functions via Azure CLI (see deployment instructions in each .kq
 ### AWS Deployment
 
 ```bash
-cd deployment-tf/aws-ec2-single-instance  # or aws-ec2-autoscale
+cd deployments/aws-ec2-single-instance  # or aws-ec2-autoscale
 terraform init
 terraform plan
 terraform apply
@@ -246,7 +248,7 @@ az monitor log-analytics workspace table create \
 
 2. Deploy:
 ```bash
-cd deployment-tf/azure-aci/deploy-public  # or deploy-china
+cd deployments/azure-aci/deploy-public  # or deploy-china
 cp terraform.tfvars.sample terraform.tfvars
 # Edit terraform.tfvars
 terraform init && terraform apply

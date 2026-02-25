@@ -22,13 +22,13 @@ This generates a complete configuration file in `logstash-configs/assembled/`.
 
 ### 2. Deploy
 
-Choose a deployment architecture from `deployment-tf/` and follow its README:
+Choose a deployment architecture from `deployments/` and follow its README:
 
 | Architecture | Description |
 |--------------|-------------|
-| [aws-ec2-autoscale](./deployment-tf/aws-ec2-autoscale) | HA autoscaling EC2 instances behind NLB |
-| [aws-ec2-single-instance](./deployment-tf/aws-ec2-single-instance) | Single EC2 instance |
-| [azure-aci](./deployment-tf/azure-aci) | Azure Container Instance |
+| [aws-ec2-autoscale](./deployments/aws-ec2-autoscale) | HA autoscaling EC2 instances behind NLB |
+| [aws-ec2-single-instance](./deployments/aws-ec2-single-instance) | Single EC2 instance |
+| [azure-aci](./deployments/azure-aci) | Azure Container Instance |
 
 ### 3. Configure Aviatrix
 
@@ -55,9 +55,9 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for detailed conf
 
 | Architecture | Description | Link |
 |--------------|-------------|------|
-| aws-ec2-autoscale | Highly-available autoscaling EC2 instances behind AWS NLB with public Elastic IP. S3 bucket stores Logstash config. Rolling upgrades on config changes. | [Folder](./deployment-tf/aws-ec2-autoscale) |
-| aws-ec2-single-instance | Single EC2 instance with public Elastic IP. S3 bucket stores Logstash config. | [Folder](./deployment-tf/aws-ec2-single-instance/) |
-| azure-aci | Single Azure Container Instance with public IP. Azure Storage Fileshare stores Logstash config. | [README](./deployment-tf/azure-aci/README.md) |
+| aws-ec2-autoscale | Highly-available autoscaling EC2 instances behind AWS NLB with public Elastic IP. S3 bucket stores Logstash config. Rolling upgrades on config changes. | [Folder](./deployments/aws-ec2-autoscale) |
+| aws-ec2-single-instance | Single EC2 instance with public Elastic IP. S3 bucket stores Logstash config. | [Folder](./deployments/aws-ec2-single-instance/) |
+| azure-aci | Single Azure Container Instance with public IP. Azure Storage Fileshare stores Logstash config. | [README](./deployments/azure-aci/README.md) |
 
 ## Observability Destinations
 
