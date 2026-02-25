@@ -50,7 +50,7 @@ azure_cloud = "AzureCloud"
 # ── Tags ─────────────────────────────────────────────────────────────────────
 tags = {
   Environment = "production"
-  Project     = "log-integration-engine"
+  Project     = "siem-connector"
   Service     = "logstash"
   ManagedBy   = "terraform"
 }

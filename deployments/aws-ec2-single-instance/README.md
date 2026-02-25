@@ -1,6 +1,6 @@
 # AWS EC2 Single Instance Deployment
 
-Deploy the Aviatrix Log Integration Engine on a single EC2 instance. Logstash receives syslog from Aviatrix gateways and forwards parsed, structured events to Splunk via HEC.
+Deploy the Aviatrix SIEM Connector on a single EC2 instance. Logstash receives syslog from Aviatrix gateways and forwards parsed, structured events to Splunk via HEC.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Aviatrix Gateways ──► EC2 (Logstash Docker) ──► Splunk HEC
 
 ## Setting Up Splunk HEC
 
-The Log Integration Engine sends parsed events to Splunk via the HTTP Event Collector (HEC). If you don't already have HEC enabled with a token, follow these steps.
+The SIEM Connector sends parsed events to Splunk via the HTTP Event Collector (HEC). If you don't already have HEC enabled with a token, follow these steps.
 
 ### 1. Enable HEC and Verify Global Settings
 

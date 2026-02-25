@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **Aviatrix Log Integration Engine** - an ETL layer built on Logstash that normalizes Aviatrix syslog data and forwards it to various SIEM/observability platforms. The engine receives syslog on UDP/TCP port 5000, parses multiple Aviatrix log types using grok patterns, and routes to configurable outputs.
+This is the **Aviatrix SIEM Connector** - an ETL layer built on Logstash that normalizes Aviatrix syslog data and forwards it to various SIEM/observability platforms. The engine receives syslog on UDP/TCP port 5000, parses multiple Aviatrix log types using grok patterns, and routes to configurable outputs.
 
 ## Architecture
 

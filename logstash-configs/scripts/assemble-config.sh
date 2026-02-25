@@ -76,7 +76,7 @@ echo ""
 
 # Create/clear the output file with a header
 cat > "$DEST" << EOF
-# Aviatrix Log Integration Engine - Assembled Configuration
+# Aviatrix SIEM Connector - Assembled Configuration
 # Output Type: $OUTPUT_TYPE
 # Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
 #

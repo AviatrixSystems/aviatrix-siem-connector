@@ -21,7 +21,7 @@ The connector is built on top of Logstash with an Aviatrix-validated log parsing
                            │ Syslog (UDP/TCP 5000)
                            ▼
      ┌─────────────────────────────────────────────────────┐
-     │              Log Integration Engine                 │
+     │              SIEM Connector                          │
      │                                                     │
      │  ┌───────────┐  ┌───────────┐  ┌────────────────┐  │
      │  │ 1. Parse  │  │ 2. Norm-  │  │ 3. Route by    │  │
