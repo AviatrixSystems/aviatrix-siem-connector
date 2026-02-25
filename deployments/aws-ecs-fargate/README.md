@@ -1,6 +1,6 @@
 # AWS ECS Fargate Deployment
 
-Deploys the Aviatrix Log Integration Engine on ECS Fargate behind an NLB. Supports any output type (`splunk-hec`, `zabbix`, `dynatrace`, etc.) via the `output_type` variable.
+Deploys the Aviatrix SIEM Connector on ECS Fargate behind an NLB. Supports any output type (`splunk-hec`, `zabbix`, `dynatrace`, etc.) via the `output_type` variable.
 
 ## Architecture
 

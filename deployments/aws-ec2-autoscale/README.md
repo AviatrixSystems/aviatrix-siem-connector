@@ -1,6 +1,6 @@
 # AWS EC2 Autoscale Deployment
 
-This deployment creates a highly available, auto-scaling cluster of EC2 instances running the Aviatrix Log Integration Engine with Logstash behind a Network Load Balancer.
+This deployment creates a highly available, auto-scaling cluster of EC2 instances running the Aviatrix SIEM Connector with Logstash behind a Network Load Balancer.
 
 ## Architecture
 

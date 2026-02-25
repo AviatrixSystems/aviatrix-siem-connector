@@ -1,6 +1,6 @@
 # Contributing
 
-This guide covers how to develop, test, and validate changes to the Log Integration Engine.
+This guide covers how to develop, test, and validate changes to the SIEM Connector.
 
 ## Prerequisites
 

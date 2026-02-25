@@ -101,7 +101,7 @@ variable "tags" {
   type        = map(string)
   default = {
     Environment = "production"
-    Project     = "log-integration-engine"
+    Project     = "siem-connector"
     Service     = "logstash"
   }
 }

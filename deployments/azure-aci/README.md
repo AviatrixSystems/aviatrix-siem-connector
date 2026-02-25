@@ -1,6 +1,6 @@
 # Azure Container Instances (ACI) Logstash Deployment
 
-Terraform deployment for the Aviatrix Log Integration Engine on Azure Container Instances. Receives syslog from Aviatrix gateways/controllers and forwards parsed, ASIM-normalized events to Azure Log Analytics via the Microsoft Log Ingestion API.
+Terraform deployment for the Aviatrix SIEM Connector on Azure Container Instances. Receives syslog from Aviatrix gateways/controllers and forwards parsed, ASIM-normalized events to Azure Log Analytics via the Microsoft Log Ingestion API.
 
 > For background on connecting Logstash to Microsoft Sentinel using Data Collection Rules, see the [Microsoft Learn article](https://learn.microsoft.com/en-us/azure/sentinel/connect-logstash-data-connection-rules).
 

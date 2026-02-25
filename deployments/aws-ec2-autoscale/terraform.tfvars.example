@@ -1,4 +1,4 @@
-# Example terraform.tfvars for Aviatrix Log Integration Engine - Autoscale Deployment
+# Example terraform.tfvars for Aviatrix SIEM Connector - Autoscale Deployment
 # Copy this file to terraform.tfvars and update with your values
 
 # AWS Configuration

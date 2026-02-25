@@ -1,6 +1,6 @@
 # Dynatrace Setup Guide
 
-End-to-end guide for connecting the Aviatrix Log Integration Engine to Dynatrace.
+End-to-end guide for connecting the Aviatrix SIEM Connector to Dynatrace.
 
 ## 1. Token Setup
 
