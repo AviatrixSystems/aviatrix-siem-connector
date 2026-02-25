@@ -4,6 +4,60 @@ Flexible and scalable log integration between Aviatrix and 3rd party SIEM, loggi
 
 The integration is built on top of Logstash with an Aviatrix-validated log parsing configuration. The engine is best-effort community supported.
 
+## Architecture
+
+```
+                         Aviatrix Cloud Network
+            ┌──────────────────────────────────────────┐
+            │                                          │
+            │  Gateways              Controller        │
+            │  ├─ Distributed        ├─ API Audit      │
+            │  │  Cloud Firewall     │  Logs           │
+            │  ├─ Suricata IDS       └─ Tunnel Status  │
+            │  ├─ Network Stats                        │
+            │  └─ System Stats                         │
+            │                                          │
+            └──────────────┬───────────────────────────┘
+                           │ Syslog (UDP/TCP 5000)
+                           ▼
+     ┌─────────────────────────────────────────────────────┐
+     │              Log Integration Engine                 │
+     │                                                     │
+     │  ┌───────────┐  ┌───────────┐  ┌────────────────┐  │
+     │  │ 1. Parse  │  │ 2. Norm-  │  │ 3. Route by    │  │
+     │  │  & Tag    ├─►│  alize &  ├─►│  Log Profile   │  │
+     │  │           │  │  Convert  │  │  & Destination  │  │
+     │  └───────────┘  └───────────┘  └────────────────┘  │
+     │                                                     │
+     │  8 log types • Grok + JSON parsing • ASIM support   │
+     └──────────┬──────────┬───────────┬──────────┬────────┘
+                │          │           │          │
+                ▼          ▼           ▼          ▼
+           ┌────────┐ ┌────────┐ ┌──────────┐ ┌───────┐
+           │ Splunk │ │ Azure  │ │Dynatrace │ │Zabbix │
+           │  HEC   │ │Sentinel│ │          │ │       │
+           └────────┘ └────────┘ └──────────┘ └───────┘
+```
+
+### Log Types
+
+| Category | Log Type | Description |
+|----------|----------|-------------|
+| **Security** | FQDN Firewall | DNS-based firewall rule hits |
+| | L4 Microsegmentation | eBPF-enforced network policy (allow/deny) |
+| | L7/TLS Inspection | Deep packet inspection via TLS proxy |
+| | Suricata IDS | Intrusion detection alerts |
+| **Networking** | Gateway Network Stats | Interface throughput, packet rates |
+| | Tunnel Status | Tunnel up/down state changes |
+| **Operations** | Controller API | API calls and admin actions |
+| | Gateway System Stats | CPU, memory, disk utilization |
+
+### Pipeline Stages
+
+1. **Parse & Tag** — Grok patterns and JSON codec extract structured fields from raw syslog. Each event is tagged by log type for downstream routing.
+2. **Normalize & Convert** — Timestamps are standardized, numeric fields are type-cast, and (for Azure) ASIM schema fields are mapped. Microseg events are throttled to reduce volume.
+3. **Route** — Events are directed to the configured output based on the `LOG_PROFILE` setting (`all`, `security`, or `networking`), which controls which log categories are forwarded.
+
 ## Quick Start
 
 ### 1. Build the Logstash Configuration
@@ -79,19 +133,6 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for detailed conf
 | dynatrace-metrics | Dynatrace metrics only (MINT line protocol) | [Folder](./logstash-configs/outputs/dynatrace-metrics/) |
 | dynatrace-logs | Dynatrace logs only (JSON ingest) | [Folder](./logstash-configs/outputs/dynatrace-logs/) |
 | zabbix | Zabbix via Dependent Items (trapper protocol) | [Folder](./logstash-configs/outputs/zabbix/) |
-
-## Supported Log Types
-
-| Log Type | Tag | Source |
-|----------|-----|--------|
-| FQDN Firewall | `fqdn` | AviatrixFQDNRule |
-| Controller API | `cmd` | AviatrixCMD, AviatrixAPI |
-| L4 Microsegmentation | `microseg` | AviatrixGwMicrosegPacket |
-| L7/TLS Inspection | `mitm` | traffic_server |
-| Suricata IDS | `suricata` | suricata JSON |
-| Gateway Network Stats | `gw_net_stats` | AviatrixGwNetStats |
-| Gateway System Stats | `gw_sys_stats` | AviatrixGwSysStats |
-| Tunnel Status | `tunnel_status` | AviatrixTunnelStatusChange |
 
 ## Adding a New Output
 
