@@ -16,6 +16,12 @@ cd logstash-configs
 
 # For Azure Log Analytics output
 ./scripts/assemble-config.sh azure-log-ingestion
+
+# For Dynatrace output (metrics + logs combined)
+./scripts/assemble-config.sh dynatrace
+
+# For Zabbix output
+./scripts/assemble-config.sh zabbix
 ```
 
 This generates a complete configuration file in `logstash-configs/assembled/`.
@@ -42,7 +48,11 @@ logstash-configs/
 ├── filters/                # Log parsing modules
 ├── outputs/                # Destination-specific outputs
 │   ├── splunk-hec/         # Splunk HTTP Event Collector
-│   └── azure-log-ingestion/# Azure Log Analytics
+│   ├── azure-log-ingestion/# Azure Log Analytics
+│   ├── dynatrace/          # Dynatrace (metrics + logs)
+│   ├── dynatrace-metrics/  # Dynatrace metrics only
+│   ├── dynatrace-logs/     # Dynatrace logs only
+│   └── zabbix/             # Zabbix via trapper items
 ├── patterns/               # Custom grok patterns
 ├── assembled/              # Generated configs (do not edit directly)
 └── scripts/
@@ -65,6 +75,10 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for detailed conf
 |-------------|-------------|------|
 | splunk-hec | Splunk HTTP Event Collector | [Folder](./logstash-configs/outputs/splunk-hec/) |
 | azure-log-ingestion | Azure Log Analytics via Data Collection Rules | [Folder](./logstash-configs/outputs/azure-log-ingestion/) |
+| dynatrace | Dynatrace metrics + logs (combined) | [Folder](./logstash-configs/outputs/dynatrace/) |
+| dynatrace-metrics | Dynatrace metrics only (MINT line protocol) | [Folder](./logstash-configs/outputs/dynatrace-metrics/) |
+| dynatrace-logs | Dynatrace logs only (JSON ingest) | [Folder](./logstash-configs/outputs/dynatrace-logs/) |
+| zabbix | Zabbix via Dependent Items (trapper protocol) | [Folder](./logstash-configs/outputs/zabbix/) |
 
 ## Supported Log Types
 
@@ -108,6 +122,23 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for details.
 | `azure_dcr_*_id` | DCR immutable IDs |
 | `azure_stream_*` | Stream names |
 | `azure_cloud` | `public` or `china` |
+
+### Dynatrace
+
+| Variable | Description |
+|----------|-------------|
+| `DT_API_TOKEN` | Platform token for metrics ingest (`storage:metrics:write`) |
+| `DT_LOGS_TOKEN` | Platform token for logs ingest (`storage:logs:write`); can be the same as `DT_API_TOKEN` |
+| `DT_METRICS_URL` | Metrics ingest endpoint (e.g. `https://<env>.apps.dynatrace.com/api/v2/metrics/ingest`) |
+| `DT_LOGS_URL` | Logs ingest endpoint (e.g. `https://<env>.apps.dynatrace.com/api/v2/logs/ingest`) |
+
+### Zabbix
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ZABBIX_SERVER` | Zabbix server hostname/IP | (required) |
+| `ZABBIX_PORT` | Zabbix trapper port | 10051 |
+| `ZABBIX_HOST_PREFIX` | Prefix for Zabbix host names | (empty) |
 
 ## Contributing
 
