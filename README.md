@@ -1,8 +1,8 @@
-# Aviatrix Log Integration Engine
+# Aviatrix SIEM Connector
 
 Flexible and scalable log integration between Aviatrix and 3rd party SIEM, logging, and observability tools.
 
-The integration is built on top of Logstash with an Aviatrix-validated log parsing configuration. The engine is best-effort community supported.
+The connector is built on top of Logstash with an Aviatrix-validated log parsing configuration. The engine is best-effort community supported.
 
 ## Architecture
 
