@@ -24,6 +24,9 @@ docs/internal/
 # Status sidecar (developed in separate branch)
 status-sidecar/
 
+# Syslog collector (internal test tool)
+test-tools/syslog-collector/
+
 # Terraform files
 # Variable files (may contain secrets)
 **/*.tfvars
