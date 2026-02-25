@@ -21,6 +21,9 @@ origin_logstash.conf
 # Internal planning docs (not shipped)
 docs/internal/
 
+# Status sidecar (developed in separate branch)
+status-sidecar/
+
 # Terraform files
 # Variable files (may contain secrets)
 **/*.tfvars

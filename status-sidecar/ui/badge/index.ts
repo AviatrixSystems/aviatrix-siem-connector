@@ -1,7 +1,0 @@
-export { Badge } from './badge';
-export type { BadgeProps } from './badge';
-export {
-  badgeVariants,
-  badgeTextVariants,
-  badgeIconVariants,
-} from './badge.variants';
