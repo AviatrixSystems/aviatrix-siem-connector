@@ -1,0 +1,69 @@
+# Example terraform.tfvars for Aviatrix Log Integration Engine - Autoscale Deployment
+# Copy this file to terraform.tfvars and update with your values
+
+# AWS Configuration
+aws_region    = "us-east-2"
+instance_size = "t3.small"
+ssh_key_name  = "YOUR_SSH_KEY_NAME"
+
+# Network Configuration
+# IMPORTANT: The VPC and subnets must be able to reach your SIEM server
+vpc_id = "vpc-XXXXXXXXXXXXX"
+
+# Subnet IDs for EC2 instances (should be in different AZs for HA)
+instance_subnet_ids = [
+  "subnet-XXXXXXXXXXXXX",  # AZ 1
+  "subnet-YYYYYYYYYYYYY"   # AZ 2
+]
+
+# Subnet IDs for Network Load Balancer (should be in different AZs)
+lb_subnet_ids = [
+  "subnet-XXXXXXXXXXXXX",  # AZ 1
+  "subnet-YYYYYYYYYYYYY"   # AZ 2
+]
+
+# Instance Configuration
+assign_instance_public_ip = false
+
+# Autoscaling Configuration
+autoscale_min_size  = 2     # Minimum number of instances
+autoscale_max_size  = 6     # Maximum number of instances
+autoscale_step_size = 2     # Number of instances to add/remove when scaling
+
+# Syslog Configuration
+syslog_port     = 5000
+syslog_protocol = "tcp"
+
+# Log Profile - which log types to forward
+# Options: "all" (default), "security", "networking"
+#   - all: Forward all log types
+#   - security: suricata, mitm, microseg, fqdn, cmd (firewall/IDS/audit logs)
+#   - networking: gw_net_stats, gw_sys_stats, tunnel_status (infrastructure monitoring)
+log_profile = "all"
+
+# --- Output Type ---
+# Set this to match a directory in logstash-configs/outputs/
+# The assembled config and docker_run template are auto-resolved from this value.
+output_type = "splunk-hec"
+
+# --- Example: Splunk HEC ---
+logstash_config_variables = {
+  "splunk_hec_auth" = "YOUR_SPLUNK_HEC_TOKEN_HERE"
+  "splunk_port"     = "8088"
+  "splunk_address"  = "https://YOUR_SPLUNK_PRIVATE_IP"
+}
+
+# --- Example: Dynatrace Metrics ---
+# output_type = "dynatrace-metrics"
+# logstash_config_variables = {
+#   "dt_environment_id" = "YOUR_DT_ENVIRONMENT_ID"
+#   "dt_api_token"      = "YOUR_DT_API_TOKEN"
+#   "dt_region"         = "live"
+# }
+
+# Resource Tags
+tags = {
+  "App"         = "avx-log-integration"
+  "Environment" = "production"
+  "Owner"       = "your-name"
+}

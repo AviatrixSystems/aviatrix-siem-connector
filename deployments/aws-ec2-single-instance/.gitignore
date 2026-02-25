@@ -1,0 +1,3 @@
+*.terraform*
+chris_var.tfvars
+dynatrace.tfvars

@@ -1,0 +1,23 @@
+#!/bin/bash
+# STANDARD INIT FOR AVIATRIX LOG INTEGRATION ENGINE (AL2023)
+set -e  # Exit on error
+
+# Install packages
+sudo yum update -y
+sudo yum install -y docker aws-cli
+
+# Start Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Create directories
+mkdir -p /logstash/pipeline
+mkdir -p /logstash/patterns
+
+# Download config files from S3
+aws s3 cp s3://${aws_s3_bucket_id}/avx.conf /logstash/patterns/avx.conf
+aws s3 cp s3://${aws_s3_bucket_id}/${logstash_config_name} /logstash/pipeline/${logstash_config_name}
+
+# Set proper permissions
+chmod 644 /logstash/patterns/avx.conf
+chmod 644 /logstash/pipeline/${logstash_config_name}
