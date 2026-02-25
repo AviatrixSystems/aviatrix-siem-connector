@@ -8,6 +8,8 @@ Sends Aviatrix gateway **networking metrics** (gw_sys_stats + gw_net_stats) to Z
 - **Logstash 8.x** with `logstash-output-zabbix` plugin installed
 - Network connectivity from Logstash to Zabbix server on port 10051 (TCP)
 
+> **Important**: Zabbix will silently reject data for hosts that don't exist. You must complete steps 1-2 below (import the template, create a host group, and create a host for each gateway) **before** data will appear in Zabbix. There is no auto-discovery — if a new gateway starts sending logs and no matching host exists, those events are dropped.
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
@@ -34,17 +36,76 @@ The template "Aviatrix Gateway Metrics" provides:
 - 14 dependent items for network metrics (throughput, conntrack, limit counters)
 - 4 triggers (CPU > 90%, memory > 85%, disk > 90%, conntrack > 80%)
 
-### 2. Create Hosts
+### 2. Create a Host Group
 
-Create a Zabbix host for each gateway. The host name must match the value sent by Logstash:
+Create a host group to organize your Aviatrix gateway hosts (the template import does **not** create one):
+
+1. In Zabbix UI: **Data collection** > **Host groups** > **Create host group**
+2. Name: `Aviatrix Gateways` (or any name you prefer)
+
+### 3. Create Hosts
+
+Create a Zabbix host for **each** Aviatrix gateway that will send logs. Zabbix rejects trapper data for unknown hosts, so this step is required before any metrics will appear.
 
 - **Host name**: `<ZABBIX_HOST_PREFIX><gateway_name>` (e.g., `avx-gw-useast1-prod`)
+- **Host group**: Add to the host group created above
 - **Template**: Link "Aviatrix Gateway Metrics"
-- **No agent interface needed** — data arrives via trapper
+- **No agent interface needed** — data arrives via trapper items
 
-If `ZABBIX_HOST_PREFIX` is empty (default), the host name equals the Aviatrix gateway name.
+If `ZABBIX_HOST_PREFIX` is empty (default), the host name must exactly match the Aviatrix gateway name as it appears in CoPilot.
 
-### 3. Build the Configuration
+#### Finding your gateway names
+
+Gateway names are visible in Aviatrix CoPilot under **Cloud Fabric** > **Gateways**. You can also check the Logstash logs after initial deployment — rejected events appear as:
+
+```
+"processing error" => "host [gateway-name] not found"
+```
+
+#### Creating hosts via Zabbix API
+
+For environments with many gateways, use the API instead of the UI. First, get the template and host group IDs:
+
+```bash
+ZABBIX_URL="http://<zabbix-server>/api_jsonrpc.php"
+ZABBIX_TOKEN="<your-api-token>"
+
+# Get template ID for "Aviatrix Gateway Metrics"
+curl -s -X POST "$ZABBIX_URL" \
+  -H "Authorization: Bearer $ZABBIX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"template.get","params":{"filter":{"host":"Aviatrix Gateway Metrics"}},"id":1}' \
+  | jq '.result[0].templateid'
+
+# Get host group ID for "Aviatrix Gateways"
+curl -s -X POST "$ZABBIX_URL" \
+  -H "Authorization: Bearer $ZABBIX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"hostgroup.get","params":{"filter":{"name":"Aviatrix Gateways"}},"id":1}' \
+  | jq '.result[0].groupid'
+```
+
+Then create a host (repeat for each gateway):
+
+```bash
+curl -s -X POST "$ZABBIX_URL" \
+  -H "Authorization: Bearer $ZABBIX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "host.create",
+    "params": {
+      "host": "<gateway-name>",
+      "groups": [{"groupid": "<GROUP_ID>"}],
+      "templates": [{"templateid": "<TEMPLATE_ID>"}]
+    },
+    "id": 1
+  }'
+```
+
+> **Note**: Zabbix 7.x API uses `Authorization: Bearer <token>` header authentication, not the legacy `"auth"` JSON parameter.
+
+### 4. Build the Configuration
 
 ```bash
 cd logstash-configs
@@ -53,7 +114,7 @@ cd logstash-configs
 
 This creates `assembled/zabbix-full.conf`.
 
-### 4. Deploy Logstash
+### 5. Deploy Logstash
 
 #### Option A: Podman/Docker (local testing)
 
@@ -73,9 +134,15 @@ podman run -d --name logstash-zabbix-test \
   logstash-avx-zabbix
 ```
 
-#### Option B: VM/EC2 deployment
+#### Option B: AWS EC2 deployment
 
-Use the Terraform deployment in `deployments/` with output_type `zabbix`.
+Use the Terraform deployment in `deployments/aws-ec2-single-instance/` or `deployments/aws-ec2-autoscale/` with `output_type = "zabbix"`.
+
+#### Option C: AWS ECS Fargate deployment
+
+Use the Terraform deployment in `deployments/aws-ecs-fargate/` with `output_type = "zabbix"`. Config is baked into the container image.
+
+> **Recommended**: Set `LOG_PROFILE=networking` for all Zabbix deployments. The Zabbix output only processes `gw_sys_stats` and `gw_net_stats` events — other log types (security, tunnel status, etc.) are not forwarded, so there's no benefit to receiving them.
 
 ## Metrics Reference
 
@@ -129,9 +196,21 @@ Use the Terraform deployment in `deployments/` with output_type `zabbix`.
 
 2. Verify in Zabbix UI: **Monitoring** > **Latest data** > filter by host
 
+## Important Notes
+
+### Multi-interface gateways
+
+The template only defines network trapper items for `eth0`. Gateways with multiple interfaces (e.g., `eth-fn0`, `eth-fn1`) will report network stats for all interfaces, but only `eth0` data is accepted. Events for other interfaces are rejected by Zabbix with `"processing error" => "item [...] not found"`. This is expected behavior — the rejected events appear in Logstash logs but cause no data loss for the `eth0` interface.
+
+### Adding new gateways
+
+When a new gateway is added in Aviatrix CoPilot, you must create a corresponding host in Zabbix (step 3 above) before its metrics will be stored. Monitor Logstash logs for `"host not found"` errors to detect gateways that need to be added.
+
 ## Troubleshooting
 
-- **"host not found"**: Ensure the Zabbix host name matches `ZABBIX_HOST_PREFIX` + gateway name exactly
-- **No data arriving**: Check trapper port 10051 is reachable (`nc -zv <zabbix-ip> 10051`)
+- **"host [name] not found"**: The gateway is sending data but no matching host exists in Zabbix. Create a host with that exact name and link the template (see step 3)
+- **"item [...] not found"**: Usually caused by non-eth0 interface events (see Multi-interface gateways above). No action needed
+- **No data arriving**: Check trapper port 10051 is reachable from Logstash (`nc -zv <zabbix-ip> 10051`)
 - **Per-core items empty**: Normal if gateway has fewer than 8 cores — items for missing cores receive no updates
 - **Plugin not found**: Run `logstash-plugin install logstash-output-zabbix` or use the Containerfile
+- **44 items but only 30 with data**: The 14 items without data are per-core metrics for vCPU cores that don't exist on the gateway (template provisions cores 0-7)
