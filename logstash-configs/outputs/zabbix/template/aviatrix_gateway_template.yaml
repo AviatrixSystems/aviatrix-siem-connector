@@ -1,0 +1,753 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: f62876c595ad43768c5c632c04a5f278
+      name: Templates
+  templates:
+    - uuid: 5a6423e5721d4c05a6c602fa52bc3010
+      template: 'Aviatrix Gateway Metrics'
+      name: 'Aviatrix Gateway Metrics'
+      description: |
+        Aviatrix gateway system and network metrics via Logstash trapper.
+        Uses Dependent Items pattern: master trapper items receive JSON blobs,
+        JSONPath preprocessing extracts individual metrics.
+      groups:
+        - name: Templates
+      items:
+        # ================================================================
+        # MASTER TRAPPER ITEMS (receive JSON blobs from Logstash)
+        # ================================================================
+        - uuid: 1d2ab84bb5f84ef99fb8004a8dcb2454
+          name: 'Aviatrix: System stats raw JSON'
+          key: aviatrix.sys_stats.raw
+          type: TRAP
+          value_type: TEXT
+          description: 'Raw JSON blob from Logstash gw_sys_stats. Master item for dependent item extraction.'
+          history: 1d
+
+        - uuid: bee9a841954d473794c85504b4b7f5a3
+          name: 'Aviatrix: Network stats raw JSON (eth0)'
+          key: 'aviatrix.net_stats.raw[eth0]'
+          type: TRAP
+          value_type: TEXT
+          description: 'Raw JSON blob from Logstash gw_net_stats for eth0. Master item for dependent item extraction.'
+          history: 1d
+
+        # ================================================================
+        # DEPENDENT ITEMS: CPU (aggregate)
+        # ================================================================
+        - uuid: 4c1603359e60442c9b15fe6655d73ba6
+          name: 'Aviatrix: CPU idle'
+          key: aviatrix.cpu.idle
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU idle percentage (aggregate)'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_idle
+
+        - uuid: abfb0e71a14c40ea89dfa8b0855e0fea
+          name: 'Aviatrix: CPU usage'
+          key: aviatrix.cpu.usage
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU usage percentage (100 - idle)'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_usage
+          triggers:
+            - uuid: d46dea8533fe43f3854ad2f5281a2ba4
+              expression: 'min(/Aviatrix Gateway Metrics/aviatrix.cpu.usage,5m)>90'
+              name: 'Aviatrix: High CPU usage on {HOST.NAME}'
+              priority: HIGH
+              description: 'CPU usage has been above 90% for 5 minutes.'
+              tags:
+                - tag: scope
+                  value: performance
+
+        # ================================================================
+        # DEPENDENT ITEMS: Memory
+        # ================================================================
+        - uuid: 16c1a638bc4e4d39ad8b90b26b618ed1
+          name: 'Aviatrix: Memory available'
+          key: aviatrix.memory.available
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Available memory in bytes'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.memory_available
+
+        - uuid: fc3629f961614fdcb68dbf8b78bb55c8
+          name: 'Aviatrix: Memory total'
+          key: aviatrix.memory.total
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Total memory in bytes'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.memory_total
+
+        - uuid: 2eaec72755fe43f5ae03d0a7c7368858
+          name: 'Aviatrix: Memory free'
+          key: aviatrix.memory.free
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Free memory in bytes'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.memory_free
+
+        - uuid: 078b12ff5a2d4fbfa4442eaca4c65df3
+          name: 'Aviatrix: Memory used'
+          key: aviatrix.memory.used
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Used memory in bytes (total - available)'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.memory_used
+
+        - uuid: c1982b5a484148a89b30d45c13832af3
+          name: 'Aviatrix: Memory usage'
+          key: aviatrix.memory.usage
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'Memory usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.memory_usage
+          triggers:
+            - uuid: 902b6ae9b5c14aefaf45fca44fdd6798
+              expression: 'last(/Aviatrix Gateway Metrics/aviatrix.memory.usage)>85'
+              name: 'Aviatrix: High memory usage on {HOST.NAME}'
+              priority: HIGH
+              description: 'Memory usage is above 85%.'
+              tags:
+                - tag: scope
+                  value: performance
+
+        # ================================================================
+        # DEPENDENT ITEMS: Disk
+        # ================================================================
+        - uuid: 0b6cdad2dbe64523a38f5a5bbc4b8af6
+          name: 'Aviatrix: Disk available'
+          key: aviatrix.disk.available
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Available disk space in bytes'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.disk_available
+
+        - uuid: 5b2600b9a96d4a2d8f5387a1abcee193
+          name: 'Aviatrix: Disk total'
+          key: aviatrix.disk.total
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Total disk space in bytes'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.disk_total
+
+        - uuid: 2fa070c3c7f14aa7a233c9dde464f089
+          name: 'Aviatrix: Disk used'
+          key: aviatrix.disk.used
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Used disk space in bytes'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.disk_used
+
+        - uuid: a653ddcb54954a678369a4b63b3c7422
+          name: 'Aviatrix: Disk usage'
+          key: aviatrix.disk.usage
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'Disk usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.disk_usage
+          triggers:
+            - uuid: 2cc218280a2f47088e0436ffccc55119
+              expression: 'last(/Aviatrix Gateway Metrics/aviatrix.disk.usage)>90'
+              name: 'Aviatrix: High disk usage on {HOST.NAME}'
+              priority: HIGH
+              description: 'Disk usage is above 90%.'
+              tags:
+                - tag: scope
+                  value: performance
+
+        # ================================================================
+        # DEPENDENT ITEMS: Per-vCPU (cores 0-7)
+        # ================================================================
+        - uuid: 31385f00a1af45a383c99102bafd5cc5
+          name: 'Aviatrix: CPU core count'
+          key: aviatrix.cpu.core_count
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Number of CPU cores'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_count
+              error_handler: DISCARD_VALUE
+
+        # Core 0
+        - uuid: 3503859a03ba4616b2da24c162c0f50c
+          name: 'Aviatrix: CPU core 0 idle'
+          key: 'aviatrix.cpu.idle[0]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 0 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_0_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: 6fc54ff39d45454a9fd2fb3fa3fbe8e3
+          name: 'Aviatrix: CPU core 0 usage'
+          key: 'aviatrix.cpu.usage[0]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 0 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_0_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 1
+        - uuid: cb7e3e4d3bf94524a4dc3643b7884d93
+          name: 'Aviatrix: CPU core 1 idle'
+          key: 'aviatrix.cpu.idle[1]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 1 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_1_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: e71125a20b99447682082a6b8810f7bd
+          name: 'Aviatrix: CPU core 1 usage'
+          key: 'aviatrix.cpu.usage[1]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 1 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_1_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 2
+        - uuid: fdc54a071ddb48068ce216bf4196c789
+          name: 'Aviatrix: CPU core 2 idle'
+          key: 'aviatrix.cpu.idle[2]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 2 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_2_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: 4c43a267d37f4f74bcc0d37afbf4e7b6
+          name: 'Aviatrix: CPU core 2 usage'
+          key: 'aviatrix.cpu.usage[2]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 2 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_2_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 3
+        - uuid: 7173e1b296914bf48d89a5db9594e8a1
+          name: 'Aviatrix: CPU core 3 idle'
+          key: 'aviatrix.cpu.idle[3]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 3 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_3_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: 31dae6d7d35541bab4b529a89d070d07
+          name: 'Aviatrix: CPU core 3 usage'
+          key: 'aviatrix.cpu.usage[3]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 3 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_3_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 4
+        - uuid: 0aa0c5289d074d3cb004b476ebac51a8
+          name: 'Aviatrix: CPU core 4 idle'
+          key: 'aviatrix.cpu.idle[4]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 4 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_4_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: accdef936f48413595b9b72fe976a12e
+          name: 'Aviatrix: CPU core 4 usage'
+          key: 'aviatrix.cpu.usage[4]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 4 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_4_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 5
+        - uuid: 7eb4dd02313648e894c1cc52007a97a4
+          name: 'Aviatrix: CPU core 5 idle'
+          key: 'aviatrix.cpu.idle[5]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 5 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_5_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: 63a7d73508df4f9db277527f56b439c0
+          name: 'Aviatrix: CPU core 5 usage'
+          key: 'aviatrix.cpu.usage[5]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 5 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_5_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 6
+        - uuid: f5dcadf9b9d44b0684cd3ad8ce0191f7
+          name: 'Aviatrix: CPU core 6 idle'
+          key: 'aviatrix.cpu.idle[6]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 6 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_6_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: bcc6b726a93246abb4d807d5ff764cc0
+          name: 'Aviatrix: CPU core 6 usage'
+          key: 'aviatrix.cpu.usage[6]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 6 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_6_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # Core 7
+        - uuid: 2350d1c3414747b79512b54987d0662a
+          name: 'Aviatrix: CPU core 7 idle'
+          key: 'aviatrix.cpu.idle[7]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 7 idle percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_7_idle
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        - uuid: 914e06fb57184f6882e4a5705672d72c
+          name: 'Aviatrix: CPU core 7 usage'
+          key: 'aviatrix.cpu.usage[7]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU core 7 usage percentage'
+          master_item:
+            key: aviatrix.sys_stats.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu_core_7_usage
+              error_handler: DISCARD_VALUE
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '3600'
+
+        # ================================================================
+        # DEPENDENT ITEMS: Network (eth0)
+        # ================================================================
+        - uuid: cd431c45880042d0bec1613c249089a0
+          name: 'Aviatrix: Network bytes received rate (eth0)'
+          key: 'aviatrix.net.bytes_rx[eth0]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: Bps
+          description: 'Network receive rate in bytes per second'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.bytes_rx
+              error_handler: DISCARD_VALUE
+
+        - uuid: 3988349970d14a7b8849c5572ee29a21
+          name: 'Aviatrix: Network bytes transmitted rate (eth0)'
+          key: 'aviatrix.net.bytes_tx[eth0]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: Bps
+          description: 'Network transmit rate in bytes per second'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.bytes_tx
+              error_handler: DISCARD_VALUE
+
+        - uuid: 1d83f84d04be4771aa6735f65a1425ee
+          name: 'Aviatrix: Network bytes total rate (eth0)'
+          key: 'aviatrix.net.bytes_total_rate[eth0]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: Bps
+          description: 'Network total (rx+tx) rate in bytes per second'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.bytes_total_rate
+              error_handler: DISCARD_VALUE
+
+        - uuid: 36468984740f4d4dbb71e53d4b6935bb
+          name: 'Aviatrix: Network RX cumulative (eth0)'
+          key: 'aviatrix.net.rx_cumulative[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Cumulative bytes received'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.rx_cumulative
+              error_handler: DISCARD_VALUE
+
+        - uuid: aa251b3356d24ef0a15bfd87c816a0b4
+          name: 'Aviatrix: Network TX cumulative (eth0)'
+          key: 'aviatrix.net.tx_cumulative[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Cumulative bytes transmitted'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.tx_cumulative
+              error_handler: DISCARD_VALUE
+
+        - uuid: 5d39d40fcb544470bfd90a6ba927b824
+          name: 'Aviatrix: Network RXTX cumulative (eth0)'
+          key: 'aviatrix.net.rxtx_cumulative[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          units: B
+          description: 'Cumulative bytes received + transmitted'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.rxtx_cumulative
+              error_handler: DISCARD_VALUE
+
+        - uuid: 7b302ace39464d0bb5822ee59b46a81b
+          name: 'Aviatrix: Conntrack count (eth0)'
+          key: 'aviatrix.net.conntrack.count[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Current conntrack entries'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.conntrack_count
+              error_handler: DISCARD_VALUE
+
+        - uuid: f92125d4265c42239f09f9c1ef906c71
+          name: 'Aviatrix: Conntrack available (eth0)'
+          key: 'aviatrix.net.conntrack.available[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Available conntrack entries'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.conntrack_available
+              error_handler: DISCARD_VALUE
+
+        - uuid: b02a1374a2ce492d81cd521e1a7c66cd
+          name: 'Aviatrix: Conntrack usage (eth0)'
+          key: 'aviatrix.net.conntrack.usage[eth0]'
+          type: DEPENDENT
+          value_type: FLOAT
+          units: '%'
+          description: 'Conntrack table usage percentage'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.conntrack_usage
+              error_handler: DISCARD_VALUE
+          triggers:
+            - uuid: 6ebfbd09a2c84c9196766ec7fd162a8c
+              expression: 'last(/Aviatrix Gateway Metrics/aviatrix.net.conntrack.usage[eth0])>80'
+              name: 'Aviatrix: High conntrack usage on {HOST.NAME}'
+              priority: WARNING
+              description: 'Conntrack table usage is above 80%.'
+              tags:
+                - tag: scope
+                  value: capacity
+
+        - uuid: 144c285e5c0e4c8a8b2c2f9aff7b6f15
+          name: 'Aviatrix: Conntrack limit exceeded (eth0)'
+          key: 'aviatrix.net.conntrack_limit_exceeded[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Conntrack limit exceeded count'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.conntrack_limit_exceeded
+              error_handler: DISCARD_VALUE
+
+        - uuid: 5da033baaaf84688868b9e047a0e8085
+          name: 'Aviatrix: BW in limit exceeded (eth0)'
+          key: 'aviatrix.net.bw_in_limit_exceeded[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Bandwidth in limit exceeded count'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.bw_in_limit_exceeded
+              error_handler: DISCARD_VALUE
+
+        - uuid: c6720fbbe4544d4681c96c47b1983de7
+          name: 'Aviatrix: BW out limit exceeded (eth0)'
+          key: 'aviatrix.net.bw_out_limit_exceeded[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Bandwidth out limit exceeded count'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.bw_out_limit_exceeded
+              error_handler: DISCARD_VALUE
+
+        - uuid: 42e0d20e3945454c9e9e3f25a58441e9
+          name: 'Aviatrix: PPS limit exceeded (eth0)'
+          key: 'aviatrix.net.pps_limit_exceeded[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Packets per second limit exceeded count'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.pps_limit_exceeded
+              error_handler: DISCARD_VALUE
+
+        - uuid: 0ca3798e90574d60a9202cf75e44aa2e
+          name: 'Aviatrix: Link-local limit exceeded (eth0)'
+          key: 'aviatrix.net.linklocal_limit_exceeded[eth0]'
+          type: DEPENDENT
+          value_type: UNSIGNED
+          description: 'Link-local limit exceeded count'
+          master_item:
+            key: 'aviatrix.net_stats.raw[eth0]'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.linklocal_limit_exceeded
+              error_handler: DISCARD_VALUE
+

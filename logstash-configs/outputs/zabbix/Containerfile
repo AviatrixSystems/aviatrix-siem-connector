@@ -1,0 +1,24 @@
+# Logstash container with Zabbix output plugin
+# Bakes in assembled config and patterns to avoid volume mount permission issues (Podman/macOS)
+#
+# Build:
+#   cd logstash-configs
+#   ./scripts/assemble-config.sh zabbix
+#   podman build -t logstash-avx-zabbix -f outputs/zabbix/Containerfile .
+#
+# Run:
+#   podman run -d --name logstash-zabbix-test \
+#     -e ZABBIX_SERVER=<zabbix-ip> \
+#     -e ZABBIX_PORT=10051 \
+#     -e ZABBIX_HOST_PREFIX="" \
+#     -e LOG_PROFILE=networking \
+#     -e XPACK_MONITORING_ENABLED=false \
+#     -p 5002:5000 -p 5002:5000/udp \
+#     logstash-avx-zabbix
+
+FROM docker.elastic.co/logstash/logstash:8.16.2
+
+RUN logstash-plugin install logstash-output-zabbix
+
+COPY --chmod=644 assembled/zabbix-full.conf /usr/share/logstash/pipeline/logstash.conf
+COPY --chmod=644 patterns/ /usr/share/logstash/patterns/
