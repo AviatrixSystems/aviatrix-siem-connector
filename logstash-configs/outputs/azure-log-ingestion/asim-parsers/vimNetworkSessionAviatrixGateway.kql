@@ -50,7 +50,8 @@ let parser = (
         IpAddr = SrcIpAddr,
         Rule = NetworkRuleName,
         SessionId = NetworkSessionId,
-        Duration = NetworkDuration
+        Duration = NetworkDuration,
+        ResultDetails = EventOriginalResultDetails
 };
 parser(
     starttime=starttime,
