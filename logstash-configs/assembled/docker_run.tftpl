@@ -1,2 +1,12 @@
 # DOCKER RUN FOR ZABBIX METRICS OUTPUT
-sudo docker run -d --restart=always -v /logstash/pipeline/:/usr/share/logstash/pipeline/ -v /logstash/patterns:/usr/share/logstash/patterns -e LOG_PROFILE=${log_profile} -e ZABBIX_SERVER=${zabbix_server} -e ZABBIX_PORT=${zabbix_port} -e ZABBIX_HOST_PREFIX=${zabbix_host_prefix} -e XPACK_MONITORING_ENABLED=false -p 5000:5000 -p 5000:5000/udp docker.elastic.co/logstash/logstash:8.16.2
+docker run -d --restart=always \
+  -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
+  -v /logstash/patterns:/usr/share/logstash/patterns \
+  -p 5000:5000/tcp \
+  -p 5000:5000/udp \
+  -e LOG_PROFILE=${log_profile} \
+  -e ZABBIX_SERVER=${zabbix_server} \
+  -e ZABBIX_PORT=${zabbix_port} \
+  -e ZABBIX_HOST_PREFIX=${zabbix_host_prefix} \
+  -e XPACK_MONITORING_ENABLED=false \
+  docker.elastic.co/logstash/logstash:8.16.2
