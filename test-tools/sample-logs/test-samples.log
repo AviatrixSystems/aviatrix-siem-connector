@@ -15,6 +15,7 @@
 #     - CONNECTION_SYN_ONLY_TIMEOUT (8.2 TCP SYN-only stall)
 # - AviatrixCMD (Controller API/Command logs)
 # - AviatrixTunnelStatusChange (Tunnel state changes)
+# - AviatrixVPNSession (VPN connect/disconnect events)
 
 ###############################################################################
 # MICROSEG LOGS - AviatrixGwMicrosegPacket
@@ -189,6 +190,17 @@ Feb 25 00:21:57 18.190.163.185 Feb 25 00:21:57 Controller-10.0.0.120 run_cloudxd
 
 # --- Up → Down failure (cross-region transit) ---
 2026-02-25T00:22:29.150906+00:00 ip-10-2-0-14 cloudxd: AviatrixTunnelStatusChange: src_gw=k8s-transit(AWS us-east-2) dst_gw=west-transit(AWS us-west-2) old_state=Up new_state=Down
+
+
+###############################################################################
+# VPN SESSION LOGS - AviatrixVPNSession
+###############################################################################
+
+# --- VPN connect event (Status=active, N/A fields for duration/bytes) ---
+Feb 25 00:23:01 ip-172-31-46-24 cloudxd: AviatrixVPNSession: User=demo, Status=active, Gateway=vpn-gw-1, GatewayIP=52.52.76.149, VPNVirtualIP=192.168.0.6, PublicIP=203.0.113.45, Login=2026-02-25 00:22:58, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=Windows, VPNClientVersion=2.14.14
+
+# --- VPN disconnect event (Status=disconnected, filled duration/bytes) ---
+Feb 25 00:41:59 ip-172-31-46-24 cloudxd: AviatrixVPNSession: User=demo, Status=disconnected, Gateway=vpn-gw-1, GatewayIP=52.52.76.149, VPNVirtualIP=192.168.0.6, PublicIP=N/A, Login=2026-02-25 00:22:58, Logout=2026-02-25 00:41:57, Duration=0:0:18:59, RXbytes=2.1 MB, TXbytes=9.03 MB, VPNClientPlatform=Windows, VPNClientVersion=2.14.14
 
 
 ###############################################################################
