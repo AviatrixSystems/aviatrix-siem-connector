@@ -142,8 +142,8 @@ All output types should support the `LOG_PROFILE` environment variable for selec
 
 | Profile | Log Types | Use Case |
 |---------|-----------|----------|
-| `all` (default) | All 8 log types | Full visibility |
-| `security` | fqdn, cmd, microseg, mitm, suricata | Firewall, IDS/IPS, audit — SIEM/SOC |
+| `all` (default) | All 9 log types | Full visibility |
+| `security` | fqdn, cmd, microseg, mitm, suricata, vpn_session | Firewall, IDS/IPS, audit, VPN — SIEM/SOC |
 | `networking` | gw_net_stats, gw_sys_stats, tunnel_status | Gateway health, performance, availability — NOC/observability |
 
 ### Log Type to Profile Mapping
@@ -155,6 +155,7 @@ All output types should support the `LOG_PROFILE` environment variable for selec
 | `microseg` | security |
 | `mitm` | security |
 | `suricata` | security |
+| `vpn_session` | security |
 | `gw_net_stats` | networking |
 | `gw_sys_stats` | networking |
 | `tunnel_status` | networking |
@@ -257,6 +258,17 @@ Currently used by: **suricata** (`14-suricata.conf`) and **gw_sys_stats** (`96-s
 - Use `-p HOST:CONTAINER` port mapping instead.
 - Use `host.docker.internal` to reach services on the host from within containers.
 - Port 5001 may be occupied by AirPlay Receiver; use 5002 or higher for Logstash.
+
+## License and Contributions
+
+This project is licensed under the [Elastic License 2.0](./LICENSE). By
+submitting a pull request or otherwise contributing to this project, you agree
+that your contributions will be licensed under the same Elastic License 2.0
+terms. Contributors retain copyright to their own contributions.
+
+See [TRADEMARK.md](./TRADEMARK.md) for Aviatrix trademark usage guidelines.
+Brand assets in `status-sidecar/assets/brand/` are proprietary and not covered
+by the Elastic License 2.0.
 
 ## Collecting Real Log Samples
 

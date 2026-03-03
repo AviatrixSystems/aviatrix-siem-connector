@@ -42,6 +42,7 @@ Aviatrix Gateways/Controllers
 | `gw_net_stats` | Gateway network stats | `AviatrixGwNetStats` |
 | `gw_sys_stats` | Gateway system stats | `AviatrixGwSysStats` |
 | `tunnel_status` | Tunnel state changes | `AviatrixTunnelStatusChange` |
+| `vpn_session` | VPN connect/disconnect | `AviatrixVPNSession` |
 
 ### Key Processing Patterns
 
@@ -67,6 +68,7 @@ logstash-configs/
 │   ├── 15-gateway-stats.conf            # gw_net_stats, gw_sys_stats
 │   ├── 16-tunnel-status.conf            # Tunnel state changes
 │   ├── 17-cpu-cores-parse.conf          # CPU cores protobuf text → structured JSON
+│   ├── 18-vpn-session.conf              # VPN session connect/disconnect
 │   ├── 80-throttle.conf                 # Microseg throttling
 │   ├── 90-timestamp.conf                # Date normalization
 │   ├── 95-field-conversion.conf         # Type conversions
