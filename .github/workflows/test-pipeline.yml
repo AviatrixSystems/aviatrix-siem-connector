@@ -61,8 +61,8 @@ jobs:
       - name: Validate config syntax
         if: matrix.syntax_check
         run: |
-          ENV_FLAGS=$(test-tools/ci/output-env-vars.sh ${{ matrix.output_type }})
-          docker run --rm \
+          ENV_FLAGS=$(test-tools/ci/output-env-vars.sh ${{ matrix.output_type }} | tr '\n' ' ')
+          eval docker run --rm \
             -v ${{ github.workspace }}/logstash-configs/assembled:/config \
             -v ${{ github.workspace }}/logstash-configs/patterns:/usr/share/logstash/patterns \
             $ENV_FLAGS \
