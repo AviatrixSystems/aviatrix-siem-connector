@@ -1,0 +1,162 @@
+name: Test Logstash Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'logstash-configs/**'
+      - 'test-tools/sample-logs/**'
+      - 'test-tools/ci/**'
+      - '.github/workflows/test-pipeline.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'logstash-configs/**'
+      - 'test-tools/sample-logs/**'
+      - 'test-tools/ci/**'
+      - '.github/workflows/test-pipeline.yml'
+
+env:
+  LOGSTASH_IMAGE: docker.elastic.co/logstash/logstash:8.16.2
+
+jobs:
+  # ---------------------------------------------------------------
+  # Job 1: Assemble all configs + syntax-validate where possible
+  # ---------------------------------------------------------------
+  validate-configs:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # These use only built-in plugins (http, file) — full syntax check
+          - output_type: splunk-hec
+            syntax_check: true
+          - output_type: dynatrace
+            syntax_check: true
+          - output_type: dynatrace-metrics
+            syntax_check: true
+          - output_type: dynatrace-logs
+            syntax_check: true
+          - output_type: webhook-test
+            syntax_check: true
+          - output_type: ci-test
+            syntax_check: true
+          # Azure needs the Sentinel plugin — assembly only
+          - output_type: azure-log-ingestion
+            syntax_check: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble config
+        run: cd logstash-configs && ./scripts/assemble-config.sh ${{ matrix.output_type }}
+
+      - name: Verify assembled file exists
+        run: test -f logstash-configs/assembled/${{ matrix.output_type }}-full.conf
+
+      - name: Pull Logstash image
+        if: matrix.syntax_check
+        run: docker pull $LOGSTASH_IMAGE
+
+      - name: Validate config syntax
+        if: matrix.syntax_check
+        run: |
+          ENV_FLAGS=$(test-tools/ci/output-env-vars.sh ${{ matrix.output_type }} | tr '\n' ' ')
+          eval docker run --rm \
+            -v ${{ github.workspace }}/logstash-configs/assembled:/config \
+            -v ${{ github.workspace }}/logstash-configs/patterns:/usr/share/logstash/patterns \
+            $ENV_FLAGS \
+            $LOGSTASH_IMAGE \
+            logstash -f /config/${{ matrix.output_type }}-full.conf --config.test_and_exit
+
+  # ---------------------------------------------------------------
+  # Job 2: End-to-end pipeline test
+  # ---------------------------------------------------------------
+  e2e-pipeline-test:
+    runs-on: ubuntu-latest
+    needs: validate-configs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Assemble ci-test config
+        run: cd logstash-configs && ./scripts/assemble-config.sh ci-test
+
+      - name: Refresh sample log timestamps
+        run: |
+          cd test-tools/sample-logs
+          python3 update-timestamps.py --overwrite
+
+      - name: Pull Logstash image
+        run: docker pull $LOGSTASH_IMAGE
+
+      - name: Start Logstash
+        run: |
+          mkdir -p /tmp/logstash-output && chmod 777 /tmp/logstash-output
+          docker run -d --name logstash-ci \
+            -v ${{ github.workspace }}/logstash-configs/assembled:/config \
+            -v ${{ github.workspace }}/logstash-configs/patterns:/usr/share/logstash/patterns \
+            -v /tmp/logstash-output:/tmp/logstash-output \
+            -p 5000:5000/udp \
+            -e XPACK_MONITORING_ENABLED=false \
+            $LOGSTASH_IMAGE \
+            logstash -f /config/ci-test-full.conf
+
+      - name: Wait for Logstash to be ready
+        run: |
+          echo "Waiting for Logstash pipeline to start..."
+          for i in $(seq 1 60); do
+            if docker logs logstash-ci 2>&1 | grep -q "Pipelines running"; then
+              echo "Logstash is ready (attempt $i)"
+              exit 0
+            fi
+            if ! docker ps -q -f name=logstash-ci | grep -q .; then
+              echo "ERROR: Logstash container exited"
+              docker logs logstash-ci 2>&1
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "ERROR: Logstash did not start within 120 seconds"
+          docker logs logstash-ci 2>&1
+          exit 1
+
+      - name: Stream sample logs
+        run: |
+          cd test-tools/sample-logs
+          python3 stream-logs.py --port 5000 -v
+
+      - name: Wait for Logstash to flush
+        run: |
+          echo "Waiting for output to stabilize..."
+          sleep 10
+          # Check file exists and has content
+          if [[ ! -f /tmp/logstash-output/logstash-output.jsonl ]]; then
+            echo "ERROR: Output file not created"
+            docker logs logstash-ci 2>&1 | tail -50
+            exit 1
+          fi
+          LINES=$(wc -l < /tmp/logstash-output/logstash-output.jsonl)
+          echo "Output lines so far: $LINES"
+          # Wait a bit more for any stragglers
+          sleep 5
+          LINES2=$(wc -l < /tmp/logstash-output/logstash-output.jsonl)
+          echo "Output lines after wait: $LINES2"
+
+      - name: Validate output
+        run: |
+          test-tools/ci/validate-output.sh \
+            /tmp/logstash-output/logstash-output.jsonl \
+            test-tools/sample-logs/test-samples.log
+
+      - name: Show Logstash logs on failure
+        if: failure()
+        run: docker logs logstash-ci 2>&1 | tail -100
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f logstash-ci 2>/dev/null || true
