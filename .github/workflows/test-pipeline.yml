@@ -96,10 +96,11 @@ jobs:
 
       - name: Start Logstash
         run: |
+          mkdir -p /tmp/logstash-output && chmod 777 /tmp/logstash-output
           docker run -d --name logstash-ci \
             -v ${{ github.workspace }}/logstash-configs/assembled:/config \
             -v ${{ github.workspace }}/logstash-configs/patterns:/usr/share/logstash/patterns \
-            -v /tmp/logstash-output:/tmp \
+            -v /tmp/logstash-output:/tmp/logstash-output \
             -p 5000:5000/udp \
             -e XPACK_MONITORING_ENABLED=false \
             $LOGSTASH_IMAGE \
