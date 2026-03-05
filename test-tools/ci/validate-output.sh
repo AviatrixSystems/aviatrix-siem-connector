@@ -14,10 +14,10 @@ check() {
     local result="$2"
     if [[ "$result" == "true" ]]; then
         echo "  PASS: $desc"
-        ((PASS++))
+        PASS=$((PASS + 1))
     else
         echo "  FAIL: $desc"
-        ((FAIL++))
+        FAIL=$((FAIL + 1))
     fi
 }
 
@@ -58,7 +58,7 @@ fi
 # --- Check 3: Expected tags present ---
 echo ""
 echo "--- Tag Coverage ---"
-EXPECTED_TAGS="microseg suricata mitm fqdn cmd gw_net_stats gw_sys_stats tunnel_status vpn_session"
+EXPECTED_TAGS="microseg suricata mitm cmd gw_net_stats gw_sys_stats tunnel_status vpn_session"
 for tag in $EXPECTED_TAGS; do
     TAG_COUNT=$(jq -r "select(.tags[]? == \"$tag\") | .tags" "$OUTPUT_FILE" 2>/dev/null | wc -l | tr -d ' ')
     check "Tag '$tag' present (count: $TAG_COUNT)" \

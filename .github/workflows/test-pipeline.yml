@@ -109,7 +109,7 @@ jobs:
         run: |
           echo "Waiting for Logstash pipeline to start..."
           for i in $(seq 1 60); do
-            if docker logs logstash-ci 2>&1 | grep -q "Pipeline running"; then
+            if docker logs logstash-ci 2>&1 | grep -q "Pipelines running"; then
               echo "Logstash is ready (attempt $i)"
               exit 0
             fi
