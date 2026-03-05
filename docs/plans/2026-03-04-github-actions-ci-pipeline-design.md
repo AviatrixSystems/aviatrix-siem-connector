@@ -77,8 +77,10 @@ output {
 ## Excluded
 
 - **Zabbix output**: requires custom Containerfile with plugin; excluded entirely
+- **Azure Log Ingestion output**: requires microsoft-sentinel plugin; assembly-only (no syntax check)
 - **Real SIEM connectivity**: no live credentials in CI
 - **Exact event count assertions**: use `>=` with known drop adjustments to avoid brittleness
+- **FQDN tag check**: no FQDN samples in test data; excluded from tag validation
 
 ## New Files
 
