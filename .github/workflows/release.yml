@@ -150,11 +150,12 @@ jobs:
 
       - name: Package quickstart Terraform
         run: |
-          tar -czf quickstart-aws.tar.gz -C deployments quickstart-aws/ \
+          tar -czf quickstart-aws.tar.gz \
             --exclude='quickstart.sh' \
             --exclude='*.tfvars' \
             --exclude='.terraform*' \
-            --exclude='terraform.tfstate*'
+            --exclude='terraform.tfstate*' \
+            -C deployments quickstart-aws/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
