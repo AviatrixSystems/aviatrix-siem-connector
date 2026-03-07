@@ -1,0 +1,13 @@
+# Aviatrix SIEM Connector — Quickstart Example
+# Copy to terraform.tfvars and fill in your values, or use quickstart.sh
+
+vpc_id     = "vpc-xxxxxxxxxxxxxxxxx"
+subnet_ids = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-yyyyyyyyyyyyyyyyy"]
+
+output_type = "splunk-hec"  # splunk-hec, dynatrace, zabbix, etc.
+
+# SIEM-specific variables
+logstash_config_variables = {
+  SPLUNK_ADDRESS  = "your-splunk-server"
+  SPLUNK_HEC_AUTH = "your-hec-token"
+}
