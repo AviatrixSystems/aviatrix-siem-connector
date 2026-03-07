@@ -60,7 +60,48 @@ The connector is built on top of Logstash with an Aviatrix-validated log parsing
 
 ## Quick Start
 
-### 1. Build the Logstash Configuration
+### Option A: One-Command AWS Deployment (Recommended)
+
+Deploy on ECS Fargate from AWS CloudShell using the pre-built container image:
+
+```bash
+wget -qO- https://github.com/AviatrixSystems/aviatrix-siem-connector/releases/latest/download/quickstart-aws.sh | bash -s -- \
+  --output-type splunk-hec \
+  --vpc-id vpc-xxxxxxxxxxxxxxxxx \
+  --subnets subnet-aaaaaaaa,subnet-bbbbbbbb \
+  --splunk-address your-splunk-server \
+  --splunk-hec-token your-hec-token
+```
+
+**Other destinations:**
+
+```bash
+# Dynatrace
+wget -qO- .../quickstart-aws.sh | bash -s -- \
+  --output-type dynatrace \
+  --vpc-id vpc-xxx --subnets subnet-aaa,subnet-bbb \
+  --dt-metrics-url https://ENV.apps.dynatrace.com/api/v2/metrics/ingest \
+  --dt-logs-url https://ENV.apps.dynatrace.com/api/v2/logs/ingest \
+  --dt-api-token dt0s16.xxx
+
+# Zabbix
+wget -qO- .../quickstart-aws.sh | bash -s -- \
+  --output-type zabbix \
+  --vpc-id vpc-xxx --subnets subnet-aaa,subnet-bbb \
+  --zabbix-server your-zabbix-server
+```
+
+The script installs Terraform if needed, creates an ECS Fargate service behind an NLB, and outputs the syslog endpoint to configure in your Aviatrix Controller.
+
+**Teardown:** `wget -qO- .../quickstart-aws.sh | bash -s -- --destroy`
+
+**All options:** `wget -qO- .../quickstart-aws.sh | bash -s -- --help`
+
+See [deployments/quickstart-aws/](./deployments/quickstart-aws/) for details.
+
+### Option B: Manual Deployment
+
+#### 1. Build the Logstash Configuration
 
 ```bash
 cd logstash-configs
@@ -80,17 +121,18 @@ cd logstash-configs
 
 This generates a complete configuration file in `logstash-configs/assembled/`.
 
-### 2. Deploy
+#### 2. Deploy
 
 Choose a deployment architecture from `deployments/` and follow its README:
 
 | Architecture | Description |
 |--------------|-------------|
+| [aws-ecs-fargate](./deployments/aws-ecs-fargate) | ECS Fargate behind NLB (build your own image) |
 | [aws-ec2-autoscale](./deployments/aws-ec2-autoscale) | HA autoscaling EC2 instances behind NLB |
 | [aws-ec2-single-instance](./deployments/aws-ec2-single-instance) | Single EC2 instance |
 | [azure-aci](./deployments/azure-aci) | Azure Container Instance |
 
-### 3. Configure Aviatrix
+#### 3. Configure Aviatrix
 
 Point your Aviatrix Controller/CoPilot syslog export to the deployed engine's IP on port 5000 (UDP/TCP).
 
@@ -119,6 +161,8 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for detailed conf
 
 | Architecture | Description | Link |
 |--------------|-------------|------|
+| **quickstart-aws** | **One-command ECS Fargate via pre-built GHCR image. No build step required.** | [Folder](./deployments/quickstart-aws/) |
+| aws-ecs-fargate | ECS Fargate behind NLB with custom-built image (ECR). For users who need to customize the container. | [Folder](./deployments/aws-ecs-fargate/) |
 | aws-ec2-autoscale | Highly-available autoscaling EC2 instances behind AWS NLB with public Elastic IP. S3 bucket stores Logstash config. Rolling upgrades on config changes. | [Folder](./deployments/aws-ec2-autoscale) |
 | aws-ec2-single-instance | Single EC2 instance with public Elastic IP. S3 bucket stores Logstash config. | [Folder](./deployments/aws-ec2-single-instance/) |
 | azure-aci | Single Azure Container Instance with public IP. Azure Storage Fileshare stores Logstash config. | [README](./deployments/azure-aci/README.md) |
