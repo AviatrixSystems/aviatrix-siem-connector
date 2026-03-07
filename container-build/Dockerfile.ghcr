@@ -1,0 +1,17 @@
+FROM docker.elastic.co/logstash/logstash:8.16.2
+
+# Install all output plugins that aren't bundled with Logstash
+RUN logstash-plugin install \
+    logstash-output-zabbix \
+    microsoft-sentinel-log-analytics-logstash-output-plugin
+
+# Bake all assembled configs into /opt/configs/
+COPY --chmod=644 configs/ /opt/configs/
+
+# Custom grok patterns
+COPY --chmod=644 patterns/ /usr/share/logstash/patterns/
+
+# Custom entrypoint for OUTPUT_TYPE selection
+COPY --chmod=755 entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

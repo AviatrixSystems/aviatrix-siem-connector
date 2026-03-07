@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  GHCR_IMAGE: ghcr.io/${{ github.repository }}
+  LOGSTASH_IMAGE: docker.elastic.co/logstash/logstash:8.16.2
+
+jobs:
+  # ---------------------------------------------------------------
+  # Job 1: Run E2E tests before releasing
+  # ---------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Assemble ci-test config
+        run: cd logstash-configs && ./scripts/assemble-config.sh ci-test
+
+      - name: Refresh sample log timestamps
+        run: cd test-tools/sample-logs && python3 update-timestamps.py --overwrite
+
+      - name: Pull Logstash image
+        run: docker pull $LOGSTASH_IMAGE
+
+      - name: Start Logstash
+        run: |
+          mkdir -p /tmp/logstash-output && chmod 777 /tmp/logstash-output
+          docker run -d --name logstash-ci \
+            -v ${{ github.workspace }}/logstash-configs/assembled:/config \
+            -v ${{ github.workspace }}/logstash-configs/patterns:/usr/share/logstash/patterns \
+            -v /tmp/logstash-output:/tmp/logstash-output \
+            -p 5000:5000/udp \
+            -e XPACK_MONITORING_ENABLED=false \
+            $LOGSTASH_IMAGE \
+            logstash -f /config/ci-test-full.conf
+
+      - name: Wait for Logstash to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if docker logs logstash-ci 2>&1 | grep -q "Pipelines running"; then
+              echo "Logstash is ready (attempt $i)"
+              exit 0
+            fi
+            if ! docker ps -q -f name=logstash-ci | grep -q .; then
+              echo "ERROR: Logstash container exited"
+              docker logs logstash-ci 2>&1
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "ERROR: Logstash did not start within 120 seconds"
+          docker logs logstash-ci 2>&1
+          exit 1
+
+      - name: Stream sample logs
+        run: cd test-tools/sample-logs && python3 stream-logs.py --port 5000 -v
+
+      - name: Wait for Logstash to flush
+        run: |
+          sleep 10
+          if [[ ! -f /tmp/logstash-output/logstash-output.jsonl ]]; then
+            echo "ERROR: Output file not created"
+            docker logs logstash-ci 2>&1 | tail -50
+            exit 1
+          fi
+          sleep 5
+
+      - name: Validate output
+        run: |
+          test-tools/ci/validate-output.sh \
+            /tmp/logstash-output/logstash-output.jsonl \
+            test-tools/sample-logs/test-samples.log
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f logstash-ci 2>/dev/null || true
+
+  # ---------------------------------------------------------------
+  # Job 2: Build and push GHCR image
+  # ---------------------------------------------------------------
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Assemble all output configs
+        run: |
+          cd logstash-configs
+          for ot in splunk-hec dynatrace dynatrace-metrics dynatrace-logs zabbix azure-log-ingestion webhook-test ci-test; do
+            if [[ -d "outputs/$ot" ]]; then
+              ./scripts/assemble-config.sh "$ot" >/dev/null
+              echo "  Assembled: $ot"
+            fi
+          done
+
+      - name: Prepare build context
+        run: |
+          mkdir -p /tmp/build-context/configs /tmp/build-context/patterns
+          cp logstash-configs/assembled/*-full.conf /tmp/build-context/configs/
+          cp logstash-configs/patterns/* /tmp/build-context/patterns/
+          cp container-build/entrypoint.sh /tmp/build-context/
+          cp container-build/Dockerfile.ghcr /tmp/build-context/Dockerfile
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: /tmp/build-context
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.GHCR_IMAGE }}:${{ github.ref_name }}
+            ${{ env.GHCR_IMAGE }}:latest
+
+  # ---------------------------------------------------------------
+  # Job 3: Create GitHub release with quickstart assets
+  # ---------------------------------------------------------------
+  create-release:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package quickstart Terraform
+        run: |
+          tar -czf quickstart-aws.tar.gz -C deployments quickstart-aws/ \
+            --exclude='quickstart.sh' \
+            --exclude='*.tfvars' \
+            --exclude='.terraform*' \
+            --exclude='terraform.tfstate*'
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            quickstart-aws.tar.gz
+            deployments/quickstart-aws/quickstart.sh
