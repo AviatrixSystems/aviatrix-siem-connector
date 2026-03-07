@@ -60,10 +60,10 @@ variable "logstash_config_variables" {
   default     = {}
 }
 
-variable "assign_public_ip" {
-  description = "Assign public IP to Fargate tasks (set false if using private subnets with NAT)"
+variable "internal_nlb" {
+  description = "Create an internal NLB (true) or internet-facing NLB (false)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "desired_count" {

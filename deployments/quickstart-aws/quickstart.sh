@@ -17,7 +17,7 @@ set -euo pipefail
 OUTPUT_TYPE=""
 VPC_ID=""
 SUBNETS=""
-ASSIGN_PUBLIC_IP="true"
+INTERNAL_NLB="false"
 SYSLOG_PORT="5000"
 LOG_PROFILE="all"
 IMAGE_TAG="latest"
@@ -43,8 +43,7 @@ Required:
   --subnets <id,id,...>         Comma-separated subnet IDs (multi-AZ recommended)
 
 Optional:
-  --public-ip                   Assign public IP to tasks (default)
-  --private-ip                  No public IP (requires NAT gateway)
+  --internal                    Create internal NLB (default: internet-facing)
   --syslog-port <port>          Syslog listen port (default: 5000)
   --log-profile <profile>       all, security, or networking (default: all)
   --image-tag <tag>             Container image tag (default: latest)
@@ -74,8 +73,7 @@ while [[ $# -gt 0 ]]; do
     --output-type)      OUTPUT_TYPE="$2"; shift 2 ;;
     --vpc-id)           VPC_ID="$2"; shift 2 ;;
     --subnets)          SUBNETS="$2"; shift 2 ;;
-    --public-ip)        ASSIGN_PUBLIC_IP="true"; shift ;;
-    --private-ip)       ASSIGN_PUBLIC_IP="false"; shift ;;
+    --internal)         INTERNAL_NLB="true"; shift ;;
     --syslog-port)      SYSLOG_PORT="$2"; shift 2 ;;
     --log-profile)      LOG_PROFILE="$2"; shift 2 ;;
     --image-tag)        IMAGE_TAG="$2"; shift 2 ;;
@@ -164,7 +162,7 @@ echo ""
 echo "  Output type:  $OUTPUT_TYPE"
 echo "  VPC:          $VPC_ID"
 echo "  Subnets:      $SUBNETS"
-echo "  Public IP:    $ASSIGN_PUBLIC_IP"
+echo "  Internal NLB: $INTERNAL_NLB"
 echo "  Syslog port:  $SYSLOG_PORT"
 echo "  Image tag:    $IMAGE_TAG"
 echo ""
@@ -228,7 +226,7 @@ cat > terraform.tfvars <<EOF
 vpc_id          = "$VPC_ID"
 subnet_ids      = $SUBNET_HCL
 output_type     = "$OUTPUT_TYPE"
-assign_public_ip = $ASSIGN_PUBLIC_IP
+internal_nlb = $INTERNAL_NLB
 syslog_port     = $SYSLOG_PORT
 log_profile     = "$LOG_PROFILE"
 image_tag       = "$IMAGE_TAG"

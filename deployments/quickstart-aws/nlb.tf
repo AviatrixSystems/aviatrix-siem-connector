@@ -1,6 +1,6 @@
 resource "aws_lb" "default" {
   name               = local.name_prefix
-  internal           = !var.assign_public_ip
+  internal           = var.internal_nlb
   load_balancer_type = "network"
   subnets            = var.subnet_ids
   tags               = var.tags
