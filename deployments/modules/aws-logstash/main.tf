@@ -151,17 +151,17 @@ locals {
     tls_sidecar_image    = var.tls_sidecar_image,
     log_profile          = var.log_profile,
     config_vars          = var.logstash_config_variables,
-  }) : format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
-    aws_s3_bucket_id     = aws_s3_bucket.default.id,
-    logstash_config_name = aws_s3_object.config.key,
-    tls_enabled          = false,
-    tls_secret_arn       = "",
-    aws_region           = var.aws_region,
-    tls_port             = 0,
-    tls_sidecar_image    = "",
-    log_profile          = "",
-    config_vars          = {},
-  }), templatefile(var.docker_run_template_path, merge(var.logstash_config_variables, {
-    log_profile = var.log_profile
+    }) : format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
+      aws_s3_bucket_id     = aws_s3_bucket.default.id,
+      logstash_config_name = aws_s3_object.config.key,
+      tls_enabled          = false,
+      tls_secret_arn       = "",
+      aws_region           = var.aws_region,
+      tls_port             = 0,
+      tls_sidecar_image    = "",
+      log_profile          = "",
+      config_vars          = {},
+      }), templatefile(var.docker_run_template_path, merge(var.logstash_config_variables, {
+        log_profile = var.log_profile
   })))
 }
