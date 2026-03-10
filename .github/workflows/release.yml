@@ -158,6 +158,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set image name
+        id: version
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/siem-connector-tls" >> "$GITHUB_OUTPUT"
+
       - name: Build and push TLS sidecar
         uses: docker/build-push-action@v6
         with:
@@ -165,8 +169,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/siem-connector-tls:${{ github.ref_name }}
-            ghcr.io/${{ github.repository_owner }}/siem-connector-tls:latest
+            ${{ steps.version.outputs.image }}:${{ github.ref_name }}
+            ${{ steps.version.outputs.image }}:latest
 
   # ---------------------------------------------------------------
   # Job 4: Create GitHub release with quickstart assets

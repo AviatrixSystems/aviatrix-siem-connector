@@ -5,10 +5,11 @@ module "tls" {
   count  = var.tls_enabled ? 1 : 0
   source = "../modules/tls-certs"
 
-  name_prefix         = "avxlog-${module.logstash.random_suffix}"
-  cert_validity_hours = var.tls_cert_validity_hours
-  secret_name         = var.tls_secret_name
-  tags                = var.tags
+  name_prefix          = "avxlog-${module.logstash.random_suffix}"
+  cert_validity_hours  = var.tls_cert_validity_hours
+  server_ip_addresses  = [aws_eip.default.public_ip]
+  secret_name          = var.tls_secret_name
+  tags                 = var.tags
 }
 
 # --- TLS Outputs ---

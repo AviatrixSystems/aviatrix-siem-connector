@@ -120,8 +120,9 @@ resource "tls_locally_signed_cert" "client" {
 # =============================================================================
 
 resource "aws_secretsmanager_secret" "tls" {
-  name = var.secret_name != "" ? var.secret_name : "${var.name_prefix}-tls-certs"
-  tags = var.tags
+  name                    = var.secret_name != "" ? var.secret_name : "${var.name_prefix}-tls-certs"
+  recovery_window_in_days = 0
+  tags                    = var.tags
 }
 
 resource "aws_secretsmanager_secret_version" "tls" {

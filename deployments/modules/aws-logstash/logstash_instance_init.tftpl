@@ -61,7 +61,7 @@ services:
       - LOG_PROFILE=${log_profile}
       - XPACK_MONITORING_ENABLED=false
 %{ for key, value in config_vars ~}
-      - ${upper(key)}=${value}
+      - ${upper(key)}="${value}"
 %{ endfor ~}
     restart: always
 COMPOSE
