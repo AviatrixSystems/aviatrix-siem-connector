@@ -42,3 +42,28 @@ resource "aws_iam_role" "ecs_task" {
 
   tags = var.tags
 }
+
+# --- Secrets Manager access for TLS certs (conditional) ---
+
+resource "aws_iam_policy" "ecs_secrets" {
+  count = var.tls_enabled ? 1 : 0
+
+  name = "${local.name_prefix}-ecs-secrets"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "secretsmanager:GetSecretValue"
+      Resource = module.tls[0].secret_arn
+    }]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_secrets" {
+  count = var.tls_enabled ? 1 : 0
+
+  role       = aws_iam_role.ecs_execution.name
+  policy_arn = aws_iam_policy.ecs_secrets[0].arn
+}
