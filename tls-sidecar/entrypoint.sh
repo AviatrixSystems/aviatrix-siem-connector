@@ -31,7 +31,7 @@ syslog = no
 
 [syslog-tls]
 accept = ${TLS_LISTEN_ADDRESS:-0.0.0.0}:${TLS_PORT:-6514}
-connect = 127.0.0.1:${LOGSTASH_PORT:-5000}
+connect = ${LOGSTASH_HOST:-127.0.0.1}:${LOGSTASH_PORT:-5000}
 cert = $CERT_DIR/server.crt
 key = $CERT_DIR/server.key
 CAfile = $CERT_DIR/ca.crt

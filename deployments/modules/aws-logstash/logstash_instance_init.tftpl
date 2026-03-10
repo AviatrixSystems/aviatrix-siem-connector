@@ -48,6 +48,7 @@ services:
       - /logstash/certs:/etc/stunnel/certs:ro
     environment:
       - TLS_PORT=${tls_port}
+      - LOGSTASH_HOST=logstash
     restart: always
     depends_on:
       - logstash
