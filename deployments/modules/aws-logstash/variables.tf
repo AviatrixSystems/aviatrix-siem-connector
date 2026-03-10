@@ -82,3 +82,35 @@ variable "tags" {
     "App" = "avx-log-integration"
   }
 }
+
+# --- TLS Configuration ---
+
+variable "tls_enabled" {
+  description = "Enable mTLS syslog ingestion via stunnel sidecar"
+  type        = bool
+  default     = false
+}
+
+variable "tls_port" {
+  description = "TLS syslog port (RFC 5425 default: 6514)"
+  type        = number
+  default     = 6514
+}
+
+variable "tls_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing TLS certs"
+  type        = string
+  default     = ""
+}
+
+variable "tls_sidecar_image" {
+  description = "Container image for the stunnel TLS sidecar"
+  type        = string
+  default     = "ghcr.io/aviatrixsystems/siem-connector-tls:latest"
+}
+
+variable "aws_region" {
+  description = "AWS region (needed for Secrets Manager fetch in user_data)"
+  type        = string
+  default     = "us-east-2"
+}

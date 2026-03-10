@@ -74,6 +74,28 @@ resource "aws_iam_role_policy_attachment" "s3_read_attach" {
   policy_arn = aws_iam_policy.s3_read_policy.arn
 }
 
+resource "aws_iam_policy" "secrets_read_policy" {
+  count       = var.tls_enabled ? 1 : 0
+  name        = "avxlog-secrets-${lower(random_string.random.id)}"
+  description = "Policy to allow EC2 instances to read TLS certs from Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action   = "secretsmanager:GetSecretValue",
+      Effect   = "Allow",
+      Resource = var.tls_secret_arn
+    }],
+  })
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "secrets_read_attach" {
+  count      = var.tls_enabled ? 1 : 0
+  role       = aws_iam_role.ec2_s3_access_role.name
+  policy_arn = aws_iam_policy.secrets_read_policy[0].arn
+}
+
 resource "aws_iam_instance_profile" "default" {
   name = "avxlog-profile-${lower(random_string.random.id)}"
   role = aws_iam_role.ec2_s3_access_role.name
@@ -86,9 +108,9 @@ resource "aws_security_group" "default" {
   name   = "avxlog-${lower(random_string.random.id)}"
   vpc_id = var.vpc_id
   ingress {
-    from_port   = var.syslog_port
-    to_port     = var.syslog_port
-    protocol    = var.syslog_protocol
+    from_port   = var.tls_enabled ? var.tls_port : var.syslog_port
+    to_port     = var.tls_enabled ? var.tls_port : var.syslog_port
+    protocol    = var.tls_enabled ? "tcp" : var.syslog_protocol
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
@@ -117,11 +139,28 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-# User data: bootstrap script + docker run command
+# User data: bootstrap script + docker run or docker-compose
 locals {
-  user_data = format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
+  user_data = var.tls_enabled ? templatefile("${path.module}/logstash_instance_init.tftpl", {
     aws_s3_bucket_id     = aws_s3_bucket.default.id,
-    logstash_config_name = aws_s3_object.config.key
+    logstash_config_name = aws_s3_object.config.key,
+    tls_enabled          = true,
+    tls_secret_arn       = var.tls_secret_arn,
+    aws_region           = var.aws_region,
+    tls_port             = var.tls_port,
+    tls_sidecar_image    = var.tls_sidecar_image,
+    log_profile          = var.log_profile,
+    config_vars          = var.logstash_config_variables,
+  }) : format("%s\n%s", templatefile("${path.module}/logstash_instance_init.tftpl", {
+    aws_s3_bucket_id     = aws_s3_bucket.default.id,
+    logstash_config_name = aws_s3_object.config.key,
+    tls_enabled          = false,
+    tls_secret_arn       = "",
+    aws_region           = var.aws_region,
+    tls_port             = 0,
+    tls_sidecar_image    = "",
+    log_profile          = "",
+    config_vars          = {},
   }), templatefile(var.docker_run_template_path, merge(var.logstash_config_variables, {
     log_profile = var.log_profile
   })))
