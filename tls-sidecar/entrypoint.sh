@@ -22,7 +22,7 @@ for f in server.crt server.key ca.crt; do
   fi
 done
 
-chmod 600 "$CERT_DIR/server.key"
+chmod 600 "$CERT_DIR/server.key" 2>/dev/null || true
 
 # Generate stunnel config
 cat > /etc/stunnel/stunnel.conf <<EOF
