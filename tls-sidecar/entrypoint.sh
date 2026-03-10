@@ -30,7 +30,7 @@ foreground = yes
 syslog = no
 
 [syslog-tls]
-accept = ${TLS_PORT:-6514}
+accept = ${TLS_LISTEN_ADDRESS:-0.0.0.0}:${TLS_PORT:-6514}
 connect = 127.0.0.1:${LOGSTASH_PORT:-5000}
 cert = $CERT_DIR/server.crt
 key = $CERT_DIR/server.key
@@ -38,5 +38,5 @@ CAfile = $CERT_DIR/ca.crt
 verify = 2
 EOF
 
-echo "stunnel: listening on :${TLS_PORT:-6514} (mTLS) -> 127.0.0.1:${LOGSTASH_PORT:-5000}"
+echo "stunnel: listening on ${TLS_LISTEN_ADDRESS:-0.0.0.0}:${TLS_PORT:-6514} (mTLS) -> 127.0.0.1:${LOGSTASH_PORT:-5000}"
 exec stunnel /etc/stunnel/stunnel.conf
