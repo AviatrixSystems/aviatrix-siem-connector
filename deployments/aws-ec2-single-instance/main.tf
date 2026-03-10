@@ -33,6 +33,13 @@ module "logstash" {
   logstash_config_variables   = var.logstash_config_variables
   log_profile                 = var.log_profile
   tags                        = var.tags
+
+  # TLS
+  tls_enabled       = var.tls_enabled
+  tls_port          = var.tls_port
+  tls_secret_arn    = var.tls_enabled ? module.tls[0].secret_arn : ""
+  tls_sidecar_image = var.tls_sidecar_image
+  aws_region        = var.aws_region
 }
 
 resource "terraform_data" "config_etag" {
