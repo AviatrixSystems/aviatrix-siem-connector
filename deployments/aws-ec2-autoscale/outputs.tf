@@ -3,9 +3,9 @@ output "avx_syslog_destination" {
 }
 
 output "avx_syslog_port" {
-  value = var.syslog_port
+  value = module.logstash.effective_port
 }
 
 output "avx_syslog_proto" {
-  value = var.syslog_protocol
+  value = var.tls_enabled ? "tcp+tls" : var.syslog_protocol
 }

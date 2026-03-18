@@ -102,3 +102,35 @@ variable "tags" {
     "App" = "avx-log-integration"
   }
 }
+
+# --- TLS Configuration ---
+
+variable "tls_enabled" {
+  description = "Enable mTLS syslog ingestion via stunnel sidecar (port 6514 replaces plaintext port 5000)"
+  type        = bool
+  default     = false
+}
+
+variable "tls_port" {
+  description = "TLS syslog port (RFC 5425 default: 6514)"
+  type        = number
+  default     = 6514
+}
+
+variable "tls_cert_validity_hours" {
+  description = "Server/client certificate validity period in hours. CA validity is 10x this value."
+  type        = number
+  default     = 8760
+}
+
+variable "tls_secret_name" {
+  description = "Secrets Manager secret name for TLS certs. Auto-generated if empty."
+  type        = string
+  default     = ""
+}
+
+variable "tls_sidecar_image" {
+  description = "Container image for the TLS stunnel sidecar"
+  type        = string
+  default     = "ghcr.io/aviatrixsystems/siem-connector-tls:latest"
+}

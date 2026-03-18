@@ -11,14 +11,14 @@ resource "aws_lb" "default" {
   tags = var.tags
 }
 
-# --- TCP_UDP Target Group ---
-# NLB does not allow separate TCP and UDP listeners on the same port.
-# TCP_UDP handles both protocols with a single target group and listener.
+# --- Target Group ---
+# When TLS is enabled: TCP on 6514 (stunnel handles TLS, UDP not available)
+# When TLS is disabled: TCP_UDP on syslog_port (current behavior)
 
 resource "aws_lb_target_group" "default" {
   name        = local.name_prefix
-  port        = var.syslog_port
-  protocol    = "TCP_UDP"
+  port        = local.effective_port
+  protocol    = var.tls_enabled ? "TCP" : "TCP_UDP"
   vpc_id      = var.vpc_id
   target_type = "ip"
 
@@ -37,8 +37,8 @@ resource "aws_lb_target_group" "default" {
 
 resource "aws_lb_listener" "default" {
   load_balancer_arn = aws_lb.default.arn
-  port              = var.syslog_port
-  protocol          = "TCP_UDP"
+  port              = local.effective_port
+  protocol          = var.tls_enabled ? "TCP" : "TCP_UDP"
 
   default_action {
     type             = "forward"

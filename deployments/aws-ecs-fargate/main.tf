@@ -5,7 +5,8 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  name_prefix = "avxlog-${random_string.suffix.result}"
+  name_prefix    = "avxlog-${random_string.suffix.result}"
+  effective_port = var.tls_enabled ? var.tls_port : var.syslog_port
 }
 
 # --- ECR Repository ---
@@ -88,26 +89,60 @@ resource "aws_ecs_task_definition" "default" {
   execution_role_arn       = aws_iam_role.ecs_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
 
-  container_definitions = jsonencode([{
-    name      = "logstash"
-    image     = var.container_image
-    essential = true
+  container_definitions = jsonencode(concat(
+    # --- stunnel TLS sidecar (conditional) ---
+    var.tls_enabled ? [{
+      name      = "stunnel"
+      image     = var.tls_sidecar_image
+      essential = true
 
-    portMappings = [
-      { containerPort = var.syslog_port, protocol = "tcp" },
-    ]
+      portMappings = [
+        { containerPort = var.tls_port, protocol = "tcp" },
+      ]
 
-    environment = local.container_env
+      environment = [
+        { name = "TLS_PORT", value = tostring(var.tls_port) },
+        { name = "LOGSTASH_PORT", value = tostring(var.syslog_port) },
+      ]
 
-    logConfiguration = {
-      logDriver = "awslogs"
-      options = {
-        "awslogs-group"         = aws_cloudwatch_log_group.default.name
-        "awslogs-region"        = var.aws_region
-        "awslogs-stream-prefix" = "logstash"
+      secrets = [
+        { name = "TLS_SERVER_CERT", valueFrom = "${module.tls[0].secret_arn}:server_cert::" },
+        { name = "TLS_SERVER_KEY", valueFrom = "${module.tls[0].secret_arn}:server_key::" },
+        { name = "TLS_CA_CERT", valueFrom = "${module.tls[0].secret_arn}:ca_cert::" },
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.default.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "stunnel"
+        }
       }
-    }
-  }])
+    }] : [],
+
+    # --- Logstash container (always present) ---
+    [{
+      name      = "logstash"
+      image     = var.container_image
+      essential = true
+
+      portMappings = var.tls_enabled ? [] : [
+        { containerPort = var.syslog_port, protocol = "tcp" },
+      ]
+
+      environment = local.container_env
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.default.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "logstash"
+        }
+      }
+    }],
+  ))
 
   tags = var.tags
 }
@@ -139,8 +174,8 @@ resource "aws_ecs_service" "default" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.default.arn
-    container_name   = "logstash"
-    container_port   = var.syslog_port
+    container_name   = var.tls_enabled ? "stunnel" : "logstash"
+    container_port   = local.effective_port
   }
 
   tags = var.tags

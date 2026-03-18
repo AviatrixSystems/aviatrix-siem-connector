@@ -1,4 +1,6 @@
 FROM docker.elastic.co/logstash/logstash:8.16.2
+LABEL org.opencontainers.image.source="https://github.com/aviatrixsystems/log-integration-engine"
+LABEL org.opencontainers.image.description="Aviatrix SIEM Connector - Logstash ETL pipeline"
 
 # Install all output plugins that aren't bundled with Logstash
 RUN logstash-plugin install \
