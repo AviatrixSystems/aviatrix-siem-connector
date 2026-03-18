@@ -7,7 +7,7 @@ The connector is built on top of Logstash with an Aviatrix-validated log parsing
 ## Architecture
 
 ```
-                         Aviatrix Cloud Network
+                  Aviatrix Cloud Native Security Fabric
             ┌──────────────────────────────────────────┐
             │                                          │
             │  Gateways              Controller        │
