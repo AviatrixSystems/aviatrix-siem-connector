@@ -1,0 +1,72 @@
+Aviatrix SIEM Connector
+Copyright 2023-2026 Aviatrix Systems, Inc.
+
+This product is licensed under the Elastic License 2.0.
+See the LICENSE file for the full license text.
+
+Brand assets located in status-sidecar/assets/brand/ are proprietary
+and are NOT licensed under the Elastic License 2.0. See the separate
+LICENSE file in that directory and TRADEMARK.md for details.
+
+---
+
+Third-Party Software Attributions
+
+This project depends on the following third-party software at runtime or
+build time. These dependencies are not bundled with the source code; they
+are fetched or installed separately.
+
+Logstash
+  License: Elastic License 2.0 / SSPL
+  URL: https://github.com/elastic/logstash
+  Usage: Runtime platform (the connector runs as a Logstash pipeline)
+
+logstash-output-zabbix
+  License: Apache License 2.0
+  URL: https://github.com/stewart/logstash-output-zabbix
+  Usage: Runtime plugin for Zabbix output
+
+microsoft-sentinel-log-analytics-logstash-output-plugin
+  License: MIT License
+  URL: https://github.com/Azure/Azure-Sentinel
+  Usage: Runtime plugin for Azure Log Analytics output
+
+Next.js
+  License: MIT License
+  URL: https://github.com/vercel/next.js
+  Usage: Status sidecar web framework
+
+React
+  License: MIT License
+  URL: https://github.com/facebook/react
+  Usage: Status sidecar UI library
+
+AG Charts Community
+  License: MIT License
+  URL: https://github.com/ag-grid/ag-charts
+  Usage: Status sidecar charting library
+
+Radix UI
+  License: MIT License
+  URL: https://github.com/radix-ui/primitives
+  Usage: Status sidecar UI primitives
+
+Tailwind CSS
+  License: MIT License
+  URL: https://github.com/tailwindlabs/tailwindcss
+  Usage: Status sidecar CSS framework
+
+Terraform AWS Provider
+  License: Mozilla Public License 2.0
+  URL: https://github.com/hashicorp/terraform-provider-aws
+  Usage: AWS deployment infrastructure
+
+Terraform AzureRM Provider
+  License: Mozilla Public License 2.0
+  URL: https://github.com/hashicorp/terraform-provider-azurerm
+  Usage: Azure deployment infrastructure
+
+Terraform
+  License: Business Source License 1.1
+  URL: https://github.com/hashicorp/terraform
+  Usage: Infrastructure deployment tooling

@@ -37,3 +37,8 @@ output "patterns_etag" {
   description = "ETag of the uploaded patterns file (for triggering replacements)"
   value       = aws_s3_object.patterns.etag
 }
+
+output "effective_port" {
+  description = "The externally-facing syslog port (TLS port when enabled, syslog port otherwise)"
+  value       = var.tls_enabled ? var.tls_port : var.syslog_port
+}

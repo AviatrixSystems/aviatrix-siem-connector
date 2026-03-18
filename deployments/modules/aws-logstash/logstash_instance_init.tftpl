@@ -4,7 +4,7 @@ set -e  # Exit on error
 
 # Install packages
 sudo yum update -y
-sudo yum install -y docker aws-cli
+sudo yum install -y docker aws-cli jq
 
 # Start Docker
 sudo systemctl start docker
@@ -21,3 +21,60 @@ aws s3 cp s3://${aws_s3_bucket_id}/${logstash_config_name} /logstash/pipeline/${
 # Set proper permissions
 chmod 644 /logstash/patterns/avx.conf
 chmod 644 /logstash/pipeline/${logstash_config_name}
+
+%{ if tls_enabled }
+# --- TLS: Fetch certs from Secrets Manager ---
+mkdir -p /logstash/certs
+
+SECRET_JSON=$(aws secretsmanager get-secret-value \
+  --secret-id "${tls_secret_arn}" \
+  --query 'SecretString' \
+  --output text \
+  --region "${aws_region}")
+
+echo "$SECRET_JSON" | jq -r '.server_cert' > /logstash/certs/server.crt
+echo "$SECRET_JSON" | jq -r '.server_key'  > /logstash/certs/server.key
+echo "$SECRET_JSON" | jq -r '.ca_cert'     > /logstash/certs/ca.crt
+chmod 600 /logstash/certs/server.key
+
+# --- TLS: Write docker-compose.yml ---
+cat > /logstash/docker-compose.yml <<'COMPOSE'
+services:
+  stunnel:
+    image: ${tls_sidecar_image}
+    ports:
+      - "${tls_port}:${tls_port}"
+    volumes:
+      - /logstash/certs:/etc/stunnel/certs:ro
+    environment:
+      - TLS_PORT=${tls_port}
+      - LOGSTASH_HOST=logstash
+    restart: always
+    depends_on:
+      - logstash
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.16.2
+    volumes:
+      - /logstash/pipeline/:/usr/share/logstash/pipeline/
+      - /logstash/patterns:/usr/share/logstash/patterns
+    environment:
+      - LOG_PROFILE=${log_profile}
+      - XPACK_MONITORING_ENABLED=false
+%{ for key, value in config_vars ~}
+      - ${upper(key)}=${value}
+%{ endfor ~}
+    restart: always
+COMPOSE
+
+# --- TLS: Install Docker Compose plugin (not in AL2023 default repos) ---
+COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL "https://github.com/docker/compose/releases/download/$${COMPOSE_VERSION}/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# --- TLS: Start with docker compose ---
+cd /logstash
+docker compose up -d
+%{ endif }

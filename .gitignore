@@ -12,6 +12,9 @@ origin_logstash.conf
 # macOS files
 .DS_Store
 
+# Git worktrees
+.worktrees/
+
 # IDE and tool-specific settings (user-specific)
 .claude/
 .serena/
@@ -20,6 +23,7 @@ origin_logstash.conf
 
 # Internal planning docs (not shipped)
 docs/internal/
+docs/plans/
 
 # Status sidecar (developed in separate branch)
 status-sidecar/

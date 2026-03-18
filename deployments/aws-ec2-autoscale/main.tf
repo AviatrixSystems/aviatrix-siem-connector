@@ -33,6 +33,17 @@ module "logstash" {
   logstash_config_variables   = var.logstash_config_variables
   log_profile                 = var.log_profile
   tags                        = var.tags
+
+  # TLS
+  tls_enabled       = var.tls_enabled
+  tls_port          = var.tls_port
+  tls_secret_arn    = var.tls_enabled ? module.tls[0].secret_arn : ""
+  tls_sidecar_image = var.tls_sidecar_image
+  aws_region        = var.aws_region
+}
+
+locals {
+  effective_port = module.logstash.effective_port
 }
 
 resource "aws_launch_template" "default" {
@@ -152,13 +163,13 @@ resource "aws_lb" "default" {
 
 resource "aws_lb_target_group" "default" {
   name     = "avxlog-${module.logstash.random_suffix}"
-  port     = var.syslog_port
-  protocol = upper(var.syslog_protocol)
+  port     = local.effective_port
+  protocol = var.tls_enabled ? "TCP" : upper(var.syslog_protocol)
   vpc_id   = var.vpc_id
 
   health_check {
     protocol            = "TCP"
-    port                = var.syslog_port
+    port                = local.effective_port
     interval            = 30
     healthy_threshold   = 3
     unhealthy_threshold = 3
@@ -168,8 +179,8 @@ resource "aws_lb_target_group" "default" {
 
 resource "aws_lb_listener" "default" {
   load_balancer_arn = aws_lb.default.arn
-  port              = var.syslog_port
-  protocol          = upper(var.syslog_protocol)
+  port              = local.effective_port
+  protocol          = var.tls_enabled ? "TCP" : upper(var.syslog_protocol)
 
   default_action {
     type             = "forward"

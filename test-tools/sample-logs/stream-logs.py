@@ -29,6 +29,7 @@ LOG_TYPE_PATTERNS = {
     "netstats": r"AviatrixGwNetStats",
     "sysstats": r"AviatrixGwSysStats",
     "tunnel": r"AviatrixTunnelStatusChange",
+    "vpn": r"AviatrixVPNSession",
 }
 
 DEFAULT_LOG_FILE = Path(__file__).parent / "test-samples.log"
