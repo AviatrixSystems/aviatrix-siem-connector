@@ -7,14 +7,14 @@ The connector is built on top of Logstash with an Aviatrix-validated log parsing
 ## Architecture
 
 ```
-                         Aviatrix Cloud Network
+                  Aviatrix Cloud Native Security Fabric
             ┌──────────────────────────────────────────┐
             │                                          │
             │  Gateways              Controller        │
             │  ├─ Distributed        ├─ API Audit      │
             │  │  Cloud Firewall     │  Logs           │
-            │  ├─ Suricata IDS       └─ Tunnel Status  │
-            │  ├─ Network Stats                        │
+            │  ├─ Suricata IDS       ├─ Tunnel Status  │
+            │  ├─ Network Stats      └─ VPN Sessions   │
             │  └─ System Stats                         │
             │                                          │
             └──────────────┬───────────────────────────┘
@@ -29,7 +29,7 @@ The connector is built on top of Logstash with an Aviatrix-validated log parsing
      │  │           │  │  Convert  │  │  & Destination  │  │
      │  └───────────┘  └───────────┘  └────────────────┘  │
      │                                                     │
-     │  8 log types • Grok + JSON parsing • ASIM support   │
+     │  9 log types • Grok + JSON parsing • ASIM support   │
      └──────────┬──────────┬───────────┬──────────┬────────┘
                 │          │           │          │
                 ▼          ▼           ▼          ▼
@@ -51,6 +51,7 @@ The connector is built on top of Logstash with an Aviatrix-validated log parsing
 | | Tunnel Status | Tunnel up/down state changes |
 | **Operations** | Controller API | API calls and admin actions |
 | | Gateway System Stats | CPU, memory, disk utilization |
+| **VPN** | VPN Session | VPN user connect/disconnect events |
 
 ### Pipeline Stages
 
@@ -130,6 +131,7 @@ Choose a deployment architecture from `deployments/` and follow its README:
 | [aws-ecs-fargate](./deployments/aws-ecs-fargate) | ECS Fargate behind NLB (build your own image) |
 | [aws-ec2-autoscale](./deployments/aws-ec2-autoscale) | HA autoscaling EC2 instances behind NLB |
 | [aws-ec2-single-instance](./deployments/aws-ec2-single-instance) | Single EC2 instance |
+| [aws-ecs-fargate](./deployments/aws-ecs-fargate) | ECS Fargate behind NLB, config baked into container image |
 | [azure-aci](./deployments/azure-aci) | Azure Container Instance |
 
 #### 3. Configure Aviatrix
@@ -165,6 +167,7 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for detailed conf
 | aws-ecs-fargate | ECS Fargate behind NLB with custom-built image (ECR). For users who need to customize the container. | [Folder](./deployments/aws-ecs-fargate/) |
 | aws-ec2-autoscale | Highly-available autoscaling EC2 instances behind AWS NLB with public Elastic IP. S3 bucket stores Logstash config. Rolling upgrades on config changes. | [Folder](./deployments/aws-ec2-autoscale) |
 | aws-ec2-single-instance | Single EC2 instance with public Elastic IP. S3 bucket stores Logstash config. | [Folder](./deployments/aws-ec2-single-instance/) |
+| aws-ecs-fargate | Single ECS Fargate task behind NLB. Logstash config and patterns baked into container image. Scalable via `desired_count` variable. | [Folder](./deployments/aws-ecs-fargate/) |
 | azure-aci | Single Azure Container Instance with public IP. Azure Storage Fileshare stores Logstash config. | [README](./deployments/azure-aci/README.md) |
 
 ## Observability Destinations
@@ -228,3 +231,13 @@ See [logstash-configs/README.md](./logstash-configs/README.md) for details.
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development workflow, test methodology, and architecture notes.
+
+## License
+
+This project is licensed under the [Elastic License 2.0](./LICENSE). You may use,
+copy, modify, and distribute the software, subject to the limitations in the license
+(notably, you may not offer it as a hosted/managed service).
+
+Brand assets in [`status-sidecar/assets/brand/`](./status-sidecar/assets/brand/) are
+proprietary to Aviatrix Systems, Inc. and are **not** covered by the Elastic License 2.0.
+See [TRADEMARK.md](./TRADEMARK.md) for trademark usage guidelines.
