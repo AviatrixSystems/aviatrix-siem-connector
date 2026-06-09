@@ -917,3 +917,95 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_tunnel_status" {
     }
   }
 }
+
+## Data Collection Rule for Aviatrix VPN Session (connect/disconnect, non-ASIM passthrough)
+resource "azurerm_monitor_data_collection_rule" "aviatrix_vpn_session" {
+  name                        = "aviatrix-vpn-session-dcr"
+  location                    = azurerm_resource_group.aci_rg.location
+  resource_group_name         = azurerm_resource_group.aci_rg.name
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
+
+  depends_on = [azapi_resource.table_vpn_session]
+
+  data_flow {
+    streams       = ["Custom-AviatrixVPNSession_CL"]
+    destinations  = ["loganalytics-destination"]
+    output_stream = "Custom-AviatrixVPNSession_CL"
+    transform_kql = "source"
+  }
+
+  destinations {
+    log_analytics {
+      workspace_resource_id = var.log_analytics_workspace.id
+      name                  = "loganalytics-destination"
+    }
+  }
+
+  stream_declaration {
+    stream_name = "Custom-AviatrixVPNSession_CL"
+    column {
+      name = "TimeGenerated"
+      type = "datetime"
+    }
+    column {
+      name = "vpn_user"
+      type = "string"
+    }
+    column {
+      name = "vpn_status"
+      type = "string"
+    }
+    column {
+      name = "vpn_gateway"
+      type = "string"
+    }
+    column {
+      name = "vpn_gateway_ip"
+      type = "string"
+    }
+    column {
+      name = "vpn_virtual_ip"
+      type = "string"
+    }
+    column {
+      name = "vpn_public_ip"
+      type = "string"
+    }
+    column {
+      name = "vpn_login"
+      type = "string"
+    }
+    column {
+      name = "vpn_logout"
+      type = "string"
+    }
+    column {
+      name = "vpn_duration"
+      type = "string"
+    }
+    column {
+      name = "vpn_rx_bytes"
+      type = "string"
+    }
+    column {
+      name = "vpn_tx_bytes"
+      type = "string"
+    }
+    column {
+      name = "vpn_client_platform"
+      type = "string"
+    }
+    column {
+      name = "vpn_client_version"
+      type = "string"
+    }
+    column {
+      name = "tags"
+      type = "dynamic"
+    }
+    column {
+      name = "unix_time"
+      type = "long"
+    }
+  }
+}

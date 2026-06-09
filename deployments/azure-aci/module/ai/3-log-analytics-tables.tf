@@ -274,6 +274,40 @@ resource "azapi_resource" "table_gw_sys_stats" {
   }
 }
 
+resource "azapi_resource" "table_vpn_session" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2022-10-01"
+  name      = "AviatrixVPNSession_CL"
+  parent_id = var.log_analytics_workspace.id
+
+  body = {
+    properties = {
+      schema = {
+        name = "AviatrixVPNSession_CL"
+        columns = [
+          { name = "TimeGenerated", type = "datetime" },
+          { name = "vpn_user", type = "string" },
+          { name = "vpn_status", type = "string" },
+          { name = "vpn_gateway", type = "string" },
+          { name = "vpn_gateway_ip", type = "string" },
+          { name = "vpn_virtual_ip", type = "string" },
+          { name = "vpn_public_ip", type = "string" },
+          { name = "vpn_login", type = "string" },
+          { name = "vpn_logout", type = "string" },
+          { name = "vpn_duration", type = "string" },
+          { name = "vpn_rx_bytes", type = "string" },
+          { name = "vpn_tx_bytes", type = "string" },
+          { name = "vpn_client_platform", type = "string" },
+          { name = "vpn_client_version", type = "string" },
+          { name = "tags", type = "dynamic" },
+          { name = "unix_time", type = "long" },
+        ]
+      }
+      retentionInDays      = 30
+      totalRetentionInDays = 30
+    }
+  }
+}
+
 resource "azapi_resource" "table_cmd" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2022-10-01"
   name      = "AviatrixCmd_CL"

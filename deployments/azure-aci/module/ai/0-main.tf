@@ -79,6 +79,7 @@ resource "azurerm_container_group" "logstash" {
       "azure_dcr_gw_sys_stats_id"  = azurerm_monitor_data_collection_rule.aviatrix_gw_sys_stats.immutable_id
       "azure_dcr_cmd_id"           = azurerm_monitor_data_collection_rule.aviatrix_cmd.immutable_id
       "azure_dcr_tunnel_status_id" = azurerm_monitor_data_collection_rule.aviatrix_tunnel_status.immutable_id
+      "azure_dcr_vpn_session_id"   = azurerm_monitor_data_collection_rule.aviatrix_vpn_session.immutable_id
       # Stream names (must match DCR stream definitions)
       "azure_stream_netsession"    = "Custom-AviatrixNetworkSession_CL"
       "azure_stream_websession"    = "Custom-AviatrixWebSession_CL"
@@ -87,6 +88,7 @@ resource "azurerm_container_group" "logstash" {
       "azure_stream_gw_sys_stats"  = "Custom-AviatrixGwSysStats_CL"
       "azure_stream_cmd"           = "Custom-AviatrixCmd_CL"
       "azure_stream_tunnel_status" = "Custom-AviatrixTunnelStatus_CL"
+      "azure_stream_vpn_session"   = "Custom-AviatrixVPNSession_CL"
       # Authentication and endpoint (computed or from variables)
       "data_collection_endpoint"   = azurerm_monitor_data_collection_endpoint.dce.logs_ingestion_endpoint
       "client_app_id"              = var.use_existing_spn ? var.client_app_id : azuread_application.logstash_app[0].client_id
