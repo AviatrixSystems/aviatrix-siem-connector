@@ -13,10 +13,10 @@ Aviatrix Gateways/Controllers
   Azure Container Instance (Logstash)
          |
          v (Log Ingestion API)
-  Data Collection Rules (7 DCRs)
+  Data Collection Rules (8 DCRs)
          |
          v
-  Azure Log Analytics (7 custom tables)
+  Azure Log Analytics (8 custom tables)
          |
          v
   Microsoft Sentinel (ASIM parsers)
@@ -32,10 +32,10 @@ Aviatrix Gateways/Controllers
 | 2 | Storage Account + 2 File Shares | Pipeline config (`logstash.conf`) and patterns (`avx.conf`) |
 | 3 | Container Group | Logstash container with file share mounts |
 | 4 | Data Collection Endpoint | Log Ingestion API endpoint |
-| 5 | 7 Custom Tables | ASIM-normalized + operational tables in Log Analytics |
-| 6 | 7 Data Collection Rules | One per table, pass-through KQL transform |
+| 5 | 8 Custom Tables | ASIM-normalized + operational tables in Log Analytics |
+| 6 | 8 Data Collection Rules | One per table, pass-through KQL transform |
 | 7 | Service Principal (optional) | Created only when `use_existing_spn = false` |
-| 8 | 7 Role Assignments | SPN "Monitoring Metrics Publisher" on each DCR |
+| 8 | 8 Role Assignments | SPN "Monitoring Metrics Publisher" on each DCR |
 
 ![Resource Group Overview](images/resource-group-overview.png)
 
@@ -50,8 +50,9 @@ Aviatrix Gateways/Controllers
 | `AviatrixGwSysStats_CL` | Gateway System Stats | (none) |
 | `AviatrixCmd_CL` | Controller CMD/API | (none) |
 | `AviatrixTunnelStatus_CL` | Tunnel Status Changes | (none) |
+| `AviatrixVPNSession_CL` | VPN Connect/Disconnect | (none) |
 
-> **Note**: FQDN firewall events are parsed by Logstash but do not have an Azure output. Only 7 of the 8 log types are forwarded to Log Analytics.
+> **Note**: FQDN firewall events are parsed by Logstash but do not have an Azure output. Only 8 of the 9 log types are forwarded to Log Analytics.
 
 ## Prerequisites
 
@@ -172,8 +173,8 @@ After `terraform apply` completes, verify:
 
 - [ ] Resource group exists with all child resources
 - [ ] Container group is running (`az container show --resource-group <your-rg> --name <container>-group --query provisioningState`)
-- [ ] 7 custom tables visible in Log Analytics workspace
-- [ ] 7 DCRs created in the resource group
+- [ ] 8 custom tables visible in Log Analytics workspace
+- [ ] 8 DCRs created in the resource group
 - [ ] SPN has "Monitoring Metrics Publisher" role on each DCR
 - [ ] Container logs show Logstash startup (`az container logs --resource-group <your-rg> --name <container>-group | tail -20`)
 
@@ -279,7 +280,7 @@ az monitor log-analytics query --workspace $WORKSPACE_ID \
 
 ### Expected Results
 
-From the 44 sample log lines, Logstash produces ~42 output events across 7 tables. FQDN events are parsed but not forwarded to Azure (no Azure output for that log type). One suricata "notice" event is dropped (alerts only).
+From the 48 sample log lines, Logstash produces ~48 output events across 8 tables. FQDN events are parsed but not forwarded to Azure (no Azure output for that log type). One suricata "notice" event is dropped (alerts only).
 
 | Table | Expected Events | Key Fields to Verify |
 |-------|-----------------|----------------------|
@@ -290,6 +291,7 @@ From the 44 sample log lines, Logstash produces ~42 output events across 7 table
 | `AviatrixGwSysStats_CL` | ~7 | `cpu_idle`, `memory_free` fields |
 | `AviatrixCmd_CL` | ~4 | `action`, `username` fields |
 | `AviatrixTunnelStatus_CL` | ~4 | `src_gw`, `dst_gw`, `new_state` fields |
+| `AviatrixVPNSession_CL` | ~6 | `vpn_user`, `vpn_status`, `vpn_gateway` fields |
 
 ### 4. Check Container Logs for Errors
 
@@ -336,4 +338,4 @@ AviatrixIDS_CL | take 10
 - **Config file not updating**: If `terraform apply` doesn't detect the file change, taint and re-apply: `terraform taint 'module.deployment.azurerm_storage_share_file.logstash_conf'`
 - **DCR ingestion errors**: Check that the SPN has "Monitoring Metrics Publisher" role on all DCRs. Verify with: `az role assignment list --assignee <spn-object-id> --scope <dcr-id>`
 - **No data in tables**: Verify the container is running and receiving syslog. Check `az container logs` for errors. Ensure timestamps in test data are within the last 24 hours (run `generate-current-samples.sh --overwrite` to refresh).
-- **FQDN events missing**: This is expected — FQDN events are parsed but not forwarded to Azure. Only 7 of the 8 log types have Azure outputs.
+- **FQDN events missing**: This is expected — FQDN events are parsed but not forwarded to Azure. Only 8 of the 9 log types have Azure outputs.
