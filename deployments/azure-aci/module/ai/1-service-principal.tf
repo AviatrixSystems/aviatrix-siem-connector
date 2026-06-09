@@ -92,3 +92,10 @@ resource "azurerm_role_assignment" "aviatrix_tunnel_status_dcr_assignment" {
   principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
   depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_tunnel_status]
 }
+
+resource "azurerm_role_assignment" "aviatrix_vpn_session_dcr_assignment" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.aci_rg.name}/providers/Microsoft.Insights/dataCollectionRules/aviatrix-vpn-session-dcr"
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = var.use_existing_spn ? data.azuread_service_principal.existing_client_app_id[0].object_id : azuread_service_principal.logstash_sp[0].object_id
+  depends_on           = [azurerm_monitor_data_collection_rule.aviatrix_vpn_session]
+}
