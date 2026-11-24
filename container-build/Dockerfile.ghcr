@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash:8.16.2
+FROM docker.elastic.co/logstash/logstash:9.5.7
 LABEL org.opencontainers.image.source="https://github.com/AviatrixSystems/aviatrix-siem-connector"
 LABEL org.opencontainers.image.description="Aviatrix SIEM Connector - Logstash ETL pipeline"
 
