@@ -5,7 +5,7 @@ This guide covers how to develop, test, and validate changes to the SIEM Connect
 ## Prerequisites
 
 - Docker Desktop (for running Logstash locally)
-- Python 3.6+ (for test tooling)
+- Python 3.9+ (for test tooling)
 - AWS CLI (for Splunk end-to-end tests, optional)
 
 ## Development Workflow
@@ -24,7 +24,7 @@ After editing modular files, assemble a complete config for testing:
 
 ```bash
 cd logstash-configs
-./scripts/assemble-config.sh splunk-hec           # or azure-log-ingestion, webhook-test
+./scripts/assemble-config.sh splunk-hec           # or any directory name under outputs/
 ```
 
 This concatenates inputs + filters + output into `assembled/<type>-full.conf`.
@@ -36,13 +36,12 @@ cd logstash-configs
 docker run --rm \
   -v "$(pwd)/assembled:/config" \
   -v "$(pwd)/patterns:/usr/share/logstash/patterns" \
-  -e SPLUNK_ADDRESS=http://localhost -e SPLUNK_PORT=8088 \
-  -e SPLUNK_HEC_AUTH=dummy -e FLATTEN_SURICATA=true \
+  $(../test-tools/ci/output-env-vars.sh splunk-hec) \
   docker.elastic.co/logstash/logstash:8.16.2 \
   logstash -f /config/splunk-hec-full.conf --config.test_and_exit
 ```
 
-Environment variables must be set (even as dummies) or Logstash will fail to parse the config.
+Environment variables must be set (even as dummies) or Logstash will fail to parse the config. `test-tools/ci/output-env-vars.sh <type>` prints the dummy `-e` flags CI uses for each output.
 
 ### 4. Test with Webhook Viewer (Local Functional Test)
 
@@ -72,18 +71,20 @@ docker run --rm --name logstash-webhook-test \
 **Terminal 3 - Stream test logs:**
 ```bash
 cd test-tools/sample-logs
-./generate-current-samples.sh --overwrite   # Refresh timestamps to now
-python3 stream-logs.py --port 5002 -v       # Stream all log types
+./generate-current-samples.sh -o /tmp/samples-now.log      # Refreshed copy; leaves the tracked file alone
+python3 stream-logs.py -f /tmp/samples-now.log --port 5002 -v
 ```
 
 **What to check in the webhook viewer:**
-- All log types parsed (no `_grokparsefailure` tags)
+- All log types parsed: no `unparsed`, `_avx_grok_failure_<type>` or `_avx_json_parse_failure` tags (these events are not forwarded by real outputs; `ci-test` writes them)
 - Fields extracted correctly for each event type
 - JSON structures (like `cpu_cores_parsed`) serialize as proper arrays/objects
 - `time` field is a recent unix epoch (not null, not zero)
 - No `%{fieldname}` literal strings in the output (indicates unresolved Logstash variables)
 
-**Expected output:** 38 events from 40 input lines (1 suricata `Notice` log is dropped by the filter, 1 legacy microseg format is throttled).
+The `webhook-test` output sends the same Splunk HEC-shaped payloads as `splunk-hec` (`{sourcetype, source, host, time, event}`) and honors `LOG_PROFILE`.
+
+**Expected output:** 52 events from 54 input lines. The suricata `Notice` line and the suricata `event_type=stats` line are dropped; nothing is throttled. Per tag: microseg 9, mitm 12, suricata 1, cmd 5, fqdn 3, gw_net_stats 7, gw_sys_stats 7, tunnel_status 4, vpn_session 4.
 
 ### 5. End-to-End Splunk Test (Optional)
 
@@ -113,15 +114,15 @@ index=* sourcetype=aviatrix:* | stats count by sourcetype
 
 ## Adding a New Log Type
 
-1. **Create a filter file** named `filters/1X-<type>.conf` (choose a number that places it before the throttle/timestamp filters at 80+).
+1. **Create a filter file** named `filters/1X-<type>.conf` (a number in 10-19, before the timestamp filter at 90). Add the new type tag to the list in `filters/97-tag-unparsed.conf`.
 
 2. **Add grok patterns** that:
    - Match only the new log type (use the exclusion pattern: `if !("tag1" in [tags] or "tag2" in [tags])`)
    - Extract `SYSLOG_TIMESTAMP:date` from the syslog header (required for timestamp normalization)
    - Add a unique tag (e.g., `add_tag => ["my_new_type"]`)
-   - Set `tag_on_failure => []` to avoid polluting other log types with `_grokparsefailure`
+   - Set `tag_on_failure => ["_avx_grok_failure_<type>"]` so misses are visible without polluting other types
 
-3. **Add output blocks** in each output type (`splunk-hec/output.conf`, `webhook-test/output.conf`, etc.) with the appropriate tag condition.
+3. **Add output blocks** in each output type (`splunk-hec/output.conf`, `webhook-test/output.conf`, etc.) with the appropriate tag condition. For Azure, add the table columns to `deployments/azure-aci/module/ai/4-table-schemas.tf` (fields missing there are dropped at ingestion).
 
 4. **Add test samples** to `test-tools/sample-logs/test-samples.log` with a section comment header.
 
@@ -186,10 +187,9 @@ Filters are processed in filename sort order. The numbering scheme:
 
 | Range | Purpose | Examples |
 |-------|---------|---------|
-| 10-19 | Log type parsing (grok + field extraction) | `10-fqdn`, `11-cmd`, `14-suricata`, `17-cpu-cores-parse` |
-| 80-89 | Throttling / rate limiting | `80-throttle` |
-| 90-94 | Timestamp normalization | `90-timestamp` (parses `date` field, sets `unix_time`) |
-| 95-99 | Post-processing (type coercions, HEC builders) | `95-field-conversion`, `96-sys-stats-hec` |
+| 10-19 | Log type parsing (grok + field extraction) | `10-microseg`, `11-l7-dcf`, `12-suricata`, `13-fqdn`, `14-cmd`, `15-gateway-stats`, `16-tunnel-status`, `17-cpu-cores-parse`, `18-vpn-session` |
+| 90-94 | Timestamp normalization, pre-conversion copies | `90-timestamp` (parses `date`, sets `unix_time`), `94-save-raw-net-rates` |
+| 95-99 | Post-processing (type coercions, HEC builders, tagging) | `95-field-conversion`, `96-sys-stats-hec`, `97-tag-unparsed` |
 
 **Key rule:** Any filter that depends on `unix_time` or type-converted fields **must** be numbered > 95.
 
@@ -201,22 +201,25 @@ Understanding timestamp flow is critical to avoid events appearing at the wrong 
 2. **`90-timestamp.conf`** parses the `date` field into `@timestamp`, then computes `unix_time = @timestamp.to_i`.
 3. **Output configs** use `unix_time` as the HEC `time` field (or equivalent).
 
-**Important:** The `date` filter parses syslog timestamps (`Feb 14 15:04:07`) as **UTC** with no timezone offset. This matches production behavior since Aviatrix gateways and controllers run in UTC.
+**Important:** The `date` filter parses syslog timestamps (`Feb 14 15:04:07`), which carry no zone, in `${SYSLOG_TIMEZONE:UTC}`. The UTC default matches Aviatrix gateways and controllers; set `SYSLOG_TIMEZONE` (e.g. `America/New_York`) only if your senders log local time.
 
 **Exceptions:**
-- **Suricata** (`14-suricata.conf`): Builds its own HEC payload with `unix_time` derived from the suricata JSON timestamp (which includes `+0000` timezone).
-- **MITM** (`13-l7-dcf.conf`): Overrides `@timestamp` from the traffic_server JSON unix epoch and removes the `date` field before `90-timestamp.conf` runs.
+- **Suricata** (`12-suricata.conf`): Builds its own HEC payload with `unix_time` derived from the suricata JSON timestamp (which includes `+0000` timezone).
+- **MITM** (`11-l7-dcf.conf`): Overrides `@timestamp` from the traffic_server JSON unix epoch and removes the `date` field before `90-timestamp.conf` runs.
 
 ### Test Sample Timestamps
 
-The file `test-tools/sample-logs/test-samples.log` ships with static timestamps. Before testing, refresh them:
+The file `test-tools/sample-logs/test-samples.log` ships with static timestamps. Before testing, write a refreshed copy outside the repo:
 
 ```bash
 cd test-tools/sample-logs
-./generate-current-samples.sh --overwrite
+./generate-current-samples.sh -o /tmp/samples-now.log
+./stream-logs.py -f /tmp/samples-now.log
 ```
 
-This runs `update-timestamps.py` which rewrites all 9 timestamp formats to a 5-minute window around now (UTC). The script handles: syslog headers, internal slash format, ISO fields, suricata JSON, flow start, JSON unix epochs, nanosecond session_start, cpu_cores protobuf seconds/nanos, and CMD dual timestamps.
+`--overwrite` rewrites the tracked file in place and leaves a large diff; reserve it for CI.
+
+This runs `update-timestamps.py` which rewrites all 11 timestamp formats to a 5-minute window around now (UTC): syslog headers, internal slash format, ISO fields, suricata JSON, flow start, JSON unix epochs, nanosecond session_start, cpu_cores protobuf seconds/nanos, CMD dual timestamps, RFC 5424 ISO syslog headers (tunnel status), and VPN `Login=`/`Logout=`.
 
 ## HEC Payload Pattern
 
@@ -250,7 +253,7 @@ http {
 
 This avoids double-escaping issues where Logstash's JSON mapping turns arrays into escaped strings.
 
-Currently used by: **suricata** (`14-suricata.conf`) and **gw_sys_stats** (`96-sys-stats-hec.conf`).
+Currently used by: **suricata** (`12-suricata.conf`), **gw_sys_stats** (`96-sys-stats-hec.conf`), and the Splunk/webhook builders for the other types (`splunk-build-hec-payload` / `webhook-build-hec-payload` in the output files, which omit absent fields). Set `SPLUNK_INCLUDE_SYSLOG=false` to leave the raw syslog line (`event.syslog`) out of Splunk payloads.
 
 ## Docker on macOS
 
@@ -267,15 +270,10 @@ that your contributions will be licensed under the same Elastic License 2.0
 terms. Contributors retain copyright to their own contributions.
 
 See [TRADEMARK.md](./TRADEMARK.md) for Aviatrix trademark usage guidelines.
-Brand assets in `status-sidecar/assets/brand/` are proprietary and not covered
-by the Elastic License 2.0.
+Aviatrix brand assets (logos and similar), including those shipped with the
+separately developed status sidecar, are proprietary and not covered by the
+Elastic License 2.0.
 
 ## Collecting Real Log Samples
 
-When you need real-world log data for testing:
-
-1. Deploy the syslog collector: `cd test-tools/syslog-collector && terraform apply`
-2. Point Aviatrix controller syslog to the collector IP on port 514
-3. Let logs accumulate, then download via the web UI at `http://<collector-ip>`
-4. Add representative samples to `test-samples.log` with section comment headers
-5. Tear down: `terraform destroy`
+Capture real lines from a gateway or controller syslog export (or the internal syslog collector, which is not shipped in this repo), then add representative samples to `test-samples.log` under a section comment header. Update the expected counts above and in `test-tools/ci/validate-output.sh`.

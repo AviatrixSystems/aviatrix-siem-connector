@@ -2,6 +2,12 @@
 """
 Syslog Log Streamer - Stream test logs to a syslog endpoint for testing Logstash pipelines.
 
+Requires Python 3.9+.
+
+Refresh timestamps into an untracked copy first (so test-samples.log stays clean):
+    ./generate-current-samples.sh -o /tmp/samples-now.log
+    ./stream-logs.py -f /tmp/samples-now.log
+
 Usage:
     ./stream-logs.py                          # Stream all samples once to localhost:5000
     ./stream-logs.py --delay 0.5              # 500ms between messages
@@ -10,6 +16,7 @@ Usage:
     ./stream-logs.py --target 192.168.1.10    # Custom Logstash host
     ./stream-logs.py --port 514               # Custom port
     ./stream-logs.py --tcp                    # Use TCP instead of UDP
+    ./stream-logs.py --filter vpn             # Types: microseg suricata mitm cmd fqdn netstats sysstats tunnel vpn
 """
 
 import argparse

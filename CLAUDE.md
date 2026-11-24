@@ -49,8 +49,8 @@ Aviatrix Gateways/Controllers
 - **Tag-based routing**: Filters add tags; subsequent filters exclude already-tagged events
 - **Break on match**: Grok uses `break_on_match => true` to stop after first successful pattern
 - **Metadata fields**: Uses `[@metadata]` namespace for intermediate processing
-- **Microseg throttling**: Max 2 logs/minute per connection (configurable via throttle filter)
-- **MITM cloning**: MITM events are cloned to generate both microseg and FQDN events
+- **No throttling or cloning**: every parsed event is forwarded once (subject to `LOG_PROFILE`). MITM events are mapped into microseg-style fields in place, not cloned
+- **Failure tags**: grok misses add `_avx_grok_failure_<type>`; invalid Suricata/MITM JSON loses its type tag and gets `_avx_json_parse_failure`; `97-tag-unparsed.conf` tags anything with no type tag as `unparsed`. Outputs route on type tags, so these are not forwarded
 - **Log profiles**: Output blocks are gated by `LOG_PROFILE` env var (`all`/`security`/`networking`) to control which log types are forwarded. See CONTRIBUTING.md for the full profile specification and implementation pattern
 
 ## Directory Structure
@@ -58,26 +58,30 @@ Aviatrix Gateways/Controllers
 ```
 logstash-configs/
 ├── inputs/                              # Modular input configs
-│   └── 00-syslog-input.conf             # UDP/TCP 5000 syslog input
+│   └── 00-syslog-input.conf             # UDP/TCP ${SYSLOG_PORT:5000} syslog input
 ├── filters/                             # Modular filter configs (processed in order)
-│   ├── 10-fqdn.conf                     # FQDN firewall rule parsing
-│   ├── 11-cmd.conf                      # Controller CMD/API parsing
-│   ├── 12-microseg.conf                 # L4 microseg parsing (legacy + 8.2)
-│   ├── 13-l7-dcf.conf                   # L7 DCF/MITM parsing
-│   ├── 14-suricata.conf                 # Suricata IDS parsing
+│   ├── 10-microseg.conf                 # L4 microseg parsing (legacy + 8.2)
+│   ├── 11-l7-dcf.conf                   # L7 DCF/MITM parsing
+│   ├── 12-suricata.conf                 # Suricata IDS parsing (+ HEC payload)
+│   ├── 13-fqdn.conf                     # FQDN firewall rule parsing
+│   ├── 14-cmd.conf                      # Controller CMD/API parsing
 │   ├── 15-gateway-stats.conf            # gw_net_stats, gw_sys_stats
 │   ├── 16-tunnel-status.conf            # Tunnel state changes
 │   ├── 17-cpu-cores-parse.conf          # CPU cores protobuf text → structured JSON
 │   ├── 18-vpn-session.conf              # VPN session connect/disconnect
-│   ├── 80-throttle.conf                 # Microseg throttling
-│   ├── 90-timestamp.conf                # Date normalization
-│   ├── 95-field-conversion.conf         # Type conversions
-│   └── 96-sys-stats-hec.conf            # gw_sys_stats HEC payload builder
+│   ├── 90-timestamp.conf                # Date normalization (SYSLOG_TIMEZONE, default UTC)
+│   ├── 94-save-raw-net-rates.conf       # Raw net-rate strings → [@metadata]
+│   ├── 95-field-conversion.conf         # Type conversions (net rates → float bytes/s)
+│   ├── 96-sys-stats-hec.conf            # gw_sys_stats HEC payload builder
+│   └── 97-tag-unparsed.conf             # Tag events with no type tag as "unparsed"
 ├── outputs/                             # Output-specific configs
 │   ├── splunk-hec/
 │   │   ├── output.conf                  # Splunk HEC output
 │   │   ├── docker_run.tftpl             # Docker run template
 │   │   └── README.md                    # Splunk setup instructions
+│   ├── dynatrace/, dynatrace-metrics/, dynatrace-logs/, zabbix/
+│   ├── webhook-test/                    # Local test sink (Splunk HEC-shaped payloads)
+│   ├── ci-test/                         # CI file output
 │   └── azure-log-ingestion/
 │       ├── output.conf                  # Azure Log Analytics output (ASIM-normalized)
 │       ├── docker_run.tftpl             # Docker run template
@@ -85,7 +89,7 @@ logstash-configs/
 │       │   ├── vimNetworkSessionAviatrixGateway.kql   # L4 microseg parser
 │       │   ├── vimWebSessionAviatrixGateway.kql       # L7 MITM parser
 │       │   └── vimNetworkSessionAviatrixSuricata.kql  # Suricata IDS parser
-│       └── _sample*.json                # Sample output files for testing
+│       └── _sample*.json                # Sample outputs (Microseg, Suricata, WebSession)
 ├── patterns/
 │   └── avx.conf                         # Enhanced grok patterns
 ├── assembled/                           # Auto-generated full configs
@@ -93,27 +97,29 @@ logstash-configs/
 │   └── azure-log-ingestion-full.conf    # Complete Azure config
 ├── scripts/
 │   └── assemble-config.sh               # Config assembly script
-└── output_loganalytics_sentinel_dcr/    # Azure Sentinel DCR templates
 
 deployments/
 ├── modules/
-│   └── aws-logstash/                    # Shared AWS module (S3, IAM, SG, AMI, user_data)
+│   ├── aws-logstash/                    # Shared AWS module (S3, IAM, SG, AMI, Secrets Manager, user_data)
+│   └── tls-certs/                       # TLS CA/server certs in Secrets Manager
 ├── aws-ec2-single-instance/             # Single EC2 + S3 config bucket
 ├── aws-ec2-autoscale/                   # NLB + ASG with rolling updates
+├── aws-ecs-fargate/                     # ECS Fargate + NLB, config baked into image
+├── quickstart-aws/                      # One-command Fargate using the GHCR image (quickstart.sh)
 └── azure-aci/                           # Azure Container Instance deployment
-    ├── deploy-public/                   # Azure Public Cloud
+    ├── deploy-public/                   # Azure Public Cloud / US Gov
     ├── deploy-china/                    # Azure China Cloud
     └── module/                          # Reusable TF modules
+        └── ai/4-table-schemas.tf        # Single source of truth for LA table + DCR columns
 
 test-tools/
 ├── sample-logs/
 │   ├── test-samples.log                 # Curated test samples for all log types
 │   ├── stream-logs.py                   # Syslog streamer for testing
 │   ├── update-timestamps.py             # Rewrite all timestamps to current UTC window
-│   └── generate-current-samples.sh      # Wrapper: refresh timestamps in-place
-├── syslog-collector/                    # AWS EC2 syslog capture tool
-│   ├── main.tf, variables.tf, etc.      # Terraform deployment
-│   └── user_data.sh                     # Container setup
+│   └── generate-current-samples.sh      # Wrapper around update-timestamps.py
+├── ci/                                  # CI helpers (output-env-vars.sh, validate-output.sh)
+├── syslog-collector/                    # Internal only: gitignored, not in a fresh clone
 └── webhook-viewer/
     └── local/
         └── run.sh                       # Start/stop local webhook viewer
@@ -141,14 +147,14 @@ cd logstash-configs
 
 1. Create `outputs/<new-type>/output.conf` with the output block
 2. Run `./scripts/assemble-config.sh <new-type>` to generate the full config
-3. Test with Logstash: `logstash -f assembled/<new-type>-full.conf --config.test_and_exit`
+3. Validate syntax with dummy env vars (see Testing Workflow step 3); add the type to `test-tools/ci/output-env-vars.sh`
 
 ### Modifying Filters
 
 Edit the appropriate file in `filters/`. Changes apply to ALL output types when reassembled:
 - Add new log types: Create a new `filters/1X-<type>.conf`
 - Modify parsing: Edit the relevant filter file
-- Change throttling: Edit `filters/80-throttle.conf`
+- Filters that need `unix_time` or converted types must be numbered > 95
 
 ### Pattern File Location
 
@@ -160,11 +166,17 @@ Configs reference patterns at `/usr/share/logstash/patterns` (deployment). Custo
 
 All output types use:
 - `LOG_PROFILE` - Which log types to forward: `all` (default), `security`, or `networking`
+- `SYSLOG_PORT` - Listen port for the UDP/TCP input (default: 5000)
+- `SYSLOG_TIMEZONE` - Zone for syslog timestamps that carry none (default: `UTC`)
+- `FLATTEN_SURICATA` - `true` flattens nested Suricata JSON (set for splunk-hec)
 
 Splunk configs use:
-- `SPLUNK_ADDRESS` - Splunk server hostname/IP
+- `SPLUNK_ADDRESS` - Splunk HEC base URL including scheme, e.g. `https://splunk.example.com` (the output appends `:${SPLUNK_PORT}/services/collector/event`)
 - `SPLUNK_PORT` - HEC port (default: 8088)
 - `SPLUNK_HEC_AUTH` - HEC authentication token
+- `SPLUNK_INCLUDE_SYSLOG` - `false` omits the raw syslog line (`event.syslog`) from payloads (default: `true`)
+
+Dynatrace configs use `DT_METRICS_URL`, `DT_LOGS_URL` (`https://<env>.apps.dynatrace.com/platform/classic/environment-api/v2/{metrics,logs}/ingest`), `DT_API_TOKEN`, `DT_LOGS_TOKEN`. Zabbix uses `ZABBIX_SERVER`, `ZABBIX_PORT`, `ZABBIX_HOST_PREFIX`. `webhook-test` uses `WEBHOOK_URL`.
 
 Azure configs use:
 - `client_app_id`, `client_app_secret`, `tenant_id` - Service principal credentials
@@ -172,9 +184,10 @@ Azure configs use:
 - `azure_dcr_netsession_id` - DCR for L4 microseg (ASIM NetworkSession)
 - `azure_dcr_websession_id` - DCR for L7 MITM (ASIM WebSession)
 - `azure_dcr_ids_id` - DCR for Suricata IDS (ASIM NetworkSession)
-- `azure_dcr_gw_net_stats_id`, `azure_dcr_gw_sys_stats_id`, `azure_dcr_cmd_id`, `azure_dcr_tunnel_status_id` - DCRs for non-security log types
+- `azure_dcr_gw_net_stats_id`, `azure_dcr_gw_sys_stats_id`, `azure_dcr_cmd_id`, `azure_dcr_tunnel_status_id`, `azure_dcr_vpn_session_id` - DCRs for non-ASIM log types
 - `azure_stream_netsession`, `azure_stream_websession`, `azure_stream_ids` - ASIM stream names
-- `azure_stream_gw_net_stats`, `azure_stream_gw_sys_stats`, `azure_stream_cmd`, `azure_stream_tunnel_status` - Non-security stream names
+- `azure_stream_gw_net_stats`, `azure_stream_gw_sys_stats`, `azure_stream_cmd`, `azure_stream_tunnel_status`, `azure_stream_vpn_session` - Non-ASIM stream names
+- All 8 DCR/stream pairs are required whatever `LOG_PROFILE` is (no defaults)
 - `azure_cloud` - "AzureCloud", "AzureChinaCloud", or "AzureUSGovernment"
 
 ## ASIM Normalization (Azure Only)
@@ -192,6 +205,9 @@ The 3 security log types are ASIM-normalized for Azure Sentinel integration. ASI
 | GwSysStats | `AviatrixGwSysStats_CL` | (none) | - |
 | Cmd | `AviatrixCmd_CL` | (none) | - |
 | TunnelStatus | `AviatrixTunnelStatus_CL` | (none) | - |
+| VpnSession | `AviatrixVPNSession_CL` | (none) | - |
+
+Columns for all 8 tables and DCRs come from `deployments/azure-aci/module/ai/4-table-schemas.tf`; a field missing there is dropped at ingestion, so add new fields there.
 
 ### ASIM Field Patterns
 
@@ -219,34 +235,22 @@ Deploy as saved functions via Azure CLI (see deployment instructions in each .kq
 ### AWS Deployment
 
 ```bash
-cd deployments/aws-ec2-single-instance  # or aws-ec2-autoscale
+cd deployments/aws-ec2-single-instance  # or aws-ec2-autoscale, aws-ecs-fargate
 terraform init
 terraform plan
 terraform apply
 ```
 
-Config changes trigger rolling instance refresh via S3 bucket updates.
+- EC2 credentials are rendered into a per-deployment Secrets Manager secret (`avxlog-<suffix>-runtime`) fetched at boot; ECS injects `logstash_config_variables` from an `avxlog-<suffix>-config` secret.
+- SSH is closed by default (`ssh_allowed_cidrs = []`); use SSM Session Manager. Restrict syslog sources with `allowed_syslog_cidrs` (default `0.0.0.0/0`).
+- `zabbix` and `azure-log-ingestion` on EC2 require `logstash_config_variables.logstash_image` (an image with the plugin).
+- EC2 TLS mode runs the output's `docker_run.tftpl` plus a stunnel container on the host network (no docker-compose).
+- Autoscale: config, pattern or credential changes roll the ASG via instance refresh (ELB health checks).
 
 ### Azure ACI Deployment
 
 Prerequisites:
-1. Tables are auto-created by Terraform (`3-log-analytics-tables.tf`). For manual creation:
-```bash
-az monitor log-analytics workspace table create \
-    --resource-group <rg> --workspace-name <ws> \
-    --name "AviatrixNetworkSession_CL" \
-    --columns TimeGenerated=datetime EventVendor=string SrcIpAddr=string DstIpAddr=string ...
-
-az monitor log-analytics workspace table create \
-    --resource-group <rg> --workspace-name <ws> \
-    --name "AviatrixWebSession_CL" \
-    --columns TimeGenerated=datetime EventVendor=string DstFqdn=string Url=string ...
-
-az monitor log-analytics workspace table create \
-    --resource-group <rg> --workspace-name <ws> \
-    --name "AviatrixIDS_CL" \
-    --columns TimeGenerated=datetime EventVendor=string ThreatName=string alert=dynamic ...
-```
+1. Tables and DCRs are created by Terraform from `module/ai/4-table-schemas.tf` (the single column list; add new fields there). For manual creation see the helper in `logstash-configs/outputs/azure-log-ingestion/README.md`.
 
 2. Deploy:
 ```bash
@@ -260,29 +264,7 @@ terraform init && terraform apply
 
 ### Syslog Collector (`test-tools/syslog-collector/`)
 
-A standalone AWS EC2 deployment for collecting sample syslog data. Use this to capture real Aviatrix logs for testing ETL configurations.
-
-**Deploy:**
-```bash
-cd test-tools/syslog-collector
-cp terraform.tfvars.example terraform.tfvars  # Edit with your settings
-terraform init && terraform apply
-```
-
-**Access:**
-- Syslog endpoint: `<public-ip>:514` (UDP/TCP)
-- Web UI: `http://<public-ip>` (browse/download logs)
-- SSH: `ssh -i ~/Documents/keys/<key>.pem ec2-user@<public-ip>`
-
-**Collect logs:**
-1. Point Aviatrix controller/gateways to send syslog to the collector IP
-2. Let logs accumulate
-3. Download via web UI or SSH: `sudo ls /opt/syslog-collector/logs/`
-
-**Cleanup:**
-```bash
-terraform destroy
-```
+Internal tool for capturing live Aviatrix syslog on an EC2 host. It is gitignored and not present in a fresh clone; if you have a local copy, deploy it with `terraform apply` in that directory and point gateways at `<public-ip>:514`.
 
 ## Testing Logstash Configurations
 
@@ -293,13 +275,15 @@ When editing or building Logstash configurations, use the following test workflo
 1. **Sample Logs** (`test-tools/sample-logs/`)
    - `test-samples.log` - Curated samples of each supported log type
    - `stream-logs.py` - Python script to stream logs to syslog endpoint
-   - `update-timestamps.py` - Rewrites all 9 timestamp formats to a UTC window around now
+   - `update-timestamps.py` - Rewrites all 11 timestamp formats to a UTC window around now
    - `generate-current-samples.sh` - Wrapper that calls update-timestamps.py
    - Includes both legacy 7.x and 8.2+ format variations
+   - 54 log lines → 52 events (suricata `Notice` and `event_type=stats` lines are dropped). Per tag: microseg 9, mitm 12, suricata 1, cmd 5, fqdn 3, gw_net_stats 7, gw_sys_stats 7, tunnel_status 4, vpn_session 4, unparsed 0
 
    ```bash
-   ./generate-current-samples.sh --overwrite   # Refresh timestamps to now (UTC)
-   ./stream-logs.py                            # Stream all to localhost:5000
+   # Refresh timestamps into an untracked copy (--overwrite rewrites the tracked file; CI only)
+   ./generate-current-samples.sh -o /tmp/samples-now.log
+   ./stream-logs.py -f /tmp/samples-now.log    # Stream all to localhost:5000
    ./stream-logs.py --port 5002 -v             # Stream to port 5002, verbose
    ./stream-logs.py --filter microseg          # Only microseg logs
    ./stream-logs.py --target 10.0.0.5 --tcp    # TCP to custom host
@@ -313,9 +297,8 @@ When editing or building Logstash configurations, use the following test workflo
    - Access UI: http://localhost:8080
    - Create a session to get a unique webhook URL
 
-3. **Syslog Collector** (`test-tools/syslog-collector/`)
+3. **Syslog Collector** (`test-tools/syslog-collector/`, internal, not shipped)
    - AWS EC2 deployment for capturing live Aviatrix logs
-   - Use to collect real-world samples for test-samples.log
 
 ### Testing Workflow
 
@@ -327,10 +310,11 @@ When editing or building Logstash configurations, use the following test workflo
    ./scripts/assemble-config.sh splunk-hec
    ```
 
-3. **Validate syntax**:
+3. **Validate syntax** (unset `${VAR}`s fail compilation, so pass the CI dummies):
    ```bash
-   docker run --rm -v $(pwd)/assembled:/config -v $(pwd)/patterns:/usr/share/logstash/patterns \
-     docker.elastic.co/logstash/logstash:8.11.0 \
+   docker run --rm -v "$(pwd)/assembled:/config" -v "$(pwd)/patterns:/usr/share/logstash/patterns" \
+     $(../test-tools/ci/output-env-vars.sh splunk-hec) \
+     docker.elastic.co/logstash/logstash:8.16.2 \
      logstash -f /config/splunk-hec-full.conf --config.test_and_exit
    ```
 
@@ -339,10 +323,11 @@ When editing or building Logstash configurations, use the following test workflo
    # Terminal 1: Start webhook viewer
    cd test-tools/webhook-viewer/local && ./run.sh
 
-   # Terminal 2: Run Logstash container (with HTTP output to webhook)
+   # Terminal 2: Run Logstash with the webhook-test output
+   #   (-e WEBHOOK_URL=http://host.docker.internal:8080/<session-id>; see CONTRIBUTING.md)
    # Terminal 3: Stream test logs
    cd test-tools/sample-logs
-   ./stream-logs.py --filter microseg -v     # Verbose, microseg only
+   ./stream-logs.py --port 5002 --filter microseg -v     # Verbose, microseg only
    ```
 
 5. **Verify parsed output** in the webhook viewer UI - check that fields are extracted correctly
@@ -384,7 +369,7 @@ This enables Claude to:
 ### Adding New Test Samples
 
 When adding support for new log types or encountering parsing issues:
-1. Collect real examples using syslog-collector or from production logs
+1. Collect real examples from production logs (or the internal syslog-collector)
 2. Add representative samples to `test-tools/sample-logs/test-samples.log`
 3. Include comments explaining the log type and any variations
 4. Test the full pipeline before committing

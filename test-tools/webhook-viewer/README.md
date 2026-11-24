@@ -51,17 +51,23 @@ Then open http://localhost:8080 in your browser.
 
 ## Testing with Logstash
 
-To test Logstash HTTP outputs, configure the webhook URL in your output:
+Use the `webhook-test` output, which sends the same Splunk HEC-shaped payloads as
+`splunk-hec` (`{sourcetype, source, host, time, event}`) and honors `LOG_PROFILE`.
+Pass the session URL as `WEBHOOK_URL`. When Logstash runs in Docker, `localhost`
+is the Logstash container itself, so use `host.docker.internal`:
 
-```ruby
-output {
-  http {
-    url => "http://localhost:8080/<session-id>"
-    http_method => "post"
-    format => "json"
-  }
-}
+```bash
+cd ../../logstash-configs
+./scripts/assemble-config.sh webhook-test
+docker run --rm -p 5002:5000/udp -p 5002:5000/tcp \
+  -v "$(pwd)/assembled:/config" \
+  -v "$(pwd)/patterns:/usr/share/logstash/patterns" \
+  -e WEBHOOK_URL=http://host.docker.internal:8080/<session-id> \
+  docker.elastic.co/logstash/logstash:8.16.2 \
+  logstash -f /config/webhook-test-full.conf
 ```
+
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for the full test loop.
 
 ## Directory Structure
 
@@ -69,7 +75,7 @@ output {
 webhook-viewer/
 ├── local/          # Local Docker-based setup
 │   └── run.sh      # Start/stop script
-└── aws/            # Future: AWS deployment (placeholder)
+└── README.md
 ```
 
 ## Requirements
