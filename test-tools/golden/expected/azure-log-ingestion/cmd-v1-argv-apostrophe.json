@@ -1,0 +1,30 @@
+{
+  "case": "cmd-v1-argv-apostrophe",
+  "input": "<14>Mar  4 23:08:07 203.0.113.5 Mar  4 23:08:07 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=EDIT_GW_TAGS, argv=['--rtn_file', '/dev/null', 'edit_gw_tags', '--gw_name', 'spoke-test-1', '--tags', \"Owner=Pat's team\"], result=Success, reason=, username=admin",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:08:07.000Z",
+          "TimeGenerated": "YYYY-03-04T23:08:07.000Z",
+          "action": "EDIT_GW_TAGS",
+          "args": "['--rtn_file', '/dev/null', 'edit_gw_tags', '--gw_name', 'spoke-test-1', '--tags', \"Owner=Pat's team\"]",
+          "controller_ip": "10.0.0.120",
+          "gw_hostname": "Controller-10.0.0.120",
+          "ls_timestamp": "YYYY-03-04T23:08:07.000Z",
+          "reason": "",
+          "result": "Success",
+          "tags": [
+            "cmd",
+            "V1Api"
+          ],
+          "unix_time": "YYYY-03-04T23:08:07.000Z (epoch)",
+          "username": "admin"
+        }
+      ],
+      "path": "/azure/azure-cmd"
+    }
+  ]
+}

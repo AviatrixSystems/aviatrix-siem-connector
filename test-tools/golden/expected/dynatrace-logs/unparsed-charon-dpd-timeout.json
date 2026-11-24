@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-charon-dpd-timeout",
+  "input": "2022-02-23T12:45:31.164506-08:00 cloudN-local charon: 17[JOB] <gw-10_198_254_177-10_50_2_11|139266> DPD check timed out, enforcing DPD action",
+  "requests": []
+}

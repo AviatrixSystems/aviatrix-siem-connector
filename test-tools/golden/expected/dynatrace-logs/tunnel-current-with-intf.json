@@ -1,0 +1,36 @@
+{
+  "avx": {
+    "min": "8.0.10"
+  },
+  "case": "tunnel-current-with-intf",
+  "input": "<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down ",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "TunnelStatus",
+          "aviatrix.tunnel.dst_cloud": "aws",
+          "aviatrix.tunnel.dst_gw": "transit-a",
+          "aviatrix.tunnel.dst_intf": "eth2",
+          "aviatrix.tunnel.dst_region": "us-east-2",
+          "aviatrix.tunnel.new_state": "Down",
+          "aviatrix.tunnel.old_state": "Up",
+          "aviatrix.tunnel.reporting_gw": "spoke-b",
+          "aviatrix.tunnel.src_cloud": "aws",
+          "aviatrix.tunnel.src_gw": "spoke-b",
+          "aviatrix.tunnel.src_intf": "eth1",
+          "aviatrix.tunnel.src_region": "us-east-2",
+          "cloud.provider": "aws",
+          "cloud.region": "us-east-2",
+          "content": "Tunnel Down: spoke-b(AWS us-east-2) -> transit-a(AWS us-east-2)",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-03-04T23:10:01.104Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

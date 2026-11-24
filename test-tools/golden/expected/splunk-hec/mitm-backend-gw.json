@@ -1,0 +1,39 @@
+{
+  "case": "mitm-backend-gw",
+  "input": "<153>Mar  4 22:57:54 GW-backend-eks-spoke-18.119.198.171-sink traffic_server[5363]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"100.64.240.131\",\"src_port\":53892,\"dest\":\"140.82.114.4\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"SNI\",\"sni_hostname\":\"github.com\",\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"proto\":\"TCP\",\"session_start\":1772665074656099006,\"session_stage\":\"start\",\"session_id\":\"01887025-0027-4f0d-bdfd-4788c5fa738c\",\"timestamp\":1772665074}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Permit",
+              "decided_by": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+              "dest": "140.82.114.4",
+              "dest_port": 443,
+              "enforced": true,
+              "ids": true,
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "POLICY",
+              "session_id": "01887025-0027-4f0d-bdfd-4788c5fa738c",
+              "session_stage": "start",
+              "session_start": 1772665074656099006,
+              "sni_hostname": "github.com",
+              "src": "100.64.240.131",
+              "src_port": 53892,
+              "stage": "SNI",
+              "timestamp": "YYYY-03-04T22:57:54.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-04T22:57:54.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

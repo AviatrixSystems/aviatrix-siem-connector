@@ -1,0 +1,5 @@
+{
+  "case": "sysstats-real-cpu-cores-double-space",
+  "input": "<14>Sep 10 14:23:50 GW-n3-fs-b-192.0.2.6-sink /usr/local/bin/avx-gw-state-sync 2026/09/10 14:23:50 AviatrixGwSysStats: timestamp=2026-09-10T14:23:47.689223362 name=n3-fs-b alias=n3-fs-b cpu_idle=33 memory_free=570860 memory_available=2306652 memory_total=3693176 disk_total=65842432 disk_free=52849644 cpu_cores=[busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59} name:1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:97  avg:59} name:-1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59}]",
+  "requests": []
+}

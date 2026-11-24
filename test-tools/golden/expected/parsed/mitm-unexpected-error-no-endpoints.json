@@ -1,0 +1,28 @@
+{
+  "case": "mitm-unexpected-error-no-endpoints",
+  "input": "<155>Mar  4 22:57:56 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ERR\",\"action\":\"Deny\",\"reason\":\"UNEXPECTED_ERROR\",\"errorcode\":\"INTERNAL\",\"stage\":\"txn\",\"timestamp\":1772665076}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:57:56.000Z",
+          "action": "Deny",
+          "gw_hostname": "frontend-eks-spoke",
+          "message": "<155>Mar  4 22:57:56 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ERR\",\"action\":\"Deny\",\"reason\":\"UNEXPECTED_ERROR\",\"errorcode\":\"INTERNAL\",\"stage\":\"txn\",\"timestamp\":1772665076}",
+          "mitm_priority": "LOG_ERR",
+          "mitm_reason": "UNEXPECTED_ERROR",
+          "mitm_stage": "txn",
+          "proto": "TCP",
+          "syslog_pri": "155",
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-03-04T22:57:56.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-account-audit",
+  "input": "<11>Mar  4 23:11:02 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixAccountAudit: Account Audit Failure - aws-sandbox",
+  "requests": []
+}

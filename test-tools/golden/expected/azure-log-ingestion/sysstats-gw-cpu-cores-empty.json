@@ -1,0 +1,30 @@
+{
+  "case": "sysstats-gw-cpu-cores-empty",
+  "input": "<14>Mar  4 23:09:06 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:06 AviatrixGwSysStats: timestamp=2026-03-04T23:09:06.1 name=transit-1 alias=transit-1 cpu_idle=100 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:09:06.000Z",
+          "TimeGenerated": "YYYY-03-04T23:09:06.000Z",
+          "alias": "transit-1",
+          "cpu_idle": 100,
+          "disk_free": 58001234,
+          "disk_total": 65842432,
+          "gateway": "transit-1",
+          "ls_timestamp": "YYYY-03-04T23:09:06.000Z",
+          "memory_available": 2899120,
+          "memory_free": 1203344,
+          "memory_total": 3828976,
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "unix_time": "YYYY-03-04T23:09:06.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-gw-sys-stats"
+    }
+  ]
+}

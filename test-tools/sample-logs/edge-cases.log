@@ -1,0 +1,608 @@
+# Aviatrix SIEM Connector - Edge-case corpus
+#
+# Variants, malformed input and negative cases that the main corpus
+# (test-samples.log) does not cover. Used by test-tools/golden/golden.py only.
+# The E2E count check (validate-output.sh) does not read this file, so cases can
+# be added here without touching its expected counts.
+#
+# Every line has a "# @case <id> [avx=<first release>] [until=<last release>]"
+# annotation (see test-tools/golden/README.md). The expected files record what
+# the current pipeline does. Where that is a known bug, the description says
+# "KNOWN BUG" and what the correct result would be, so a fix shows up as an
+# intended change to the expected files.
+#
+# Sources:
+#   [copilot]  CoPilot repo: logstash avxlogs.conf comment samples, avx-log-gen
+#              generators, UI fixtures (paths in the description)
+#   [oteld]    oteld repo enums (proto/logs/v1/dcf_logs.proto, avx-oteld-gateway.yaml)
+#   [synth]    built from a real sample by changing only the noted fields
+# All public IPs are TEST-NET (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24);
+# domains are example.com.
+
+###############################################################################
+# SYSLOG HEADER VARIANTS
+###############################################################################
+
+# --- Space between <PRI> and the timestamp (layout emitted by CoPilot avx-log-gen) ---
+# [copilot] integration_tests/avx-log-gen/src/generators/syslog.py:112-144
+# Parses: the header pattern (AVX_PRI) allows a space after <PRI>.
+# @case hdr-space-after-pri-microseg
+<133> Nov 23 10:00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[4242]: 2026/11/23 10:00:00 AviatrixGwMicrosegPacket: POLICY=0b6c3f9e-2f43-4b8e-9d1e-5f0a6f3c2a11 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.12.34.56 DST_IP=10.65.43.21 PROTO=TCP SRC_PORT=50123 DST_PORT=443 DATA=0x ACT=ALLOW ENFORCED=TRUE
+
+# --- Relayed line: outer syslog header + inner ISO-8601 header, with ACT/ENFORCED ---
+# [copilot] avxlogs.conf:93 shape, ACT/ENFORCED appended. Parses; note @timestamp
+# comes from the outer (relay) header, not the inner ISO timestamp.
+# @case hdr-relay-double-header-microseg
+<133>May 14 03:46:16 GW-aws-usw1-0a330200-gw-198.51.100.58 syslog 2022-05-14T03:46:10.257442+00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[5432]: 2022/05/14 03:46:10 AviatrixGwMicrosegPacket: POLICY=96438983-a98c-9938-fcbc-73f72e83f089 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.4.221.148 DST_IP=10.235.240.155 PROTO=TCP SRC_PORT=42948 DST_PORT=2000 DATA=0x ACT=PERMIT ENFORCED=true
+
+###############################################################################
+# MICROSEG (L4 DCF)
+###############################################################################
+
+# --- Pre-ACT format: line ends at DATA=0x, no ACT/ENFORCED (relayed, 7.x era) ---
+# [copilot] avxlogs.conf:93 verbatim (IPs sanitized)
+# KNOWN BUG: fails grok; the 8.2 pattern requires ACT/ENFORCED and the legacy
+# pattern requires SPT/DPT/ACTION. CoPilot parses it.
+# @case microseg-pre-act-relayed
+<133>May 14 03:46:16 GW-aws-usw1-0a330200-gw-198.51.100.58 syslog 2022-05-14T03:46:10.257442+00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[5432]: 2022/05/14 03:46:10 AviatrixGwMicrosegPacket: POLICY=96438983-a98c-9938-fcbc-73f72e83f089 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.4.221.148 DST_IP=10.235.240.155 PROTO=TCP SRC_PORT=42948 DST_PORT=2000 DATA=0x
+
+# --- IPv6 source and destination, session start, no pid on the process ---
+# [copilot] synthetic from avxlogs.conf alternatives. The session block is incomplete
+# (no SESSION_END_REASON..SESSION_DUR), so it lands in microseg_unparsed_suffix and
+# the event is tagged _avx_microseg_unknown_fields (still forwarded).
+# @case microseg-ipv6-session-start
+<158>Nov 23 10:00:01 GW-spoke-v6-198.51.100.7-sink /usr/local/bin/avx-gw-state-sync 2026/11/23 10:00:01 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=80 SRC_IP=2001:db8::10 DST_IP=2001:db8:1::20 PROTO=TCP SRC_PORT=37368 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=15625921951502722107 SESSION_EVENT=0
+
+###############################################################################
+# L7 DCF / MITM (traffic_server JSON)
+###############################################################################
+
+# --- Legacy daemon-facility line: action DROP, no session_* fields, not a -sink host ---
+# [copilot] avxlogs.conf:203 + git history (JSON unescaped, IPs sanitized)
+# @case mitm-legacy-drop-daemon-facility
+<25>May 11 05:05:15 GW-webfilter-aws-spoke-east-198.51.100.125 traffic_server[9196]: {"priority":"LOG_ALERT","action":"DROP","reason":"POLICY","src":"10.11.0.39","src_port":57016,"dest":"10.12.0.36","dest_port":443,"enforced":true,"ids":false,"stage":"SNI","sni_hostname":"blocked.example.com","decided_by":"9e0c30af-2c6c-45cb-a451-ed1df1e62003","proto":"TCP","timestamp":1683781515}
+
+# --- RFC 5424 header, program "traffic-server" (hyphen), action PERMIT uppercase ---
+# [copilot] integration_tests/avx-log-gen/src/generators/syslog.py:146-154
+# Parses: AVX_PRI accepts the RFC 5424 version, the L7 filter accepts
+# "traffic-server" and takes the JSON from the first "{" (procid/"- -" skipped).
+# @case mitm-rfc5424-traffic-server-hyphen
+<153>1 2026-11-23T10:00:02.123456Z hostname traffic-server 2 - - {"priority":"LOG_ALERT","action":"PERMIT","reason":"POLICY","src":"10.21.0.36","src_port":42148,"dest":"203.0.113.21","dest_port":443,"enforced":false,"ids":false,"stage":"SNI","sni_hostname":"www.example.com","decided_by":"21018422-0b45-4226-9694-d2cfab39a382","proto":"TCP","timestamp":1795428002,"session_id":"00000000-0000-0000-0000-000000000000","session_start":1795428002,"session_stage":"start"}
+
+# --- traffic_server without [pid] ---
+# [copilot] synthetic from avxlogs.conf alternatives
+# Parses: the L7 filter accepts traffic_server with or without [pid].
+# @case mitm-no-pid
+<153>Nov 23 10:00:03 GW-frontend-spoke-198.51.100.41-sink traffic_server: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"10.1.5.205","src_port":40708,"dest":"203.0.113.138","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"www.example.com","decided_by":"3822a647-d2b2-4e04-9be3-6808da41110e","proto":"TCP","timestamp":1795428003}
+
+# --- reason POLICY_REQUIRE_TLS, stage SNI_ORIGIN_VERIFY, errorcode key ---
+# [oteld] enums from proto/logs/v1/dcf_logs.proto; [synth] from mitm-ips-policy-deny
+# errorcode is not mapped by any output today.
+# @case mitm-require-tls-origin-verify
+<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Deny","reason":"POLICY_REQUIRE_TLS","errorcode":"TLS_REQUIRED","src":"10.1.5.205","src_port":40712,"dest":"203.0.113.138","dest_port":80,"enforced":true,"ids":false,"stage":"SNI_ORIGIN_VERIFY","sni_hostname":"plain.example.com","decided_by":"3822a647-d2b2-4e04-9be3-6808da41110e","proto":"TCP","session_start":1772665075787368966,"session_time":1200,"session_stage":"end","session_id":"58f0b86a-b3ec-45a8-9ae1-4180c465f001","timestamp":1772665075}
+
+# --- reason UNEXPECTED_ERROR with no src/dest/ports (CoPilot drops these) ---
+# [oteld] enum; [synth]. We forward it today with no endpoint fields.
+# @case mitm-unexpected-error-no-endpoints
+<155>Mar  4 22:57:56 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {"priority":"LOG_ERR","action":"Deny","reason":"UNEXPECTED_ERROR","errorcode":"INTERNAL","stage":"txn","timestamp":1772665076}
+
+###############################################################################
+# SURICATA
+###############################################################################
+
+# --- Alert with in_iface and an smb object (not flattened today) ---
+# [copilot] oteld Suricata attribute list (avx-oteld-gateway.yaml:373-417)
+# @case suricata-alert-smb-in-iface
+<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {"timestamp":"2026-11-23T10:00:04.000000+0000","flow_id":1,"in_iface":"eth0","event_type":"alert","src_ip":"203.0.113.5","src_port":445,"dest_ip":"10.0.0.5","dest_port":49152,"proto":"TCP","alert":{"action":"allowed","gid":1,"signature_id":2100498,"rev":7,"signature":"GPL ATTACK_RESPONSE id check returned root","category":"Potentially Bad Traffic","severity":2},"smb":{"id":1,"dialect":"3.11","command":"SMB2_COMMAND_NEGOTIATE_PROTOCOL"}}
+
+###############################################################################
+# CONTROLLER API (AviatrixAPI, V2.5)
+###############################################################################
+
+# --- Real layout: method=, host=, ip= before user=; resp_status with reason phrase ---
+# [copilot] apps/ui/src/components/Security/Audit/constants.tsx:47
+# action=/v2.5/app-domains/<uuid> (trailing "?" stripped), http_method=PUT,
+# api_host and client_ip extracted. (Before the fix action held "<url>? host=.. ip=..".)
+# @case api-v25-put-host-ip-201
+<14>Aug 30 00:15:56 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=PUT url=/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd? host=198.51.100.2 ip=203.0.113.218 user=admin req_data={"name": "test-sg-1", "selector": {"any": [{"all": {"name": "web-vm", "type": "vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"} resp_status=201 CREATED resp_data={"name": "test-sg-1", "selector": {"any": [{"all": {"name": "web-vm", "type": "vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"}
+
+# --- No <PRI>, ISO-8601 timestamp, POST ---
+# [copilot] avxlogs.conf:40 (exampleSuccess)
+# @case api-v25-no-pri-iso-post
+2023-08-23T15:54:41.859849+00:00 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=POST url=/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159 user=admin req_data={"name": "test-sg", "selector": {"any": [{"all": {"type": "vm", "name": "web-vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"} resp_status=201 CREATED resp_data={"name": "test-sg", "selector": {"any": [{"all": {"type": "vm", "name": "web-vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"}
+
+# --- 401 UNAUTHORIZED failure ---
+# [copilot] avxlogs.conf:41 (exampleFailure)
+# @case api-v25-401-unauthorized
+2023-08-23T15:54:41.859849+00:00 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=POST url=/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159 user=admin req_data={"name": "test-sg", "selector": {"any": [{"all": {"type": "vm", "name": "web-vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"} resp_status=401 UNAUTHORIZED resp_data={"reason": "myreason"}
+
+###############################################################################
+# NEGATIVE CASES: lines we do not parse (must stay unparsed, never forwarded)
+###############################################################################
+
+# --- Gateway daemon log with rsyslog #011 tab escaping ---
+# [copilot] avxlogs.conf:14
+# @case unparsed-gw-state-sync-daemon
+<32>May 14 03:46:16 GW-UdpGateway-198.51.100.173 avx-gw-state-sync[11249]: warn#011gateway_launcher/gateway_launcher.go:212#011daemon exited
+
+# --- strongSwan charon DPD timeout, ISO timestamp with -08:00 offset ---
+# [copilot] avxlogs.conf:126
+# @case unparsed-charon-dpd-timeout
+2022-02-23T12:45:31.164506-08:00 cloudN-local charon: 17[JOB] <gw-10_198_254_177-10_50_2_11|139266> DPD check timed out, enforcing DPD action
+
+# --- Empty-ish and junk lines ---
+# @case unparsed-junk-text
+this is not a syslog line
+
+# --- Truncated JSON (UDP datagram cut mid-payload) ---
+# [synth] from mitm-ips-policy-deny. Expected: _avx_json_parse_failure, not forwarded.
+# @case mitm-truncated-json
+<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {"priority":"LOG_ALERT","action":"Deny","reason":"IPS_POLICY_DENY","src":"10.1.5.205","src_port":40708,"dest":"203.0.113.138","dest_po
+
+# --- Truncated Suricata EVE JSON ---
+# [synth] Expected: _avx_json_parse_failure, not forwarded.
+# @case suricata-truncated-json
+<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {"timestamp":"2026-11-23T10:00:04.000000+0000","flow_id":1,"event_type":"alert","src_ip":"203.0.113.5","src_port":4
+
+###############################################################################
+# FROM CONTROLLER/GATEWAY SOURCE (cloudn)
+# [cloudn] = format string read from the emitter; file:line in the description.
+# Release ranges come from cloudn tags and file history.
+###############################################################################
+
+# ----- MICROSEG ---------------------------------------------------------------
+
+# --- 10.1+ format: SESSION_START between ENFORCED and SESSION_ID, EGRESS_PATH at end ---
+# [cloudn] gateway-conduit/microseg.go:245-262 (AVX-75609, AVX-77573)
+# All SESSION_* fields plus session_start and egress_path are captured. (Before the
+# fix the optional session group stopped matching and they were silently dropped.)
+# @case microseg-101-session-start avx=10.1
+<158>Mar  4 23:01:05 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:01:05 AviatrixGwMicrosegPacket: POLICY=5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70 SRC_MAC=02:11:22:33:44:55 DST_MAC=02:66:77:88:99:aa IP_SZ=60 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=TCP SRC_PORT=51544 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_START=2026-03-04T23:01:05.104512337Z SESSION_ID=9134502218874411021 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0 EGRESS_PATH=EGRESS_PATH_DEFAULT
+
+# --- 10.1+: local egress, session end by CLIENT_RST (SESSION_END_REASON=4) ---
+# [cloudn] microseg.go:245-262; end reasons from microseg.bpf.c:53-59
+# @case microseg-101-session-end-client-rst-local-egress avx=10.1
+<158>Mar  4 23:01:09 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:01:09 AviatrixGwMicrosegPacket: POLICY=5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70 SRC_MAC=02:11:22:33:44:55 DST_MAC=02:66:77:88:99:aa IP_SZ=40 SRC_IP=10.20.1.15 DST_IP=203.0.113.80 PROTO=TCP SRC_PORT=51560 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_START=2026-03-04T23:01:05.9Z SESSION_ID=9134502218874411377 SESSION_EVENT=1 SESSION_END_REASON=4 SESSION_PKT_CNT=14 SESSION_BYTE_CNT=6021 SESSION_DUR=3920114551 EGRESS_PATH=EGRESS_PATH_LOCAL
+
+# --- 9.0-10.0: session-cleaner timeout (empty MACs, POLICY=UNKNOWN, ACT=UNSPECIFIED, IP_SZ=0) ---
+# [cloudn] microseg_session_cleaner.go:439-504
+# Parses with no src_mac/dst_mac and uuid=UNKNOWN. Real lines before AVX-80147
+# (10.2) also have byte-swapped IPs/ports; this sample does not.
+# @case microseg-90-cleaner-timeout avx=9.0 until=10.0
+<158>Mar  4 23:03:40 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:40 AviatrixGwMicrosegPacket: POLICY=UNKNOWN SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=UDP SRC_PORT=40122 DST_PORT=53 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=12004417735561230099 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=2 SESSION_BYTE_CNT=164 SESSION_DUR=120000412339
+
+# --- 10.1+: session-cleaner timeout with SESSION_START/EGRESS_PATH and known policy ---
+# [cloudn] microseg_session_cleaner.go + microseg.go:245-262
+# Parses with no src_mac/dst_mac.
+# @case microseg-101-cleaner-timeout avx=10.1
+<158>Mar  4 23:03:41 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:41 AviatrixGwMicrosegPacket: POLICY=5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70 SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=TCP SRC_PORT=51577 DST_PORT=8443 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_START=2026-03-04T23:01:41.552019Z SESSION_ID=9134502218874419988 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=6 SESSION_BYTE_CNT=902 SESSION_DUR=120004771210 EGRESS_PATH=EGRESS_PATH_DEFAULT
+
+# --- 8.2-10.0: ICMP DENY in watch mode (ports 0), policy-update event (SESSION_EVENT=2) ---
+# [cloudn] microseg.go; SESSION_EVENT enum microseg.bpf.c:64-66
+# @case microseg-82-icmp-deny-policy-update avx=8.2 until=10.0
+<158>Mar  4 23:02:00 GW-db-spoke-198.51.100.31-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:02:00 AviatrixGwMicrosegPacket: POLICY=0b6e4d3c-91a2-4f7e-8c55-3d2e1f0a9b88 SRC_MAC=02:aa:bb:cc:dd:01 DST_MAC=02:aa:bb:cc:dd:02 IP_SZ=84 SRC_IP=10.40.0.9 DST_IP=10.50.0.7 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=771249900311 SESSION_EVENT=2 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- 8.2-10.0 datapath: policy UUID undecodable (POLICY=?), PROTO=UNKNOWN ---
+# [cloudn] microseg.go toLog()
+# Parses with uuid="?".
+# @case microseg-82-policy-unknown-uuid avx=8.2 until=10.0
+<158>Mar  4 23:02:03 GW-db-spoke-198.51.100.31-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:02:03 AviatrixGwMicrosegPacket: POLICY=? SRC_MAC=02:aa:bb:cc:dd:01 DST_MAC=02:aa:bb:cc:dd:02 IP_SZ=52 SRC_IP=10.40.0.9 DST_IP=10.50.0.7 PROTO=UNKNOWN SRC_PORT=0 DST_PORT=0 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- Customer custom template: RFC 5424 header on a microseg line ---
+# [cloudn] fwd_syslog.py:93-101 (--omfwd_template accepts any rsyslog template)
+# Parses: AVX_PRI accepts the RFC 5424 version field after <PRI>.
+# @case hdr-rfc5424-custom-template-microseg avx=8.2 until=10.0
+<158>1 2026-03-04T23:02:10.120000+00:00 GW-db-spoke-198.51.100.31-sink avx-gw-state-sync - - - 2026/03/04 23:02:10 AviatrixGwMicrosegPacket: POLICY=0b6e4d3c-91a2-4f7e-8c55-3d2e1f0a9b88 SRC_MAC=02:aa:bb:cc:dd:01 DST_MAC=02:aa:bb:cc:dd:02 IP_SZ=60 SRC_IP=10.40.0.9 DST_IP=10.50.0.7 PROTO=TCP SRC_PORT=40100 DST_PORT=5432 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=771249900399 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# ----- L7 DCF / MITM (emitter is a third-party ATS plugin; inferred) ----------
+
+# --- LOG_WARNING, reason TLS_PROFILE, stage ORIGIN_CERT_VALIDATE, a "message" key, no sni_hostname ---
+# [cloudn] facility/forwarding rsyslog_service.go:55-59; fields event_log.proto:68-185
+# @case mitm-warning-tls-profile-cert-expired avx=8.2
+<156>Mar  4 23:05:01 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {"priority":"LOG_WARNING","action":"Deny","reason":"TLS_PROFILE","src":"10.60.1.12","src_port":40312,"dest":"203.0.113.10","dest_port":443,"enforced":true,"ids":false,"message":"certificate has expired","stage":"ORIGIN_CERT_VALIDATE","decided_by":"7a1c9e44-2b3d-4f61-9e80-1c2d3e4f5a6b","proto":"TCP","session_start":1772665501000000000,"session_time":2210,"session_stage":"tls_check","session_id":"c2d4e6f8-1a3b-4c5d-8e9f-0a1b2c3d4e5f","timestamp":1772665501}
+
+# --- Over the 8 KB rsyslog limit (before 9.1/10.1 raised it to 64k): JSON cut mid-string ---
+# [cloudn] avx-logging/50-default.conf $MaxMessageSize (commit 03158bf1ba)
+# Expected: _avx_json_parse_failure, not forwarded.
+# @case mitm-truncated-8k-limit avx=8.2 until=10.0
+<153>Mar  4 23:05:02 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"10.60.1.12","src_port":40313,"dest":"203.0.113.11","dest_port":443,"enforced":true,"ids":true,"stage":"txn","sni_hostname":"app.example.com","url":"app.example.com/search?q=aaaaaaaaaaaaaaaaaaaaaaaa
+
+# ----- SURICATA ---------------------------------------------------------------
+# Since 7.2 the gateway rsyslog forwards only local5 lines containing
+# "event_type":"alert" (rsyslog_service.go:61-73). 9.0 ships Suricata 7.0.11,
+# 10.0+ ships 8.0.5.
+
+# --- Suricata 8: IPS block (action=blocked), ICMP (no ports), ip_v, direction, flow endpoints ---
+# [cloudn] testdata/suricata_service/suricata_1.yaml.expected; Suricata 8 EVE keys
+# @case suricata-8-blocked-icmp avx=10.0
+<174>Mar  4 23:06:10 GW-egress-spoke-198.51.100.44-sink suricata[4]: {"timestamp":"2026-03-04T23:06:10.402113+0000","flow_id":118823401992211,"in_iface":"ids0","event_type":"alert","src_ip":"10.60.1.12","dest_ip":"203.0.113.50","proto":"ICMP","ip_v":4,"icmp_type":8,"icmp_code":0,"pkt_src":"wire/pcap","alert":{"action":"blocked","gid":1,"signature_id":2100366,"rev":8,"signature":"GPL ICMP_INFO PING *NIX","category":"Misc activity","severity":3},"direction":"to_server","flow":{"pkts_toserver":1,"pkts_toclient":0,"bytes_toserver":98,"bytes_toclient":0,"start":"2026-03-04T23:06:10.402113+0000","src_ip":"10.60.1.12","dest_ip":"203.0.113.50"}}
+
+# --- Suricata 7+: alert on the GRE copy of decrypted traffic from ATS (tunnel object), metadata, app_proto ---
+# [cloudn] ids0 dummy interface + ATS GRE copies
+# @case suricata-7-tunnel-gre-metadata avx=9.0
+<174>Mar  4 23:06:12 GW-egress-spoke-198.51.100.44-sink suricata[4]: {"timestamp":"2026-03-04T23:06:12.881004+0000","flow_id":118823401992377,"in_iface":"ids0","event_type":"alert","src_ip":"10.60.1.12","src_port":40420,"dest_ip":"203.0.113.60","dest_port":443,"proto":"TCP","ip_v":4,"pkt_src":"wire/pcap","tunnel":{"src_ip":"127.0.0.2","dest_ip":"127.0.0.3","proto":"GRE","depth":0,"pkt_src":"wire/pcap"},"tx_id":0,"alert":{"action":"allowed","gid":1,"signature_id":2200311,"rev":2,"signature":"ET POLICY Example Suspicious UA","category":"Potential Corporate Privacy Violation","severity":1,"metadata":{"created_at":["2024_01_01"],"signature_severity":["Minor"]}},"app_proto":"http","direction":"to_server","flow":{"pkts_toserver":3,"pkts_toclient":2,"bytes_toserver":512,"bytes_toclient":300,"start":"2026-03-04T23:06:12.880001+0000","src_ip":"10.60.1.12","dest_ip":"203.0.113.60","src_port":40420,"dest_port":443}}
+
+# --- Suricata's own log format (not EVE) on the user facility ---
+# [cloudn] Suricata syslog output format "[%i] <%d> -- "
+# Expected: not forwarded (dropped or unparsed).
+# @case suricata-own-format-notice
+<14>Mar  4 23:06:15 GW-egress-spoke-198.51.100.44-sink suricata[4]: [4] <Notice> -- all 2 packet processing threads, 4 management threads initialized, engine started.
+
+# ----- FQDN (emitter avx-nfq is not in cloudn; inferred from its reader) --------
+
+# --- Accepted: neither drop_reason nor Rule ---
+# [cloudn] reader cloudx-common/gateway/diag/fqdn_stats_search.py:85-112
+# @case fqdn-matched-no-rule-no-drop-reason
+<14>Mar  4 23:07:01 GW-egress-fqdn-gw-198.51.100.60 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.70.1.5 D_IP=203.0.113.70 hostname=docs.example.com state=MATCHED
+
+# --- Malformed client hello: no hostname ---
+# [cloudn] fqdn_stats_search.py:217-219 (MALFORMED / BAD_PKT lines)
+# Expected: _avx_grok_failure_fqdn, not forwarded.
+# @case fqdn-malformed-no-hostname
+<14>Mar  4 23:07:03 GW-egress-fqdn-gw-198.51.100.60 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#245  Gateway=egress-fqdn-gw S_IP=10.70.1.5 D_IP=203.0.113.71 state=MALFORMED drop_reason=BAD_PKT
+
+# --- 8.2+ "-sink" host, Rule with ;port suffix ---
+# @case fqdn-sink-host-rule-port avx=8.2
+<14>Mar  4 23:07:05 GW-egress-fqdn-gw-198.51.100.60-sink avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.70.2.9 D_IP=203.0.113.72 hostname=cdn.example.org state=MATCHED Rule=*.example.org;1
+
+# ----- CONTROLLER CMD (V1) ------------------------------------------------------
+# [cloudn] cloudx-local/logs/audit.py:156-205 log_cli. Format stable 8.0-11.0.
+
+# --- Fail; reason is free text with commas and '='; no username ---
+# @case cmd-v1-fail-reason-commas-no-username
+<14>Mar  4 23:08:01 203.0.113.5 Mar  4 23:08:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=CREATE_SPOKE_GW, argv=['--rtn_file', '/dev/null', 'create_spoke_gw', '--gw_name', 'spoke-test-1', '--vpc_id', 'vpc-0abc1234', '--gw_size', 't3.small', '--insane_mode', None], result=Fail, reason=Gateway spoke-test-1 already exists, size=t3.small, choose another name
+
+# --- Sensitive command: argv fully redacted, username is an email ---
+# @case cmd-v1-argv-redacted-email-user
+<14>Mar  4 23:08:05 203.0.113.5 Mar  4 23:08:05 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=SETUP_ACCOUNT_PROFILE, argv=['********'], result=Success, reason=, username=ops.user@example.com
+
+# --- argv element containing an apostrophe (Python repr switches to double quotes) ---
+# @case cmd-v1-argv-apostrophe
+<14>Mar  4 23:08:07 203.0.113.5 Mar  4 23:08:07 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=EDIT_GW_TAGS, argv=['--rtn_file', '/dev/null', 'edit_gw_tags', '--gw_name', 'spoke-test-1', '--tags', "Owner=Pat's team"], result=Success, reason=, username=admin
+
+# ----- CONTROLLER API (V2.5) ----------------------------------------------------
+# [cloudn] audit.py:280-348: keys in order method url host ip user req_data
+# resp_status resp_data, each followed by a space (trailing space at end of line).
+
+# --- Real field order, 200 OK, trailing space ---
+# Parsed by the full-format pattern; the trailing space is trimmed from reason.
+# @case api-v25-put-200-ok-trailing-space
+<14>Mar  4 23:08:10 203.0.113.5 Mar  4 23:08:10 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=PUT url=/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77 user=admin req_data={"gw_size": "t3.medium"} resp_status=200 OK resp_data={"return": true, "results": "Gateway spoke-test-1 resized to t3.medium"} 
+
+# --- Empty user, empty body, 401, resp_data=None ---
+# @case api-v25-delete-empty-user-401-none
+<14>Mar  4 23:08:12 203.0.113.5 Mar  4 23:08:12 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=DELETE url=/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78 user= req_data={} resp_status=401 UNAUTHORIZED resp_data=None 
+
+# --- req_data truncated at 512 chars + "..." (invalid JSON), 201 CREATED ---
+# @case api-v25-req-data-truncated-512
+<14>Mar  4 23:08:14 203.0.113.5 Mar  4 23:08:14 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=POST url=/v2.5/app-domains? host=controller.example.com ip=198.51.100.79 user=netops req_data={"name": "web-tier", "selector": {"any": [{"all": {"type": "vm", "tags": {"app": "web", "env": "prod", "owner": "team-a", "cost_center": "cc-1001", "region": "us-east-2", "tier": "frontend", "zone": "a"}}}, {"all": {"type": "vm", "tags": {"app": "web", "env": "prod", "owner": "team-a", "cost_center": "cc-1001", "region": "us-east-2", "tier": "frontend", "zone": "b"}}}, {"all": {"type": "vm", "tags": {"app": "web", "env": "prod", "owner": "team-a", "cost_center": "cc-1001", "region": "us-east-2", "tier": "frontend", "zone": "c"}}}]}, "uui... resp_status=201 CREATED resp_data={"uuid": "4c5d6e7f-8091-4a2b-bc3d-4e5f60718293"} 
+
+# ----- GATEWAY / CONTROLLER STATS -----------------------------------------------
+# [cloudn] gateway: gateway-conduit/vmsysmon_service.go:306-375 (unchanged 8.2-10.1)
+#          controller: cloudx-common/vmsysmon/perfmon.py:385-485
+# NOTE: rates are bits/s (Kb = kilobits, base 1024); 95-field-conversion converts
+# them to a number in bits/s, including Pb/Eb.
+
+# --- eth1, empty alias, Gb/TB values, negative conntrack_usage_rate, no public_ip (double space) ---
+# @case netstats-gw-eth1-empty-alias-negative-usage
+<14>Mar  4 23:09:01 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:01 AviatrixGwNetStats: timestamp=2026-03-04T23:09:01.5 name=transit-1 alias=  private_ip=10.80.0.20 interface=eth1 total_rx_rate=9.87Gb total_tx_rate=9.12Gb total_rx_tx_rate=18.99Gb total_rx_cum=1.20TB total_tx_cum=1.07TB total_rx_tx_cum=2.27TB conntrack_limit_exceeded=0 bw_in_limit_exceeded=1532 bw_out_limit_exceeded=12 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=48211 conntrack_allowance_available=611204 conntrack_usage_rate=-41.30
+
+# --- Private-mode gateway: eth0 with empty public_ip, idle (0.00 rates, B units) ---
+# @case netstats-gw-private-mode-idle
+<14>Mar  4 23:09:02 GW-private-spoke-10.81.0.10-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:02 AviatrixGwNetStats: timestamp=2026-03-04T23:09:02 name=private-spoke alias=private-spoke public_ip= private_ip=10.81.0.10 interface=eth0 total_rx_rate=0.00 total_tx_rate=0.00 total_rx_tx_rate=0.00 total_rx_cum=0.00B total_tx_cum=512.00B total_rx_tx_cum=512.00B conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=3
+
+# --- Interface without IPv4: private_ip empty ---
+# Parses with no private_ip.
+# @case netstats-gw-no-ipv4-empty-private-ip
+<14>Mar  4 23:09:03 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:03 AviatrixGwNetStats: timestamp=2026-03-04T23:09:03.123456789 name=transit-1 alias=transit-1  private_ip= interface=eth2 total_rx_rate=1.02Kb total_tx_rate=0.00 total_rx_tx_rate=1.02Kb total_rx_cum=4.50KB total_tx_cum=0.00B total_rx_tx_cum=4.50KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=10
+
+# --- Controller with a public IP on eth0: public_ip twice, no private_ip, 1-decimal values ---
+# Parses with public_ip set and no private_ip.
+# @case netstats-controller-public-ip-twice
+<14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211
+
+# --- Very high rate with a Pb unit (not matched by the [KMGT] conversion) ---
+# [synth] from netstats-gw-eth1-empty-alias-negative-usage
+# @case netstats-gw-petabit-unit
+<14>Mar  4 23:09:07 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:07 AviatrixGwNetStats: timestamp=2026-03-04T23:09:07.5 name=transit-1 alias=transit-1  private_ip=10.80.0.20 interface=eth1 total_rx_rate=1.10Pb total_tx_rate=0.00 total_rx_tx_rate=1.10Pb total_rx_cum=3.20PB total_tx_cum=0.00B total_rx_tx_cum=3.20PB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=12
+
+# --- SysStats: core 0 implicit (proto3 omits name:0), idle core without stats, aggregate with only max ---
+# @case sysstats-gw-cpu-cores-proto3-omitted
+<14>Mar  4 23:09:05 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:05 AviatrixGwSysStats: timestamp=2026-03-04T23:09:05.77 name=transit-1 alias= cpu_idle=97 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[busy:{start:{seconds:1772665705 nanos:1200} end:{seconds:1772665745 nanos:99}} name:1 busy:{start:{seconds:1772665705} end:{seconds:1772665745} max:7 avg:1} name:-1 busy:{start:{seconds:1772665705 nanos:5} end:{seconds:1772665745 nanos:6} max:4}]
+
+# --- SysStats: no cores (empty list) ---
+# @case sysstats-gw-cpu-cores-empty
+<14>Mar  4 23:09:06 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:06 AviatrixGwSysStats: timestamp=2026-03-04T23:09:06.1 name=transit-1 alias=transit-1 cpu_idle=100 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[]
+
+# ----- TUNNEL STATUS ------------------------------------------------------------
+# [cloudn] cloudx-local/tunnels/db.py:1703-1741. The "Gateway X reported Tunnel <...>"
+# form is current since 8.0.10 / 8.1.10; src_gw=/dst_gw= is 8.0.0 / 8.1.0 and older.
+
+# --- Current format with interfaces ---
+# Parsed by the current-format pattern: src_gw/dst_gw from the tunnel endpoints,
+# plus reporting_gw, src_intf, dst_intf.
+# @case tunnel-current-with-intf avx=8.0.10
+<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down 
+
+# --- Current format, no interfaces, NA vendor/region, vendor with spaces ---
+# @case tunnel-current-na-vendor avx=8.0.10
+<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up 
+
+# --- Current format, teardown (new_state=Deleted), HA gateway, GCP ---
+# @case tunnel-current-deleted-hagw avx=8.0.10
+<14>2026-03-04T23:10:09.000117+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-c-hagw reported Tunnel <spoke-c-hagw(Gcloud us-central1),transit-g(Gcloud us-central1)> old_state=Up new_state=Deleted 
+
+# --- Legacy 8.0.0/8.1.0 format with src_intf/dst_intf ---
+# @case tunnel-legacy-with-intf until=8.1
+<14>2026-03-04T23:10:12.330001+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: src_gw=spoke-b(AWS us-east-2) src_intf=eth1 dst_gw=transit-a(AWS us-east-2) dst_intf=eth2 old_state=Down new_state=Up 
+
+# ----- VPN SESSION ----------------------------------------------------------------
+# [cloudn] cloudx-local/ucc_db.py:219-247. Sizes have no space ("1.2GB").
+
+# --- Connect, user details masked (PublicIP=<omitted>), empty client platform/version ---
+# @case vpn-connect-masked-public-ip
+<14>Mar 10 12:40:01 203.0.113.5 Mar 10 12:40:01 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=jane.doe@example.com, Status=active, Gateway=vpn-gw-2, GatewayIP=198.51.100.140, VPNVirtualIP=192.168.44.10, PublicIP=<omitted>, Login=2026-03-10 12:39:58, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=, VPNClientVersion=
+
+# --- Disconnect with real size format (no space), d:h:m:s duration ---
+# @case vpn-disconnect-real-size-format
+<14>Mar 10 13:12:07 203.0.113.5 Mar 10 13:12:07 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=jane.doe@example.com, Status=disconnected, Gateway=vpn-gw-2, GatewayIP=198.51.100.140, VPNVirtualIP=192.168.44.10, PublicIP=<omitted>, Login=2026-03-10 12:39:58, Logout=2026-03-10 13:12:05, Duration=0:0:32:7, RXbytes=1.2GB, TXbytes=0.0B, VPNClientPlatform=linux, VPNClientVersion=AVPNC-2.18.1
+
+# ----- NEGATIVES: other Aviatrix* tags (must not be forwarded) ---------------------
+
+# --- License user count emitted right after every VPN session line ---
+# @case unparsed-license-vpn-users
+<14>Mar 10 13:12:07 203.0.113.5 Mar 10 13:12:07 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixLicenseVPNUsers: users=3 
+
+# --- Event-bus "AviatrixTunnelStatusChanged" (note the trailing d) ---
+# Contains the substring AviatrixTunnelStatusChange; the filter gate requires the
+# colon ("AviatrixTunnelStatusChange:") so this stays unparsed, not a grok failure.
+# @case unparsed-event-tunnel-status-changed
+<14>Mar  4 23:11:00 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixTunnelStatusChanged: gwname=spoke-b src_intf=eth1 peer=transit-a dst_intf=eth2 old_state=Up new_state=Down detected=2026-03-04 23:10:58 modified=2026-03-04 23:10:59 origin=gateway
+
+# --- Event-bus gateway status ---
+# @case unparsed-event-gateway-status-changed
+<14>Mar  4 23:11:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixGatewayStatusChanged: gwname=spoke-b status=down time=2026-03-04 23:11:00.512003
+
+# --- Account audit failure (LOG_ERR) ---
+# @case unparsed-account-audit
+<11>Mar  4 23:11:02 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixAccountAudit: Account Audit Failure - aws-sandbox
+
+# --- Kernel netfilter log of VPN user traffic ---
+# @case unparsed-kernel-aviatrix-user
+<4>Mar  4 23:11:03 GW-vpn-gw-2-198.51.100.140-sink kernel: [88231.120034] AviatrixUser: IN=tun0 OUT=eth0 MAC= SRC=192.168.44.10 DST=203.0.113.9 LEN=60 TOS=0x00 PREC=0x00 TTL=63 ID=4242 DF PROTO=TCP SPT=51000 DPT=443 WINDOW=64240 RES=0x00 SYN URGP=0
+
+# --- First line of a multi-line controller message (TCP splits on newlines) ---
+# @case unparsed-learned-cidr-multiline-head
+<14>Mar  4 23:11:04 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixLearnedCIDRPendingApproval: Request approval for new learned CIDR(s):
+
+# --- A continuation line of that message, arriving as its own TCP line ---
+# @case unparsed-multiline-continuation
+    Attachment: vpc-0abc1234, CIDRs list: ['10.99.0.0/16'] 
+
+# --- strongSwan IKE established (local7) ---
+# @case unparsed-charon-ike-established
+<86>Mar  4 23:11:05 GW-transit-1-198.51.100.90-sink charon: 13[IKE] <peer-198.51.100.200|7> IKE_SA peer-198.51.100.200[7] established with SPIs 1a2b3c4d5e6f7081_i 8192a3b4c5d6e7f8_r
+
+###############################################################################
+# FROM THE LAB SPLUNK (real gateway/controller lines, 2025-10 .. 2026-11)
+# [splunk] sanitized: public IPs -> TEST-NET, names -> example. Splunk's UDP input
+# stripped <PRI>; it is restored here with the emitter's facility (microseg <158>,
+# L7 <153>, Suricata <174>, controller/stats <14>). JSON-only events (raw line not
+# kept by Splunk) are wrapped in the type's real header, timestamp from the JSON.
+###############################################################################
+
+# --- Session END, END_REASON=2 (rare) (count: 22) ---
+# [splunk] L4 #3
+# @case microseg-real-end-reason-2 avx=8.2 until=10.0
+<158>Dec  9 15:16:42 GW-frontend-eks-spoke-203.0.113.1-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 15:16:42 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=40 SRC_IP=100.64.17.166 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=40136 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=4113820858146262443 SESSION_EVENT=1 SESSION_END_REASON=2 SESSION_PKT_CNT=3 SESSION_BYTE_CNT=36864 SESSION_DUR=185346
+
+# --- SESSION_EVENT=2 (DENY TCP). Event code 2 is undocumented in samples (count: 20,624 (+11,178 PERMIT, +460 with EGRESS_PATH)) ---
+# [splunk] L4 #5
+# @case microseg-real-session-event-2-deny avx=8.2 until=10.0
+<158>Jul  2 11:41:31 GW-n14-n15-spoke-192.0.2.2-sink /usr/local/bin/avx-gw-state-sync 2026/07/02 11:41:31 AviatrixGwMicrosegPacket: POLICY=c04f0a7a-5ba6-4b05-b247-d286ac9e8c61 SRC_MAC=a0:3d:6f:93:b9:a7 DST_MAC=7c:ed:8d:75:83:81 IP_SZ=60 SRC_IP=10.60.11.20 DST_IP=10.60.12.10 PROTO=TCP SRC_PORT=3306 DST_PORT=58878 DATA=0x ACT=DENY ENFORCED=true SESSION_ID=4296001445883337582 SESSION_EVENT=2 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- ICMP: SRC_PORT=0 DST_PORT=0, ENFORCED=false (monitor mode), public src, Azure placeholder DST_MAC 12:34:56:78:9a:bc (count: 174,340) ---
+# [splunk] L4 #6
+# @case microseg-real-icmp-public-src-monitor avx=8.2 until=10.0
+<158>Jul  7 01:23:59 GW-aks-demo-frontend-spoke-198.51.100.2-sink /usr/local/bin/avx-gw-state-sync 2026/07/07 01:23:59 AviatrixGwMicrosegPacket: POLICY=3c1520ac-5e09-4868-9c45-eb35fb661a0e SRC_MAC=7c:1e:52:f4:3b:5a DST_MAC=12:34:56:78:9a:bc IP_SZ=52 SRC_IP=203.0.113.2 DST_IP=100.64.0.44 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- Newer shape, ICMP with IP_SZ=28 (count: 545) ---
+# [splunk] L4 #8
+# @case microseg-real-101-icmp avx=10.1
+<158>Nov  3 19:51:15 GW-n3-fs-b-192.0.2.3-sink /usr/local/bin/avx-gw-state-sync 2026/11/03 19:51:15 AviatrixGwMicrosegPacket: POLICY=7f1aea27-fdb5-4635-b651-893b37d9c855 SRC_MAC=12:ff:f7:57:9f:09 DST_MAC=12:ff:cc:7c:ee:a7 IP_SZ=28 SRC_IP=10.11.0.58 DST_IP=10.12.0.41 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_START=2026-11-03T17:10:21.461098724Z SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0 EGRESS_PATH=EGRESS_PATH_DEFAULT
+
+# --- Same 8.2 shape as received by Splunk's UDP input: PRI stripped and Splunk prepended its own 'MMM D HH:MM:SS <sender-ip>' (prefix removed here). (count: 99,553 (syslog sourcetype)) ---
+# Parses: <PRI> is optional in the header pattern (AVX_PRI).
+# [splunk] L4 #9
+# @case hdr-no-pri-relay-stripped-microseg avx=8.2 until=10.0
+Mar 10 14:08:05 GW-insertion-gw-dev-agent-198.51.100.1-sink /usr/local/bin/avx-gw-state-sync 2026/03/10 14:08:05 AviatrixGwMicrosegPacket: POLICY=665b3391-0abe-4c0d-af0a-b4f892323c9a SRC_MAC=06:d9:42:0b:45:c3 DST_MAC=06:09:6c:50:13:21 IP_SZ=60 SRC_IP=10.0.66.44 DST_IP=10.0.4.178 PROTO=TCP SRC_PORT=8000 DST_PORT=59670 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=32026532893825936 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- Controller form: run_cloudxd.py, no alias, no conntrack_allowance_available/usage_rate, 6-digit fractional timestamp, mixed units in one line (Mb/Kb) (count: 158,069 shape) ---
+# [splunk] Gateway network #1
+# @case netstats-real-controller-mixed-units
+<14>Nov  5 12:23:37 Controller-10.0.0.131 run_cloudxd.py[333589]: AviatrixGwNetStats: timestamp=2026-11-05T12:23:37.679444 name=controller public_ip=203.0.113.3 private_ip=10.0.0.131 interface=eth0 total_rx_rate=80.33Mb total_tx_rate=263.33Kb total_rx_tx_rate=80.59Mb total_rx_cum=33.2GB total_tx_cum=147.4GB total_rx_tx_cum=180.6GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=2891 bw_out_limit_exceeded=1092 pps_limit_exceeded=2690 linklocal_limit_exceeded=0 conntrack_count=1415
+
+# --- Controller with unit-less zero rates `0.0` (count: 144) ---
+# [splunk] Gateway network #2
+# @case netstats-real-controller-unitless-zero
+<14>Nov  5 12:12:37 Controller-10.0.0.131 run_cloudxd.py[333589]: AviatrixGwNetStats: timestamp=2026-11-05T12:12:37.802935 name=controller public_ip=203.0.113.3 private_ip=10.0.0.131 interface=eth0 total_rx_rate=0.0 total_tx_rate=0.0 total_rx_tx_rate=0.0 total_rx_cum=32.5GB total_tx_cum=147.4GB total_rx_tx_cum=180.0GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=2888 bw_out_limit_exceeded=1092 pps_limit_exceeded=2690 linklocal_limit_exceeded=0 conntrack_count=3214
+
+# --- Non-eth0 interface (eth-fn1): public_ip key ABSENT leaving a double space after alias, rates without unit suffix (count: 117,101 shape (no public_ip)) ---
+# [splunk] Gateway network #4
+# @case netstats-real-eth-fn1-no-public-ip-unitless
+<14>Jul  6 23:02:32 GW-k8s-demo-transit-198.51.100.4-sink /usr/local/bin/avx-gw-state-sync 2026/07/06 23:02:32 AviatrixGwNetStats: timestamp=2026-07-06T23:02:29.087638985 name=k8s-demo-transit alias=k8s-demo-transit  private_ip=10.2.0.85 interface=eth-fn1 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=12.63KB total_tx_cum=21.51KB total_rx_tx_cum=34.14KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=33 conntrack_allowance_available=273615 conntrack_usage_rate=0.03
+
+# --- eth-tgw0 interface (count: 18,958) ---
+# [splunk] Gateway network #5
+# @case netstats-real-eth-tgw0
+<14>Nov  3 18:56:57 GW-n3-transit-hagw-203.0.113.4-sink /usr/local/bin/avx-gw-state-sync 2026/11/03 18:56:57 AviatrixGwNetStats: timestamp=2026-11-03T18:56:54.557776383 name=n3-transit-hagw alias=n3-transit-hagw  private_ip=10.13.0.92 interface=eth-tgw0 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=2.65KB total_tx_cum=6.14KB total_rx_tx_cum=8.80KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=103 conntrack_allowance_available=51296 conntrack_usage_rate=-0.00
+
+# --- eth-vng0 interface, older shape without conntrack_allowance/usage (count: 1,162) ---
+# [splunk] Gateway network #6
+# @case netstats-real-eth-vng0-old-shape
+<14>Oct 30 17:59:24 GW-n4-azure-transit-192.0.2.5-sink /usr/local/bin/avx-gw-state-sync 2026/10/30 17:59:24 AviatrixGwNetStats: timestamp=2026-10-30T17:59:21.277804159 name=n4-azure-transit alias=n4-azure-transit  private_ip=10.20.0.132 interface=eth-vng0 total_rx_rate=16.00 total_tx_rate=0.00 total_rx_tx_rate=16.00 total_rx_cum=35.23KB total_tx_cum=7.24KB total_rx_tx_cum=42.46KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=75
+
+# --- Edge gateway: RFC1918 address in the GW-<name>-<ip>-sink header (not a public IP), eth2, no public_ip (count: 151) ---
+# [splunk] Gateway network #9
+# @case netstats-real-edge-rfc1918-header
+<14>Mar 16 21:23:01 GW-edge-n11-n12-lab-10.0.1.10-sink /usr/local/bin/avx-gw-state-sync 2026/03/16 21:23:01 AviatrixGwNetStats: timestamp=2026-03-16T21:22:58.765778199 name=edge-n11-n12-lab alias=edge-n11-n12-lab  private_ip=10.0.1.179 interface=eth2 total_rx_rate=3.40Mb total_tx_rate=51.10Kb total_rx_tx_rate=3.45Mb total_rx_cum=1.95GB total_tx_cum=7.50MB total_rx_tx_cum=1.96GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=63
+
+# --- cpu_cores protobuf text, DOUBLE-space separators (Go prototext randomizes spacing per process), min/max/avg (count: 99,671) ---
+# [splunk] Gateway system #3
+# @case sysstats-real-cpu-cores-double-space
+<14>Sep 10 14:23:50 GW-n3-fs-b-192.0.2.6-sink /usr/local/bin/avx-gw-state-sync 2026/09/10 14:23:50 AviatrixGwSysStats: timestamp=2026-09-10T14:23:47.689223362 name=n3-fs-b alias=n3-fs-b cpu_idle=33 memory_free=570860 memory_available=2306652 memory_total=3693176 disk_total=65842432 disk_free=52849644 cpu_cores=[busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59} name:1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:97  avg:59} name:-1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59}]
+
+# --- busy block with no min/max/avg at all (all zero); note name:-1 aggregate entry (count: 42,142 (+15,200 double-space)) ---
+# [splunk] Gateway system #5
+# @case sysstats-real-cpu-cores-no-stats
+<14>Nov  3 18:59:58 GW-n3-eks-192.0.2.4-sink /usr/local/bin/avx-gw-state-sync 2026/11/03 18:59:58 AviatrixGwSysStats: timestamp=2026-11-03T18:59:55.771546086 name=n3-eks alias=n3-eks cpu_idle=100 memory_free=13381248 memory_available=18319568 memory_total=20151464 disk_total=65842432 disk_free=56816484 cpu_cores=[name:2 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:3 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:-1 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:5 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:1 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:4 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:7 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} name:6 busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}} busy:{start:{seconds:1793732351 nanos:718795649} end:{seconds:1793732391 nanos:718913564}}]
+
+# --- 32-vCPU gateway: line > 4000 chars (max 4,069). Check any 4096-byte UDP/field limits (count: 11 lines > 4000; 2,155 lines > 3000) ---
+# [splunk] Gateway system #6
+# @case sysstats-real-32-vcpu-long-line
+<14>Oct  2 00:25:11 GW-cust-transit-euc1-198.51.100.6-sink /usr/local/bin/avx-gw-state-sync 2026/10/02 00:25:11 AviatrixGwSysStats: timestamp=2026-10-02T00:25:08.518824492 name=cust-transit-euc1 alias=cust-transit-euc1 cpu_idle=100 memory_free=57313492 memory_available=61998968 memory_total=64012496 disk_total=65842432 disk_free=56799416 cpu_cores=[name:24 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:2 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:-1 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:21 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:20 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:16 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:8 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:23 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:15 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:7 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:12 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:31 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:18 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:1 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:17 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:4 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:10 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:26 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:11 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:22 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:19 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:6 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:3 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:28 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:9 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:5 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:30 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:25 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:27 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:14 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:29 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:13 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}}]
+
+# --- CMD without username (older controller build) (count: 16,328) ---
+# [splunk] Controller CMD #1
+# @case cmd-real-no-username
+<14>Nov  5 12:15:09 Controller-10.0.0.131 run_cloudxd.py[332516]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password'], result=Success, reason=
+
+# --- CMD Fail without username, reason contains a URL and double space (count: 44) ---
+# [splunk] Controller CMD #4
+# @case cmd-real-fail-url-double-space
+<14>Sep 30 14:34:46 Controller-10.0.0.131 run_cloudxd.py[2780]: AviatrixCMD: action=EDIT_GW_CONFIG, argv=['--rtn_file', '/dev/null', 'edit_gw_config'], result=Fail, reason=[AVXERR-GATEWAY-0042] Failed to resize Gateway n5-az-spoke-b. (InvalidParameter) The VM size 'Standard_D2s_v6' cannot boot with DiskControllerType 'SCSI'. Please check that the disk controller type provided is one of the supported disk controller types for the VM size 'Standard_D2s_v6'. Please query sku api at https://aka.ms/azure-compute-skus  to determine supported disk controller types for the VM size.
+
+# --- Longest CMD (1,980 chars, not truncated): argv with long CIDR lists (count: 1) ---
+# [splunk] Controller CMD #5
+# @case cmd-real-longest-argv
+<14>Mar 16 17:58:52 Controller-10.0.0.141 run_cloudxd.py[58235]: AviatrixCMD: action=CREATE_MCT_PRIMARY_GATEWAY, argv=['--rtn_file', '/dev/null', 'create_mct_primary_gateway', '--regular_gateway', '1', 'AWS', 'vpc-0abc0123456789def', 'byo-x-vpn-aws', '--gw_subnet', '10.1.0.80/28', '--vpc_region', 'us-east-2', '--gw_size', 't3.small', '--oob_mgmt_subnet', '', '--insane_mode', 'no', '--regular_gateway', '--enc_volume', 'no', '--cloud_type', '1', '--vpn_cidr', '192.168.43.0/24', '--max_connections', '25', '--enable_elb', 'yes', '--elb_protocol', 'TCP', '--split_tunnel', 'yes', '--additional_cidrs', '203.0.113.6/22,192.0.2.7/22,198.51.100.7/20,203.0.113.7/20,192.0.2.8/32,198.51.100.8/32,203.0.113.8/32,192.0.2.9/32,198.51.100.9/32,203.0.113.9/32,192.0.2.10/32,198.51.100.10/32,203.0.113.10/32,192.0.2.11/32,198.51.100.11/32,203.0.113.11/32,192.0.2.12/32,198.51.100.12/32,203.0.113.12/32,192.0.2.13/32,198.51.100.13/32,203.0.113.13/32,192.0.2.14/32,198.51.100.14/32,203.0.113.14/32,192.0.2.15/32,198.51.100.15/32,203.0.113.15/32,192.0.2.16/32,198.51.100.16/32,203.0.113.16/32,192.0.2.17/32,198.51.100.17/32,203.0.113.17/32,192.0.2.18/32,198.51.100.18/32,203.0.113.18/32,192.0.2.19/32,198.51.100.19/32,203.0.113.19/32,192.0.2.20/32,198.51.100.20/32,203.0.113.20/32,192.0.2.21/32,198.51.100.21/32,203.0.113.21/32,192.0.2.22/32,198.51.100.22/32,203.0.113.22/32,192.0.2.23/32,198.51.100.23/32,203.0.113.23/32,192.0.2.24/32,198.51.100.24/32,203.0.113.24/32,192.0.2.25/32,198.51.100.25/32,203.0.113.25/32,192.0.2.26/32,198.51.100.26/32,203.0.113.26/31,192.0.2.27/32,198.51.100.27/32,203.0.113.27/32,192.0.2.28/32,198.51.100.28/32,203.0.113.28/32,192.0.2.29/32,198.51.100.29/32,203.0.113.29/32,192.0.2.30/32,198.51.100.30/32,203.0.113.30/32,192.0.2.31/32,198.51.100.31/32,203.0.113.31/32,192.0.2.32/32', '--enable_nat', 'no', '--gw_name', 'byo-x-vpn-aws'], result=Success, reason=, username=admin
+
+# --- API DELETE 204, `host=<controller public ip> ip=<client ip>`, resp_data=None (count: 1,144) ---
+# [splunk] Controller CMD #6
+# @case api-real-delete-204-none
+<14>Nov  3 20:03:16 Controller-10.0.0.131 run_cloudxd.py[456318]: AviatrixAPI: method=DELETE url=/v2.5/k8s/clusters/6aea18a306f557b62f476c15? host=203.0.113.3 ip=198.51.100.32 user=admin req_data={} resp_status=204 NO CONTENT resp_data=None
+
+# --- API POST 400 with EMPTY `ip=` and JSON resp_data error (count: 6,613) ---
+# [splunk] Controller CMD #7
+# @case api-real-post-400-empty-ip
+<14>Jul 16 16:47:45 Controller-10.0.0.141 run_cloudxd.py[1956]: AviatrixAPI: method=POST url=/v2.5/microseg/policy-list3? host=203.0.113.32 ip= user=admin req_data={"attach_to": "defa11a1-3000-4001-0000-000000000000", "name": "zta-individual-segments", "sub_policies": [], "uuid": "3e715a2f-09e2-4986-bdbd-9e110301e370"} resp_status=400 BAD REQUEST resp_data={"message": "[AVXERR-DFW-0043] The attachment point defa11a1-3000-4001-0000-000000000000 already has a target_uuid set to bd3b6613-1f2f-4c9a-bdb5-ab30cc176723"}
+
+# --- API from internal reconciler: host=localhost ip= (count: 1,473) ---
+# [splunk] Controller CMD #8
+# @case api-real-reconciler-localhost
+<14>Jun 10 21:20:42 Controller-10.0.0.141 run_cloudxd.py[2417]: AviatrixAPI: method=POST url=/v2.5/app-domains? host=localhost ip= user=admin req_data={"desc": "Created by assetd firewall policy reconciler", "name": "firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977", "selector": {"any": [{"all": {"cidr": "0.0.0.0/0"}}]}} resp_status=400 BAD REQUEST resp_data={"message": "[AVXERR-SMARTGROUP-0004] Smart Group with name firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977 exists. Smart Group UUID is ed36e4db-b013-429a-8725-19e853773126"}
+
+# --- API with req_data truncated by the controller (`...` inside JSON, so req_data is not valid JSON) (count: 3,631) ---
+# [splunk] Controller CMD #9
+# @case api-real-req-data-truncated
+<14>Sep  1 18:23:08 Controller-10.0.0.141 run_cloudxd.py[2299]: AviatrixAPI: method=PUT url=/v2.5/microseg/policy-list? host=203.0.113.32 ip= user=admin req_data={"policies": [{"name": "n1-n2-10-client-to-n1-data", "action": "PERMIT", "logging": true, "dst_ads": ["8b9954be-d452-4d40-92d6-f2579da7054d"], "src_ads": ["32678529-5e7a-4080-af0b-aeff0cb4e504"], "port_ranges": [{"lo": 443}], "priority": 10, "protocol": "TCP", "flow_app_requirement": "APP_UNSPECIFIED", "decrypt_policy": "DECRYPT_UNSPECIFIED"}, {"name": "n1-n2-11-client-to-n1-control", "action": "PERMIT", "logging": true, "dst_ads": ["d3dfc083-f43d-492f-b532-257f85897324"], "src... resp_status=201 CREATED resp_data={"policies": [{"action": "PERMIT", "ai_inspection_mode": "AI_INSPECTION_DISABLED", "decrypt_policy": "DECRYPT_UNSPECIFIED", "desc": "", "dst_ads": ["8b9954be-d452-4d40-92d6-f2579da7054d"], "exclude_sg_orchestration": false, "flow_app_requirement": "APP_UNSPECIFIED", "log_profile": "", "logging": true, "name": "n1-n2-10-client-to-n1-data", "port_ranges": [{"hi": 0, "lo": 443}], "priority": 10, "protocol": "TCP", "ruleset": 0, "ruleset_name": "", "src_ads": ["32678529-5e7a-4080-af0b-aeff0cb4e50...
+
+# --- RAW: end record with request_bytes but no response_bytes, session_time ~1 day (count: 3) ---
+# [splunk] L7 #6
+# @case mitm-real-end-no-response-bytes avx=8.2
+<153>Dec 10 00:36:21 GW-backend-eks-spoke-198.51.100.38-sink traffic_server[5363]: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"100.64.127.120","src_port":37964,"dest":"203.0.113.38","dest_port":80,"enforced":true,"ids":true,"stage":"txn","sni_hostname":"example3.com","decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","proto":"TCP","session_start":1765240579110927579,"session_time":86402405592960,"session_stage":"end","session_id":"d5bd5032-93dc-46ed-aea2-7ae88bfb3e78","request_bytes":192,"url":"example3.com/","timestamp":1765326981}
+
+# --- JSON only: newest shape, lowercase proto `tcp`, egress_path appended (count: 320,809) ---
+# [splunk] L7 #7
+# @case mitm-real-lowercase-proto-egress-path avx=10.1
+<153>Nov  3 17:56:16 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {"session_stage":"start","reason":"POLICY","enforced":true,"src":"10.10.2.113","session_id":"1682c7e1-2785-4838-ae17-e7aafeffb00c","dest":"203.0.113.37","priority":"LOG_ALERT","session_start":1793728576371733505,"decided_by":"4a2ec33a-cdb3-4820-815a-5a78b8b2731f","src_port":48842,"stage":"SNI","proto":"tcp","action":"Deny","ids":false,"sni_hostname":"example2.com","dest_port":443,"timestamp":1793728576,"egress_path":"EGRESS_PATH_DEFAULT"}
+
+# --- JSON only: txn end with new session_bytes field + egress_path (count: 25,660) ---
+# [splunk] L7 #8
+# @case mitm-real-session-bytes-egress-path avx=10.1
+<153>Sep 21 15:55:37 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {"reason":"POLICY","session_stage":"end","enforced":true,"session_bytes":85,"src":"10.10.2.216","session_id":"ea42bbf7-7f04-4035-aac1-9cc136850346","dest":"198.51.100.39","priority":"LOG_ALERT","session_start":1790006137922125333,"url":"198.51.100.39/","session_time":98217,"decided_by":"b32d68fc-7608-454c-a603-5cc5ce163c5c","src_port":51782,"stage":"txn","proto":"tcp","action":"Deny","ids":false,"sni_hostname":"198.51.100.39","request_bytes":85,"dest_port":80,"timestamp":1790006137,"egress_path":"EGRESS_PATH_DEFAULT"}
+
+# --- JSON only: UDP, stage `Unknown`, reason IDS_POLICY_ALERT, `sid` (string), no sni_hostname (count: 26) ---
+# [splunk] L7 #9
+# @case mitm-real-udp-stage-unknown-ids-alert avx=10.1
+<153>Sep 10 15:03:19 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {"enforced":true,"reason":"IDS_POLICY_ALERT","session_stage":"end","src":"10.10.1.177","session_id":"2e4b212b-1221-4f0f-8dca-bf3aa5c79a2f","dest":"203.0.113.39","priority":"LOG_ALERT","session_start":1789052599049892147,"session_time":17795,"decided_by":"81d10deb-0898-4774-aab1-b7dc5750afa4","sid":"2014169","src_port":43937,"stage":"Unknown","proto":"udp","action":"Deny","ids":true,"dest_port":53,"timestamp":1789052599,"egress_path":"EGRESS_PATH_DEFAULT"}
+
+# --- JSON only: tls_check with stage Unknown, LOG_ALERT, message `Failed to get origin cert`, action Deny (count: 9) ---
+# [splunk] L7 #11
+# @case mitm-real-tls-check-stage-unknown avx=10.1
+<153>Mar  4 00:18:45 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {"reason":"TLS_PROFILE","enforced":true,"session_stage":"tls_check","src":"10.0.2.246","session_id":"7061dc2e-057e-40c9-98a5-108f44926d47","dest":"203.0.113.32","priority":"LOG_ALERT","message":"Failed to get origin cert","session_start":1772583448132494898,"session_time":76946121741,"decided_by":"e569594b-d4da-46fe-85cf-a66f32c73dee","src_port":48386,"stage":"Unknown","proto":"TCP","ids":false,"action":"Deny","dest_port":443,"timestamp":1772583525}
+
+# --- JSON only: SNI_ORIGIN_VERIFY, priority LOG_INFO (count: 2) ---
+# [splunk] L7 #12
+# @case mitm-real-sni-origin-verify-log-info avx=10.1
+<158>Dec  9 18:36:14 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {"reason":"TLS_PROFILE","session_stage":"tls_check","enforced":true,"src":"100.64.10.182","session_id":"100d7ee7-7d4a-4b86-9832-02eea8ff1a74","message":"SNI verification failed","dest":"192.0.2.40","priority":"LOG_INFO","session_start":1765305374621473818,"session_time":192433,"decided_by":"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a","src_port":57548,"stage":"SNI_ORIGIN_VERIFY","proto":"TCP","action":"Deny","ids":true,"sni_hostname":"h1.example4.com","dest_port":443,"timestamp":1765305374}
+
+# --- JSON only: url present but no sni_hostname (plain-IP HTTP, non-standard port) (count: 215) ---
+# [splunk] L7 #13
+# @case mitm-real-url-no-sni avx=8.2
+<153>Mar  8 00:20:50 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {"reason":"POLICY","enforced":true,"session_stage":"start","src":"10.0.4.237","session_id":"06cc7aca-43c9-444e-bd40-adc18a1c2eba","dest":"10.0.69.227","priority":"LOG_ALERT","session_start":1772929250815846577,"url":"/","decided_by":"f8d91e27-a99b-46fe-93ff-8c40758bafd2","src_port":53330,"stage":"txn","proto":"TCP","action":"Permit","ids":true,"dest_port":5432,"timestamp":1772929250}
+
+# --- RAW: alert, http, with files[] and tx_guessed, alert.policy_id empty string (count: 12 raw lines total) ---
+# [splunk] Suricata #1
+# @case suricata-real-http-files-tx-guessed
+<174>Dec  9 00:10:24 GW-backend-eks-spoke-198.51.100.38-sink suricata[4]: {"timestamp":"2025-12-09T00:10:24.067396+0000","flow_id":2225331147839834,"pcap_cnt":21598,"event_type":"alert","src_ip":"198.51.100.40","src_port":80,"dest_ip":"100.64.93.36","dest_port":48696,"proto":"TCP","pkt_src":"wire/pcap","tx_id":0,"tx_guessed":true,"alert":{"action":"allowed","gid":1,"signature_id":2100498,"rev":7,"signature":"GPL ATTACK_RESPONSE id check returned root","category":"Potentially Bad Traffic","severity":2,"metadata":{"confidence":["Medium"],"created_at":["2010_09_23"],"signature_severity":["Informational"],"updated_at":["2019_07_26"]},"policy_id":""},"http":{"hostname":"example3.com","url":"http:///uid/index.html","http_user_agent":"curl/7.81.0","http_content_type":"text/html","http_method":"GET","protocol":"HTTP/1.1","status":200,"length":40},"files":[{"filename":"/uid/index.html","gaps":true,"state":"TRUNCATED","stored":false,"size":40,"tx_id":0}],"app_proto":"http","direction":"to_client","flow":{"pkts_toserver":5,"pkts_toclient":5,"bytes_toserver":299,"bytes_toclient":738,"start":"2025-12-09T00:10:23.976877+0000","src_ip":"100.64.93.36","dest_ip":"198.51.100.40","src_port":48696,"dest_port":80}}
+
+# --- RAW: flow-timeout alert: pkt_src `stream (flow timeout)`, http:{} empty object, no pcap_cnt, no alert.policy_id ---
+# [splunk] Suricata #2
+# @case suricata-real-flow-timeout-empty-http
+<174>Dec  9 00:11:28 GW-backend-eks-spoke-198.51.100.38-sink suricata[4]: {"timestamp":"2025-12-09T00:11:28.038198+0000","flow_id":2225331147839834,"event_type":"alert","src_ip":"198.51.100.40","src_port":80,"dest_ip":"100.64.93.36","dest_port":48696,"proto":"TCP","pkt_src":"stream (flow timeout)","tx_id":1,"tx_guessed":true,"alert":{"action":"allowed","gid":1,"signature_id":2100498,"rev":7,"signature":"GPL ATTACK_RESPONSE id check returned root","category":"Potentially Bad Traffic","severity":2,"metadata":{"confidence":["Medium"],"created_at":["2010_09_23"],"signature_severity":["Informational"],"updated_at":["2019_07_26"]}},"http":{},"app_proto":"http","direction":"to_client","flow":{"pkts_toserver":6,"pkts_toclient":6,"bytes_toserver":339,"bytes_toclient":778,"start":"2025-12-09T00:10:23.976877+0000","src_ip":"100.64.93.36","dest_ip":"198.51.100.40","src_port":48696,"dest_port":80}}
+
+# --- RAW: non-JSON suricata Warning (startup) ---
+# [splunk] Suricata #3
+# @case suricata-real-warning-non-json
+<174>Dec  9 00:00:22 GW-frontend-eks-spoke-203.0.113.1-sink suricata[24063]: Warning: counters: stats are enabled but no loggers are active [StatsInitCtxPostOutput:counters.c:317]
+
+# --- RAW: non-JSON suricata Error ---
+# [splunk] Suricata #4
+# @case suricata-real-error-non-json
+<174>Dec  9 00:00:22 GW-frontend-eks-spoke-203.0.113.1-sink suricata[24063]: Error: affinity: worker-cpu-set: upper bound (2) of cpu set is too high, only 2 cpu(s) [BuildCpusetWithCallback:util-affinity.c:130]
+
+# --- JSON only (2026-09): dns alert, no alert.action key at all, alert.session_id "", ip_v (count: 35) ---
+# [splunk] Suricata #7
+# @case suricata-real-dns-alert-no-action avx=10.0
+<174>Sep 10 14:32:38 GW-egress-spoke-198.51.100.44-sink suricata[4]: {"pcap_cnt":302,"event_type":"alert","direction":"to_server","app_proto":"dns","flow_id":1909643457098901,"flow":{"bytes_toserver":75,"pkts_toclient":0,"dest_port":53,"src_ip":"10.10.1.177","dest_ip":"203.0.113.39","src_port":35049,"pkts_toserver":1,"bytes_toclient":0,"start":"2026-09-10T14:32:38.837839+0000"},"dest_ip":"203.0.113.39","proto":"UDP","tx_id":0,"timestamp":"2026-09-10T14:32:38.837839+0000","pkt_src":"wire/pcap","dns":{"version":3,"id":877,"type":"request","opcode":0,"rcode":"NOERROR","flags":"120","queries":[{"rrname":"example5.com","rrtype":"A"}],"tx_id":0,"rd":true,"additionals":[{"opt":[{"code":10,"data":"f2aa44e0c48ded5f"}],"rrname":"","rrtype":"OPT","ttl":0}]},"dest_port":53,"ip_v":4,"src_ip":"10.10.1.177","src_port":35049,"alert":{"metadata":{"updated_at":["2020_09_14"],"confidence":["Medium"],"created_at":["2012_01_31"],"signature_severity":["Major"]},"severity":2,"policy_id":"81d10deb-0898-4774-aab1-b7dc5750afa4","signature":"ET DNS Query for .su TLD (Soviet Union) Often Malware Related","rev":4,"signature_id":2014169,"category":"Potentially Bad Traffic","gid":1,"session_id":""}}
+
+# --- JSON only (2026-09): tls alert with ja3/ja4/client_alpns, MITRE metadata (count: 6) ---
+# [splunk] Suricata #8
+# @case suricata-real-tls-ja3-ja4-mitre avx=10.0
+<174>Sep 10 14:31:57 GW-egress-spoke-198.51.100.44-sink suricata[4]: {"pcap_cnt":67,"event_type":"alert","tc_progress":"server_in_progress","app_proto":"tls","flow_id":1493962827218914,"direction":"to_server","flow":{"bytes_toserver":1700,"pkts_toclient":1,"dest_port":443,"src_ip":"10.10.1.177","dest_ip":"192.0.2.41","src_port":55378,"pkts_toserver":3,"bytes_toclient":40,"start":"2026-09-10T14:31:57.413376+0000"},"dest_ip":"192.0.2.41","proto":"TCP","tx_id":0,"timestamp":"2026-09-10T14:31:57.460883+0000","pkt_src":"wire/pcap","dest_port":443,"ip_v":4,"ts_progress":"client_hello_done","src_ip":"10.10.1.177","src_port":55378,"tls":{"version":"TLS 1.3","sni":"h1.example6.com","ja3":{"string":"771,4866-4867-4865-49196-49200-159-52393-52392-52394-49195-49199-158-49188-49192-107-49187-49191-103-49162-49172-57-49161-49171-51-157-156-61-60-53-47,65281-0-11-10-16-22-23-49-13-43-45-51-27,4588-29-23-30-24-25-256-257,0-1-2","hash":"32e4b8812cda0c0d50783b438492a769"},"client_alpns":["h2","http/1.1"],"ja4":"t13d3013h2_1d37bd780c83_8537cf56674e"},"alert":{"metadata":{"updated_at":["2024_06_26"],"performance_impact":["Low"],"reviewed_at":["2024_10_04"],"signature_severity":["Informational"],"deployment":["Perimeter"],"affected_product":["Any"],"confidence":["High"],"created_at":["2024_06_26"],"attack_target":["Client_Endpoint"]},"severity":3,"policy_id":"81d10deb-0898-4774-aab1-b7dc5750afa4","signature":"ET INFO Observed Pastebin-like Service Domain (cryptpad .disroot .org) in TLS SNI","rev":1,"signature_id":2053979,"category":"Misc activity","gid":1,"session_id":"4207c558-5486-49bd-ba82-3f6c71e52bb5"}}
+
+# --- JSON only (2026-09): http alert with ts_progress/tc_progress, http.url `http:///` (empty host) (count: 24) ---
+# [splunk] Suricata #9
+# @case suricata-real-http-empty-host-url avx=10.0
+<174>Sep 10 14:32:59 GW-egress-spoke-198.51.100.44-sink suricata[4]: {"pcap_cnt":393,"event_type":"alert","tc_progress":"response_started","app_proto":"http","flow_id":1055309731693262,"direction":"to_server","http":{"length":0,"hostname":"example7.com","http_method":"GET","protocol":"HTTP/1.1","url":"http:///","http_user_agent":"curl/8.14.1"},"flow":{"bytes_toserver":201,"pkts_toclient":1,"dest_port":80,"src_ip":"10.10.1.177","dest_ip":"198.51.100.41","src_port":44978,"pkts_toserver":3,"bytes_toclient":40,"start":"2026-09-10T14:32:59.442316+0000"},"dest_ip":"198.51.100.41","proto":"TCP","tx_id":0,"timestamp":"2026-09-10T14:32:59.484852+0000","pkt_src":"wire/pcap","dest_port":80,"ip_v":4,"ts_progress":"request_complete","src_ip":"10.10.1.177","src_port":44978,"alert":{"metadata":{"signature_severity":["Informational"],"deployment":["Perimeter"],"created_at":["2015_11_13"],"mitre_technique_name":["System_Location_Discovery"],"updated_at":["2024_11_26"],"performance_impact":["Low"],"mitre_technique_id":["T1614"],"mitre_tactic_id":["TA0007"],"confidence":["High"],"mitre_tactic_name":["Discovery"],"attack_target":["Client_Endpoint"]},"severity":2,"policy_id":"81d10deb-0898-4774-aab1-b7dc5750afa4","signature":"ET POLICY External IP Lookup example7.com","rev":6,"signature_id":2022082,"category":"Device Retrieving External IP Address Detected","gid":1,"session_id":"7ba00e36-cb5e-429a-ad02-cc58ada12d63"}}
+
+# --- JSON only (2026-03): http alert with xff, alert.action nested (count: 5) ---
+# [splunk] Suricata #10
+# @case suricata-real-http-xff
+<174>Mar 25 16:16:03 GW-egress-spoke-198.51.100.44-sink suricata[4]: {"flow_id":1103538019779224,"event_type":"alert","dest_ip":"10.1.3.5","proto":"TCP","alert":{"policy_id":"87eb7aa4-5c63-4479-b5ae-bc35105c69e2","severity":1,"signature_id":2024364,"rev":4,"signature":"ET SCAN Possible Nmap User-Agent Observed","gid":1,"category":"Web Application Attack","metadata":{"reviewed_at":["2024_05_06"],"signature_severity":["Informational"],"updated_at":["2020_08_06"],"confidence":["Medium"],"attack_target":["Client_and_Server"],"affected_product":["Any"],"deployment":["Perimeter"],"performance_impact":["Low"],"created_at":["2017_06_08"]},"action":"allowed"},"src_port":80,"tx_id":0,"flow":{"dest_port":80,"bytes_toclient":80,"dest_ip":"10.2.1.10","src_port":53160,"pkts_toserver":3,"bytes_toserver":486,"pkts_toclient":2,"start":"2026-03-25T16:16:03.453545+0000","src_ip":"10.1.3.5"},"http":{"http_method":"HEAD","protocol":"HTTP/1.1","length":0,"hostname":"localhost.localdomain","http_user_agent":"Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)","xff":"127.0.0.1:49498","url":"http:///"},"app_proto":"http","direction":"to_client","timestamp":"2026-03-25T16:16:03.496548+0000","pkt_src":"wire/pcap","src_ip":"10.2.1.10","dest_port":53160,"pcap_cnt":37448}
+
+# --- active: Logout/Duration/RX/TX = N/A, GatewayIP empty, VPNClientVersion=None (count: 51) ---
+# [splunk] VPN #1
+# @case vpn-real-active-client-version-none
+<14>Apr 16 21:09:06 Controller-10.0.0.141 run_cloudxd.py[16576]: AviatrixVPNSession: User=ci-runner, Status=active, Gateway=n7-runners-vpn, GatewayIP=, VPNVirtualIP=192.168.44.6, PublicIP=203.0.113.41, Login=2026-04-16 21:09:05, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=linux, VPNClientVersion=None
+
+# --- Real client platform/version (mac, AVPNC-2.17.7) via Splunk UDP (prefix stripped) (count: 3) ---
+# [splunk] VPN #3
+# @case vpn-real-mac-client
+<14>Mar 10 12:37:41 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=user1, Status=active, Gateway=egress-vpn-gw, GatewayIP=, VPNVirtualIP=192.168.43.6, PublicIP=198.51.100.32, Login=2026-03-10 12:37:39, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=mac, VPNClientVersion=AVPNC-2.17.7
+
+# --- Unsupported Aviatrix event (would be tagged `unparsed`) (count: 3) ---
+# [splunk] Other #1
+# @case unparsed-real-gateway-created
+<14>Mar  3 01:05:22 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayCreated: gwname=insertion-gw-dev-agent
+
+# --- Unsupported Aviatrix event (would be tagged `unparsed`) (count: 5) ---
+# [splunk] Other #2
+# @case unparsed-real-gateway-deleted
+<14>Mar  3 00:57:04 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayDeleted: gwname=dev-agent-vpn-gw vpc_id=vpc-0abc0123456789def lb_name=None
+
+# --- Unsupported Aviatrix event (would be tagged `unparsed`) (count: 4) ---
+# [splunk] Other #3
+# @case unparsed-real-gateway-initialized
+<14>Mar  3 01:05:22 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayInitialized: gwname=insertion-gw-dev-agent
+
+# --- Unsupported Aviatrix event (would be tagged `unparsed`) (count: 1) ---
+# [splunk] Other #4
+# @case unparsed-real-gateway-status-no-pri
+Mar  9 20:28:25 Controller-10.0.0.141 run_cloudxd.py[94463]: AviatrixGatewayStatusChanged: gwname=egress-vpn-gw status=up time=2026-03-09 20:28:25.424108
+
+# --- Unsupported Aviatrix event (would be tagged `unparsed`) (count: 3) ---
+# [splunk] Other #5
+# @case unparsed-real-license-vpn-users-no-pri
+Mar 10 12:38:17 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixLicenseVPNUsers: users=0

@@ -1,0 +1,42 @@
+{
+  "case": "mitm-route53-session-end",
+  "input": "<153>Mar  4 22:57:47 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"100.64.166.42\",\"src_port\":49870,\"dest\":\"44.216.197.17\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"SNI\",\"sni_hostname\":\"route53.amazonaws.com\",\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"proto\":\"TCP\",\"session_start\":1772665067781174508,\"session_time\":6405635612,\"session_stage\":\"end\",\"session_id\":\"fb9125c3-e756-4e23-b545-034cc18ccef9\",\"request_bytes\":7598,\"response_bytes\":9859,\"timestamp\":1772665067}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Permit",
+              "decided_by": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+              "dest": "44.216.197.17",
+              "dest_port": 443,
+              "enforced": true,
+              "ids": true,
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "POLICY",
+              "request_bytes": 7598,
+              "response_bytes": 9859,
+              "session_id": "fb9125c3-e756-4e23-b545-034cc18ccef9",
+              "session_stage": "end",
+              "session_start": 1772665067781174508,
+              "session_time": 6405635612,
+              "sni_hostname": "route53.amazonaws.com",
+              "src": "100.64.166.42",
+              "src_port": 49870,
+              "stage": "SNI",
+              "timestamp": "YYYY-03-04T22:57:47.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-04T22:57:47.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

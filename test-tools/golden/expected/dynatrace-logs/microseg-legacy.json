@@ -1,0 +1,33 @@
+{
+  "avx": {
+    "until": "7.2"
+  },
+  "case": "microseg-legacy",
+  "input": "<14>Mar  4 22:54:27 avx-gw-test AviatrixGwMicrosegPacket: SRC_MAC=aa:bb:cc:dd:ee:ff DST_MAC=11:22:33:44:55:66 PROTO=TCP SPT=443 DPT=8080 ACTION=PERMIT",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "PERMIT",
+          "aviatrix.dcf.dst_ip": "unknown",
+          "aviatrix.dcf.dst_port": 8080,
+          "aviatrix.dcf.enforced": "unknown",
+          "aviatrix.dcf.gateway": "avx-gw-test",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "legacy-format",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.src_ip": "unknown",
+          "aviatrix.dcf.src_port": 443,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Allow: unknown:443 -> unknown:8080 TCP",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T22:54:27.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

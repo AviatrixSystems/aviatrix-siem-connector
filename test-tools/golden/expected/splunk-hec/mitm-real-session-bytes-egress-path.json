@@ -1,0 +1,47 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-session-bytes-egress-path",
+  "input": "<153>Sep 21 15:55:37 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"POLICY\",\"session_stage\":\"end\",\"enforced\":true,\"session_bytes\":85,\"src\":\"10.10.2.216\",\"session_id\":\"ea42bbf7-7f04-4035-aac1-9cc136850346\",\"dest\":\"198.51.100.39\",\"priority\":\"LOG_ALERT\",\"session_start\":1790006137922125333,\"url\":\"198.51.100.39/\",\"session_time\":98217,\"decided_by\":\"b32d68fc-7608-454c-a603-5cc5ce163c5c\",\"src_port\":51782,\"stage\":\"txn\",\"proto\":\"tcp\",\"action\":\"Deny\",\"ids\":false,\"sni_hostname\":\"198.51.100.39\",\"request_bytes\":85,\"dest_port\":80,\"timestamp\":1790006137,\"egress_path\":\"EGRESS_PATH_DEFAULT\"}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Deny",
+              "decided_by": "b32d68fc-7608-454c-a603-5cc5ce163c5c",
+              "dest": "198.51.100.39",
+              "dest_port": 80,
+              "egress_path": "EGRESS_PATH_DEFAULT",
+              "enforced": true,
+              "ids": false,
+              "priority": "LOG_ALERT",
+              "proto": "tcp",
+              "reason": "POLICY",
+              "request_bytes": 85,
+              "session_bytes": 85,
+              "session_id": "ea42bbf7-7f04-4035-aac1-9cc136850346",
+              "session_stage": "end",
+              "session_start": 1790006137922125333,
+              "session_time": 98217,
+              "sni_hostname": "198.51.100.39",
+              "src": "10.10.2.216",
+              "src_port": 51782,
+              "stage": "txn",
+              "timestamp": "YYYY-09-21T15:55:37.000Z (epoch)",
+              "url": "198.51.100.39/"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-09-21T15:55:37.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

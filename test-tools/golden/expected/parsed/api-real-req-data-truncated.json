@@ -1,0 +1,35 @@
+{
+  "case": "api-real-req-data-truncated",
+  "input": "<14>Sep  1 18:23:08 Controller-10.0.0.141 run_cloudxd.py[2299]: AviatrixAPI: method=PUT url=/v2.5/microseg/policy-list? host=203.0.113.32 ip= user=admin req_data={\"policies\": [{\"name\": \"n1-n2-10-client-to-n1-data\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e504\"], \"port_ranges\": [{\"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\"}, {\"name\": \"n1-n2-11-client-to-n1-control\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"d3dfc083-f43d-492f-b532-257f85897324\"], \"src... resp_status=201 CREATED resp_data={\"policies\": [{\"action\": \"PERMIT\", \"ai_inspection_mode\": \"AI_INSPECTION_DISABLED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\", \"desc\": \"\", \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"exclude_sg_orchestration\": false, \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"log_profile\": \"\", \"logging\": true, \"name\": \"n1-n2-10-client-to-n1-data\", \"port_ranges\": [{\"hi\": 0, \"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"ruleset\": 0, \"ruleset_name\": \"\", \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e50...",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-09-01T18:23:08.000Z",
+          "action": "/v2.5/microseg/policy-list",
+          "api_host": "203.0.113.32",
+          "args": "{\"policies\": [{\"name\": \"n1-n2-10-client-to-n1-data\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e504\"], \"port_ranges\": [{\"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\"}, {\"name\": \"n1-n2-11-client-to-n1-control\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"d3dfc083-f43d-492f-b532-257f85897324\"], \"src...",
+          "controller_ip": "10.0.0.141",
+          "event": {
+            "original": "<14>Sep  1 18:23:08 Controller-10.0.0.141 run_cloudxd.py[2299]: AviatrixAPI: method=PUT url=/v2.5/microseg/policy-list? host=203.0.113.32 ip= user=admin req_data={\"policies\": [{\"name\": \"n1-n2-10-client-to-n1-data\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e504\"], \"port_ranges\": [{\"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\"}, {\"name\": \"n1-n2-11-client-to-n1-control\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"d3dfc083-f43d-492f-b532-257f85897324\"], \"src... resp_status=201 CREATED resp_data={\"policies\": [{\"action\": \"PERMIT\", \"ai_inspection_mode\": \"AI_INSPECTION_DISABLED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\", \"desc\": \"\", \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"exclude_sg_orchestration\": false, \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"log_profile\": \"\", \"logging\": true, \"name\": \"n1-n2-10-client-to-n1-data\", \"port_ranges\": [{\"hi\": 0, \"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"ruleset\": 0, \"ruleset_name\": \"\", \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e50..."
+          },
+          "gw_hostname": "Controller-10.0.0.141",
+          "http_method": "PUT",
+          "message": "<14>Sep  1 18:23:08 Controller-10.0.0.141 run_cloudxd.py[2299]: AviatrixAPI: method=PUT url=/v2.5/microseg/policy-list? host=203.0.113.32 ip= user=admin req_data={\"policies\": [{\"name\": \"n1-n2-10-client-to-n1-data\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e504\"], \"port_ranges\": [{\"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\"}, {\"name\": \"n1-n2-11-client-to-n1-control\", \"action\": \"PERMIT\", \"logging\": true, \"dst_ads\": [\"d3dfc083-f43d-492f-b532-257f85897324\"], \"src... resp_status=201 CREATED resp_data={\"policies\": [{\"action\": \"PERMIT\", \"ai_inspection_mode\": \"AI_INSPECTION_DISABLED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\", \"desc\": \"\", \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"exclude_sg_orchestration\": false, \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"log_profile\": \"\", \"logging\": true, \"name\": \"n1-n2-10-client-to-n1-data\", \"port_ranges\": [{\"hi\": 0, \"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"ruleset\": 0, \"ruleset_name\": \"\", \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e50...",
+          "reason": "{\"policies\": [{\"action\": \"PERMIT\", \"ai_inspection_mode\": \"AI_INSPECTION_DISABLED\", \"decrypt_policy\": \"DECRYPT_UNSPECIFIED\", \"desc\": \"\", \"dst_ads\": [\"8b9954be-d452-4d40-92d6-f2579da7054d\"], \"exclude_sg_orchestration\": false, \"flow_app_requirement\": \"APP_UNSPECIFIED\", \"log_profile\": \"\", \"logging\": true, \"name\": \"n1-n2-10-client-to-n1-data\", \"port_ranges\": [{\"hi\": 0, \"lo\": 443}], \"priority\": 10, \"protocol\": \"TCP\", \"ruleset\": 0, \"ruleset_name\": \"\", \"src_ads\": [\"32678529-5e7a-4080-af0b-aeff0cb4e50...",
+          "result": "201 CREATED",
+          "tags": [
+            "cmd",
+            "V2.5API"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-09-01T18:23:08.000Z (epoch)",
+          "username": "admin"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

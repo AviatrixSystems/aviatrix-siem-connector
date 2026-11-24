@@ -1,0 +1,60 @@
+{
+  "case": "sysstats-real-cpu-cores-double-space",
+  "input": "<14>Sep 10 14:23:50 GW-n3-fs-b-192.0.2.6-sink /usr/local/bin/avx-gw-state-sync 2026/09/10 14:23:50 AviatrixGwSysStats: timestamp=2026-09-10T14:23:47.689223362 name=n3-fs-b alias=n3-fs-b cpu_idle=33 memory_free=570860 memory_available=2306652 memory_total=3693176 disk_total=65842432 disk_free=52849644 cpu_cores=[busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59} name:1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:97  avg:59} name:-1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59}]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-09-10T14:23:50.000Z",
+          "alias": "n3-fs-b",
+          "cpu_aggregate_busy_avg": 59,
+          "cpu_aggregate_busy_max": 98,
+          "cpu_aggregate_busy_min": 48,
+          "cpu_busy": 59,
+          "cpu_core_count": 2,
+          "cpu_cores": "[busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59} name:1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:97  avg:59} name:-1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59}]",
+          "cpu_cores_parsed": [
+            {
+              "busy_avg": 59,
+              "busy_max": 98,
+              "busy_min": 48,
+              "name": "0"
+            },
+            {
+              "busy_avg": 59,
+              "busy_max": 97,
+              "busy_min": 48,
+              "name": "1"
+            },
+            {
+              "busy_avg": 59,
+              "busy_max": 98,
+              "busy_min": 48,
+              "name": "-1"
+            }
+          ],
+          "cpu_idle": 33,
+          "disk_free": 52849644,
+          "disk_total": 65842432,
+          "event": {
+            "original": "<14>Sep 10 14:23:50 GW-n3-fs-b-192.0.2.6-sink /usr/local/bin/avx-gw-state-sync 2026/09/10 14:23:50 AviatrixGwSysStats: timestamp=2026-09-10T14:23:47.689223362 name=n3-fs-b alias=n3-fs-b cpu_idle=33 memory_free=570860 memory_available=2306652 memory_total=3693176 disk_total=65842432 disk_free=52849644 cpu_cores=[busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59} name:1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:97  avg:59} name:-1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59}]"
+          },
+          "gateway": "n3-fs-b",
+          "memory_available": 2306652,
+          "memory_free": 570860,
+          "memory_total": 3693176,
+          "message": "<14>Sep 10 14:23:50 GW-n3-fs-b-192.0.2.6-sink /usr/local/bin/avx-gw-state-sync 2026/09/10 14:23:50 AviatrixGwSysStats: timestamp=2026-09-10T14:23:47.689223362 name=n3-fs-b alias=n3-fs-b cpu_idle=33 memory_free=570860 memory_available=2306652 memory_total=3693176 disk_total=65842432 disk_free=52849644 cpu_cores=[busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59} name:1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:97  avg:59} name:-1  busy:{start:{seconds:1789050185  nanos:429629408}  end:{seconds:1789050225  nanos:429404749}  min:48  max:98  avg:59}]",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-09-10T14:23:50.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

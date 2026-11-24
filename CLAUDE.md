@@ -71,7 +71,7 @@ logstash-configs/
 │   ├── 18-vpn-session.conf              # VPN session connect/disconnect
 │   ├── 90-timestamp.conf                # Date normalization (SYSLOG_TIMEZONE, default UTC)
 │   ├── 94-save-raw-net-rates.conf       # Raw net-rate strings → [@metadata]
-│   ├── 95-field-conversion.conf         # Type conversions (net rates → float bytes/s)
+│   ├── 95-field-conversion.conf         # Type conversions (net rates → float bits/s)
 │   ├── 96-sys-stats-hec.conf            # gw_sys_stats HEC payload builder
 │   └── 97-tag-unparsed.conf             # Tag events with no type tag as "unparsed"
 ├── outputs/                             # Output-specific configs
@@ -118,6 +118,7 @@ test-tools/
 │   ├── stream-logs.py                   # Syslog streamer for testing
 │   ├── update-timestamps.py             # Rewrite all timestamps to current UTC window
 │   └── generate-current-samples.sh      # Wrapper around update-timestamps.py
+├── golden/                              # Golden I/O tests: golden.py + expected/<output>/<case>.json
 ├── ci/                                  # CI helpers (output-env-vars.sh, validate-output.sh)
 ├── syslog-collector/                    # Internal only: gitignored, not in a fresh clone
 └── webhook-viewer/
@@ -291,13 +292,23 @@ When editing or building Logstash configurations, use the following test workflo
    ./stream-logs.py --list-types               # Show available filters
    ```
 
-2. **Webhook Viewer** (`test-tools/webhook-viewer/local/`)
+   - `edge-cases.log` - variants, release-specific formats (9.0, 10.1), known bugs and negative cases, sourced from cloudn, CoPilot/oteld and the lab Splunk. Read only by the golden tests, not the E2E count check
+   - Every sample line has a `# @case <id> [avx=<first release>] [until=<last release>]` annotation
+
+2. **Golden I/O tests** (`test-tools/golden/`, see its README)
+   - Field-by-field expected output per case for `parsed`, `splunk-hec`, `dynatrace-logs`, `azure-log-ingestion`
+   - `./golden.py check [--output X] [--case REGEX] [--avx 10.1]` diffs the engine against `expected/`; `generate` accepts new behavior after review
+   - `./golden.py azure-columns` flags fields the Azure DCR would drop and column type mismatches
+   - Engine-agnostic: the Fluent Bit port is tested against the same expected files
+   - Needs ~1 GB free in the Docker/Podman VM (test JVM is capped at 512 MB)
+
+3. **Webhook Viewer** (`test-tools/webhook-viewer/local/`)
    - Local Docker-based webhook endpoint for testing HTTP outputs
    - Start: `cd test-tools/webhook-viewer/local && ./run.sh`
    - Access UI: http://localhost:8080
    - Create a session to get a unique webhook URL
 
-3. **Syslog Collector** (`test-tools/syslog-collector/`, internal, not shipped)
+4. **Syslog Collector** (`test-tools/syslog-collector/`, internal, not shipped)
    - AWS EC2 deployment for capturing live Aviatrix logs
 
 ### Testing Workflow

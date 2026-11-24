@@ -1,0 +1,39 @@
+{
+  "case": "mitm-ssm-endpoint",
+  "input": "<153>Mar  4 22:57:30 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"10.10.1.163\",\"src_port\":43374,\"dest\":\"3.146.9.169\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"SNI\",\"sni_hostname\":\"ssm.us-east-2.amazonaws.com\",\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"proto\":\"TCP\",\"session_start\":1772665050697574397,\"session_stage\":\"start\",\"session_id\":\"1247e3cb-49f1-49f8-85f3-6233cc297b24\",\"timestamp\":1772665050}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Permit",
+              "decided_by": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+              "dest": "3.146.9.169",
+              "dest_port": 443,
+              "enforced": true,
+              "ids": true,
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "POLICY",
+              "session_id": "1247e3cb-49f1-49f8-85f3-6233cc297b24",
+              "session_stage": "start",
+              "session_start": 1772665050697574397,
+              "sni_hostname": "ssm.us-east-2.amazonaws.com",
+              "src": "10.10.1.163",
+              "src_port": 43374,
+              "stage": "SNI",
+              "timestamp": "YYYY-03-04T22:57:30.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-04T22:57:30.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "10.0"
+  },
+  "case": "microseg-real-end-reason-2",
+  "input": "<158>Dec  9 15:16:42 GW-frontend-eks-spoke-203.0.113.1-sink /usr/local/bin/avx-gw-state-sync 2025/12/09 15:16:42 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=40 SRC_IP=100.64.17.166 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=40136 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=4113820858146262443 SESSION_EVENT=1 SESSION_END_REASON=2 SESSION_PKT_CNT=3 SESSION_BYTE_CNT=36864 SESSION_DUR=185346",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-12-09T15:16:42.000Z",
+          "DstIpAddr": "10.5.0.8",
+          "DstMacAddr": "02:55:21:72:8c:63",
+          "DstPortNumber": 80,
+          "DvcAction": "Allow",
+          "DvcHostname": "frontend-eks-spoke",
+          "DvcIpAddr": "203.0.113.1",
+          "DvcOriginalAction": "PERMIT",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-12-09T15:16:42.000Z",
+          "EventOriginalResultDetails": "tcp-rst",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "NetworkSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-12-09T15:16:42.000Z",
+          "EventSubType": "End",
+          "EventType": "NetworkSession",
+          "EventVendor": "Aviatrix",
+          "NetworkBytes": 36864,
+          "NetworkDuration": 0,
+          "NetworkPackets": 3,
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "51321a3b-e5e2-4ab3-9594-e97a51799e15",
+          "NetworkSessionId": "4113820858146262443",
+          "SrcIpAddr": "100.64.17.166",
+          "SrcMacAddr": "02:64:c0:e4:c9:b1",
+          "SrcPortNumber": 40136,
+          "TimeGenerated": "YYYY-12-09T15:16:42.000Z",
+          "action": "PERMIT",
+          "dst_ip": "10.5.0.8",
+          "dst_mac": "02:55:21:72:8c:63",
+          "dst_port": 80,
+          "enforced": true,
+          "gw_hostname": "frontend-eks-spoke",
+          "gw_ip": "203.0.113.1",
+          "ip_size": "40",
+          "proto": "TCP",
+          "session_byte_cnt": "36864",
+          "session_dur": "185346",
+          "session_end_reason": "2",
+          "session_end_reason_text": "tcp-rst",
+          "session_event": "1",
+          "session_event_type": "End",
+          "session_id": "4113820858146262443",
+          "session_pkt_cnt": "3",
+          "src_ip": "100.64.17.166",
+          "src_mac": "02:64:c0:e4:c9:b1",
+          "src_port": 40136,
+          "tags": [
+            "microseg",
+            "ebpf"
+          ],
+          "unix_time": "YYYY-12-09T15:16:42.000Z (epoch)",
+          "uuid": "51321a3b-e5e2-4ab3-9594-e97a51799e15"
+        }
+      ],
+      "path": "/azure/azure-microseg"
+    }
+  ]
+}

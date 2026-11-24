@@ -1,0 +1,46 @@
+{
+  "case": "api-real-post-400-empty-ip",
+  "input": "<14>Jul 16 16:47:45 Controller-10.0.0.141 run_cloudxd.py[1956]: AviatrixAPI: method=POST url=/v2.5/microseg/policy-list3? host=203.0.113.32 ip= user=admin req_data={\"attach_to\": \"defa11a1-3000-4001-0000-000000000000\", \"name\": \"zta-individual-segments\", \"sub_policies\": [], \"uuid\": \"3e715a2f-09e2-4986-bdbd-9e110301e370\"} resp_status=400 BAD REQUEST resp_data={\"message\": \"[AVXERR-DFW-0043] The attachment point defa11a1-3000-4001-0000-000000000000 already has a target_uuid set to bd3b6613-1f2f-4c9a-bdb5-ab30cc176723\"}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-07-16T16:47:45.000Z",
+          "action": "/v2.5/microseg/policy-list3",
+          "api_host": "203.0.113.32",
+          "args": {
+            "__json_string__": {
+              "attach_to": "defa11a1-3000-4001-0000-000000000000",
+              "name": "zta-individual-segments",
+              "sub_policies": [],
+              "uuid": "3e715a2f-09e2-4986-bdbd-9e110301e370"
+            }
+          },
+          "controller_ip": "10.0.0.141",
+          "event": {
+            "original": "<14>Jul 16 16:47:45 Controller-10.0.0.141 run_cloudxd.py[1956]: AviatrixAPI: method=POST url=/v2.5/microseg/policy-list3? host=203.0.113.32 ip= user=admin req_data={\"attach_to\": \"defa11a1-3000-4001-0000-000000000000\", \"name\": \"zta-individual-segments\", \"sub_policies\": [], \"uuid\": \"3e715a2f-09e2-4986-bdbd-9e110301e370\"} resp_status=400 BAD REQUEST resp_data={\"message\": \"[AVXERR-DFW-0043] The attachment point defa11a1-3000-4001-0000-000000000000 already has a target_uuid set to bd3b6613-1f2f-4c9a-bdb5-ab30cc176723\"}"
+          },
+          "gw_hostname": "Controller-10.0.0.141",
+          "http_method": "POST",
+          "message": "<14>Jul 16 16:47:45 Controller-10.0.0.141 run_cloudxd.py[1956]: AviatrixAPI: method=POST url=/v2.5/microseg/policy-list3? host=203.0.113.32 ip= user=admin req_data={\"attach_to\": \"defa11a1-3000-4001-0000-000000000000\", \"name\": \"zta-individual-segments\", \"sub_policies\": [], \"uuid\": \"3e715a2f-09e2-4986-bdbd-9e110301e370\"} resp_status=400 BAD REQUEST resp_data={\"message\": \"[AVXERR-DFW-0043] The attachment point defa11a1-3000-4001-0000-000000000000 already has a target_uuid set to bd3b6613-1f2f-4c9a-bdb5-ab30cc176723\"}",
+          "reason": {
+            "__json_string__": {
+              "message": "[AVXERR-DFW-0043] The attachment point defa11a1-3000-4001-0000-000000000000 already has a target_uuid set to bd3b6613-1f2f-4c9a-bdb5-ab30cc176723"
+            }
+          },
+          "result": "400 BAD REQUEST",
+          "tags": [
+            "cmd",
+            "V2.5API"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-07-16T16:47:45.000Z (epoch)",
+          "username": "admin"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

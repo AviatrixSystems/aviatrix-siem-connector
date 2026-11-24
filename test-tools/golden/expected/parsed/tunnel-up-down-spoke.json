@@ -1,0 +1,33 @@
+{
+  "avx": {
+    "until": "8.1"
+  },
+  "case": "tunnel-up-down-spoke",
+  "input": "<14>2026-03-04T22:58:57.324312+00:00 ip-10-20-0-10 cloudxd: AviatrixTunnelStatusChange: src_gw=backend-eks-spoke(AWS us-east-2) dst_gw=frontend-eks-spoke(AWS us-east-2) old_state=Up new_state=Down",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:58:57.324Z",
+          "dst_gw": "frontend-eks-spoke(AWS us-east-2)",
+          "event": {
+            "original": "<14>2026-03-04T22:58:57.324312+00:00 ip-10-20-0-10 cloudxd: AviatrixTunnelStatusChange: src_gw=backend-eks-spoke(AWS us-east-2) dst_gw=frontend-eks-spoke(AWS us-east-2) old_state=Up new_state=Down"
+          },
+          "gateway": "backend-eks-spoke",
+          "message": "<14>2026-03-04T22:58:57.324312+00:00 ip-10-20-0-10 cloudxd: AviatrixTunnelStatusChange: src_gw=backend-eks-spoke(AWS us-east-2) dst_gw=frontend-eks-spoke(AWS us-east-2) old_state=Up new_state=Down",
+          "new_state": "Down",
+          "old_state": "Up",
+          "src_gw": "backend-eks-spoke(AWS us-east-2)",
+          "tags": [
+            "tunnel_status"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:58:57.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

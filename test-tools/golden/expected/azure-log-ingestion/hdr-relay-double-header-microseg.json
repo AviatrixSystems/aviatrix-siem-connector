@@ -1,0 +1,57 @@
+{
+  "case": "hdr-relay-double-header-microseg",
+  "input": "<133>May 14 03:46:16 GW-aws-usw1-0a330200-gw-198.51.100.58 syslog 2022-05-14T03:46:10.257442+00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[5432]: 2022/05/14 03:46:10 AviatrixGwMicrosegPacket: POLICY=96438983-a98c-9938-fcbc-73f72e83f089 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.4.221.148 DST_IP=10.235.240.155 PROTO=TCP SRC_PORT=42948 DST_PORT=2000 DATA=0x ACT=PERMIT ENFORCED=true",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-05-14T03:46:16.000Z",
+          "DstIpAddr": "10.235.240.155",
+          "DstMacAddr": "06:97:38:9c:5a:df",
+          "DstPortNumber": 2000,
+          "DvcAction": "Allow",
+          "DvcHostname": "aws-usw1-0a330200-gw",
+          "DvcIpAddr": "198.51.100.58",
+          "DvcOriginalAction": "PERMIT",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-05-14T03:46:16.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "NetworkSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-05-14T03:46:16.000Z",
+          "EventType": "NetworkSession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "96438983-a98c-9938-fcbc-73f72e83f089",
+          "SrcIpAddr": "10.4.221.148",
+          "SrcMacAddr": "06:ef:2f:7d:10:83",
+          "SrcPortNumber": 42948,
+          "TimeGenerated": "YYYY-05-14T03:46:16.000Z",
+          "action": "PERMIT",
+          "dst_ip": "10.235.240.155",
+          "dst_mac": "06:97:38:9c:5a:df",
+          "dst_port": 2000,
+          "enforced": true,
+          "gw_hostname": "aws-usw1-0a330200-gw",
+          "gw_ip": "198.51.100.58",
+          "ip_size": "60",
+          "proto": "TCP",
+          "src_ip": "10.4.221.148",
+          "src_mac": "06:ef:2f:7d:10:83",
+          "src_port": 42948,
+          "tags": [
+            "microseg",
+            "ebpf"
+          ],
+          "unix_time": "YYYY-05-14T03:46:16.000Z (epoch)",
+          "uuid": "96438983-a98c-9938-fcbc-73f72e83f089"
+        }
+      ],
+      "path": "/azure/azure-microseg"
+    }
+  ]
+}

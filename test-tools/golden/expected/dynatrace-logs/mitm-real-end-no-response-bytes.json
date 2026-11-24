@@ -1,0 +1,38 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-real-end-no-response-bytes",
+  "input": "<153>Dec 10 00:36:21 GW-backend-eks-spoke-198.51.100.38-sink traffic_server[5363]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"100.64.127.120\",\"src_port\":37964,\"dest\":\"203.0.113.38\",\"dest_port\":80,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"example3.com\",\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"proto\":\"TCP\",\"session_start\":1765240579110927579,\"session_time\":86402405592960,\"session_stage\":\"end\",\"session_id\":\"d5bd5032-93dc-46ed-aea2-7ae88bfb3e78\",\"request_bytes\":192,\"url\":\"example3.com/\",\"timestamp\":1765326981}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "Permit",
+          "aviatrix.dcf.dst_ip": "203.0.113.38",
+          "aviatrix.dcf.dst_port": 80,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "backend-eks-spoke",
+          "aviatrix.dcf.layer": "L7",
+          "aviatrix.dcf.policy_uuid": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.reason": "POLICY",
+          "aviatrix.dcf.request_bytes": 192,
+          "aviatrix.dcf.session_id": "d5bd5032-93dc-46ed-aea2-7ae88bfb3e78",
+          "aviatrix.dcf.sni_hostname": "example3.com",
+          "aviatrix.dcf.src_ip": "100.64.127.120",
+          "aviatrix.dcf.src_port": 37964,
+          "aviatrix.dcf.url": "example3.com/",
+          "aviatrix.event.type": "WebInspection",
+          "content": "L7 DCF Allow: 100.64.127.120 -> example3.com",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-12-10T00:36:21.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

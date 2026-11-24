@@ -1,0 +1,49 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "10.0"
+  },
+  "case": "microseg-real-icmp-public-src-monitor",
+  "input": "<158>Jul  7 01:23:59 GW-aks-demo-frontend-spoke-198.51.100.2-sink /usr/local/bin/avx-gw-state-sync 2026/07/07 01:23:59 AviatrixGwMicrosegPacket: POLICY=3c1520ac-5e09-4868-9c45-eb35fb661a0e SRC_MAC=7c:1e:52:f4:3b:5a DST_MAC=12:34:56:78:9a:bc IP_SZ=52 SRC_IP=203.0.113.2 DST_IP=100.64.0.44 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-07-07T01:23:59.000Z",
+          "action": "DENY",
+          "data_hex": "0x",
+          "dst_ip": "100.64.0.44",
+          "dst_mac": "12:34:56:78:9a:bc",
+          "dst_port": 0,
+          "enforced": false,
+          "gw_hostname": "aks-demo-frontend-spoke",
+          "gw_ip": "198.51.100.2",
+          "ip_size": "52",
+          "message": "<158>Jul  7 01:23:59 GW-aks-demo-frontend-spoke-198.51.100.2-sink /usr/local/bin/avx-gw-state-sync 2026/07/07 01:23:59 AviatrixGwMicrosegPacket: POLICY=3c1520ac-5e09-4868-9c45-eb35fb661a0e SRC_MAC=7c:1e:52:f4:3b:5a DST_MAC=12:34:56:78:9a:bc IP_SZ=52 SRC_IP=203.0.113.2 DST_IP=100.64.0.44 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0",
+          "proto": "ICMP",
+          "session_byte_cnt": "0",
+          "session_dur": "0",
+          "session_end_reason": "0",
+          "session_end_reason_text": "active",
+          "session_event": "0",
+          "session_event_type": "Start",
+          "session_id": "0",
+          "session_pkt_cnt": "0",
+          "src_ip": "203.0.113.2",
+          "src_mac": "7c:1e:52:f4:3b:5a",
+          "src_port": 0,
+          "syslog_pri": "158",
+          "tags": [
+            "microseg",
+            "ebpf"
+          ],
+          "unix_time": "YYYY-07-07T01:23:59.000Z (epoch)",
+          "uuid": "3c1520ac-5e09-4868-9c45-eb35fb661a0e"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

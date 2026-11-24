@@ -1,0 +1,38 @@
+{
+  "case": "mitm-rfc5424-traffic-server-hyphen",
+  "input": "<153>1 2026-11-23T10:00:02.123456Z hostname traffic-server 2 - - {\"priority\":\"LOG_ALERT\",\"action\":\"PERMIT\",\"reason\":\"POLICY\",\"src\":\"10.21.0.36\",\"src_port\":42148,\"dest\":\"203.0.113.21\",\"dest_port\":443,\"enforced\":false,\"ids\":false,\"stage\":\"SNI\",\"sni_hostname\":\"www.example.com\",\"decided_by\":\"21018422-0b45-4226-9694-d2cfab39a382\",\"proto\":\"TCP\",\"timestamp\":1795428002,\"session_id\":\"00000000-0000-0000-0000-000000000000\",\"session_start\":1795428002,\"session_stage\":\"start\"}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-23T10:00:02.000Z",
+          "action": "PERMIT",
+          "dst_ip": "203.0.113.21",
+          "dst_port": 443,
+          "enforced": false,
+          "gw_hostname": "hostname",
+          "message": "<153>1 2026-11-23T10:00:02.123456Z hostname traffic-server 2 - - {\"priority\":\"LOG_ALERT\",\"action\":\"PERMIT\",\"reason\":\"POLICY\",\"src\":\"10.21.0.36\",\"src_port\":42148,\"dest\":\"203.0.113.21\",\"dest_port\":443,\"enforced\":false,\"ids\":false,\"stage\":\"SNI\",\"sni_hostname\":\"www.example.com\",\"decided_by\":\"21018422-0b45-4226-9694-d2cfab39a382\",\"proto\":\"TCP\",\"timestamp\":1795428002,\"session_id\":\"00000000-0000-0000-0000-000000000000\",\"session_start\":1795428002,\"session_stage\":\"start\"}",
+          "mitm_ids": "false",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_session_id": "00000000-0000-0000-0000-000000000000",
+          "mitm_session_stage": "start",
+          "mitm_sni_hostname": "www.example.com",
+          "mitm_stage": "SNI",
+          "proto": "TCP",
+          "src_ip": "10.21.0.36",
+          "src_port": 42148,
+          "syslog_pri": "153",
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-11-23T10:00:02.000Z (epoch)",
+          "uuid": "21018422-0b45-4226-9694-d2cfab39a382"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

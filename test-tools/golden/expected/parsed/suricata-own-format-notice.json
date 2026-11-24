@@ -1,0 +1,5 @@
+{
+  "case": "suricata-own-format-notice",
+  "input": "<14>Mar  4 23:06:15 GW-egress-spoke-198.51.100.44-sink suricata[4]: [4] <Notice> -- all 2 packet processing threads, 4 management threads initialized, engine started.",
+  "requests": []
+}

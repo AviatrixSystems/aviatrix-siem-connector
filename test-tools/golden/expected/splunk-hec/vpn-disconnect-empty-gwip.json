@@ -1,0 +1,33 @@
+{
+  "case": "vpn-disconnect-empty-gwip",
+  "input": "<14>Mar 10 12:38:18 3.131.22.171 Mar 10 12:38:17 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=cmchenr, Status=disconnected, Gateway=egress-vpn-gw, GatewayIP=, VPNVirtualIP=192.168.43.6, PublicIP=45.26.1.144, Login=2026-03-10 12:37:39, Logout=2026-03-10 12:38:16, Duration=0:0:0:37, RXbytes=8.7KB, TXbytes=13.4KB, VPNClientPlatform=mac, VPNClientVersion=AVPNC-2.17.7",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "syslog": "<14>Mar 10 12:38:18 3.131.22.171 Mar 10 12:38:17 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=cmchenr, Status=disconnected, Gateway=egress-vpn-gw, GatewayIP=, VPNVirtualIP=192.168.43.6, PublicIP=45.26.1.144, Login=2026-03-10 12:37:39, Logout=2026-03-10 12:38:16, Duration=0:0:0:37, RXbytes=8.7KB, TXbytes=13.4KB, VPNClientPlatform=mac, VPNClientVersion=AVPNC-2.17.7",
+            "vpn_client_platform": "mac",
+            "vpn_client_version": "AVPNC-2.17.7",
+            "vpn_duration": "0:0:0:37",
+            "vpn_gateway": "egress-vpn-gw",
+            "vpn_login": "YYYY-03-10 12:37:39",
+            "vpn_logout": "YYYY-03-10 12:38:16",
+            "vpn_public_ip": "45.26.1.144",
+            "vpn_rx_bytes": "8.7KB",
+            "vpn_status": "disconnected",
+            "vpn_tx_bytes": "13.4KB",
+            "vpn_user": "cmchenr",
+            "vpn_virtual_ip": "192.168.43.6"
+          },
+          "source": "avx-vpn-session",
+          "sourcetype": "aviatrix:vpn:session",
+          "time": "YYYY-03-10T12:38:18.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

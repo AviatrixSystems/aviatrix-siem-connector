@@ -1,0 +1,42 @@
+{
+  "case": "netstats-gw-private-mode-idle",
+  "input": "<14>Mar  4 23:09:02 GW-private-spoke-10.81.0.10-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:02 AviatrixGwNetStats: timestamp=2026-03-04T23:09:02 name=private-spoke alias=private-spoke public_ip= private_ip=10.81.0.10 interface=eth0 total_rx_rate=0.00 total_tx_rate=0.00 total_rx_tx_rate=0.00 total_rx_cum=0.00B total_tx_cum=512.00B total_rx_tx_cum=512.00B conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=3",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:09:02.000Z",
+          "alias": "private-spoke",
+          "bw_in_limit_exceeded": "0",
+          "bw_out_limit_exceeded": "0",
+          "conntrack_count": "3",
+          "conntrack_limit_exceeded": "0",
+          "event": {
+            "original": "<14>Mar  4 23:09:02 GW-private-spoke-10.81.0.10-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:02 AviatrixGwNetStats: timestamp=2026-03-04T23:09:02 name=private-spoke alias=private-spoke public_ip= private_ip=10.81.0.10 interface=eth0 total_rx_rate=0.00 total_tx_rate=0.00 total_rx_tx_rate=0.00 total_rx_cum=0.00B total_tx_cum=512.00B total_rx_tx_cum=512.00B conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=3"
+          },
+          "gateway": "private-spoke",
+          "interface": "eth0",
+          "linklocal_limit_exceeded": "0",
+          "message": "<14>Mar  4 23:09:02 GW-private-spoke-10.81.0.10-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:02 AviatrixGwNetStats: timestamp=2026-03-04T23:09:02 name=private-spoke alias=private-spoke public_ip= private_ip=10.81.0.10 interface=eth0 total_rx_rate=0.00 total_tx_rate=0.00 total_rx_tx_rate=0.00 total_rx_cum=0.00B total_tx_cum=512.00B total_rx_tx_cum=512.00B conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=3",
+          "pps_limit_exceeded": "0",
+          "private_ip": "10.81.0.10",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_net_stats"
+          ],
+          "total_rx_cum": "0.00B",
+          "total_rx_rate": 0,
+          "total_rx_tx_cum": "512.00B",
+          "total_rx_tx_rate": 0,
+          "total_tx_cum": "512.00B",
+          "total_tx_rate": 0,
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T23:09:02.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

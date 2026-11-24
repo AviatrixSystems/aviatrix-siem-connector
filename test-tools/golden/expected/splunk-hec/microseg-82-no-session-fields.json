@@ -1,0 +1,38 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "8.2"
+  },
+  "case": "microseg-82-no-session-fields",
+  "input": "<158>Mar  4 22:55:15 GW-frontend-eks-spoke-18.216.17.241-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:15 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=60 SRC_IP=100.64.242.5 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=37412 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "PERMIT",
+            "dst_ip": "10.5.0.8",
+            "dst_mac": "02:55:21:72:8c:63",
+            "dst_port": 80,
+            "enforced": true,
+            "gw_ip": "18.216.17.241",
+            "ip_size": "60",
+            "proto": "TCP",
+            "src_ip": "100.64.242.5",
+            "src_mac": "02:64:c0:e4:c9:b1",
+            "src_port": 37412,
+            "syslog": "<158>Mar  4 22:55:15 GW-frontend-eks-spoke-18.216.17.241-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:15 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=60 SRC_IP=100.64.242.5 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=37412 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true",
+            "timestamp": "YYYY-03-04T22:55:15.000Z (epoch)",
+            "uuid": "51321a3b-e5e2-4ab3-9594-e97a51799e15"
+          },
+          "source": "avx-l4-fw",
+          "sourcetype": "aviatrix:firewall:l4",
+          "time": "YYYY-03-04T22:55:15.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

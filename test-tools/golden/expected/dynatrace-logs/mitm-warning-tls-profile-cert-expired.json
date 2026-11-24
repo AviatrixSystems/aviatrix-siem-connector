@@ -1,0 +1,35 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-warning-tls-profile-cert-expired",
+  "input": "<156>Mar  4 23:05:01 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {\"priority\":\"LOG_WARNING\",\"action\":\"Deny\",\"reason\":\"TLS_PROFILE\",\"src\":\"10.60.1.12\",\"src_port\":40312,\"dest\":\"203.0.113.10\",\"dest_port\":443,\"enforced\":true,\"ids\":false,\"message\":\"certificate has expired\",\"stage\":\"ORIGIN_CERT_VALIDATE\",\"decided_by\":\"7a1c9e44-2b3d-4f61-9e80-1c2d3e4f5a6b\",\"proto\":\"TCP\",\"session_start\":1772665501000000000,\"session_time\":2210,\"session_stage\":\"tls_check\",\"session_id\":\"c2d4e6f8-1a3b-4c5d-8e9f-0a1b2c3d4e5f\",\"timestamp\":1772665501}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "Deny",
+          "aviatrix.dcf.dst_ip": "203.0.113.10",
+          "aviatrix.dcf.dst_port": 443,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "egress-spoke",
+          "aviatrix.dcf.layer": "L7",
+          "aviatrix.dcf.policy_uuid": "7a1c9e44-2b3d-4f61-9e80-1c2d3e4f5a6b",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.reason": "TLS_PROFILE",
+          "aviatrix.dcf.session_id": "c2d4e6f8-1a3b-4c5d-8e9f-0a1b2c3d4e5f",
+          "aviatrix.dcf.src_ip": "10.60.1.12",
+          "aviatrix.dcf.src_port": 40312,
+          "aviatrix.event.type": "WebInspection",
+          "content": "L7 DCF Deny: 10.60.1.12 -> 203.0.113.10:443",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-03-04T23:05:01.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

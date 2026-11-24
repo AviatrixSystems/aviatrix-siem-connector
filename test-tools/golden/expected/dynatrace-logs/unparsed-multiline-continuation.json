@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-multiline-continuation",
+  "input": "    Attachment: vpc-0abc1234, CIDRs list: ['10.99.0.0/16'] ",
+  "requests": []
+}

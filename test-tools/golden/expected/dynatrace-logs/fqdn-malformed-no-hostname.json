@@ -1,0 +1,5 @@
+{
+  "case": "fqdn-malformed-no-hostname",
+  "input": "<14>Mar  4 23:07:03 GW-egress-fqdn-gw-198.51.100.60 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#245  Gateway=egress-fqdn-gw S_IP=10.70.1.5 D_IP=203.0.113.71 state=MALFORMED drop_reason=BAD_PKT",
+  "requests": []
+}

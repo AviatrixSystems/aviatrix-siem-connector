@@ -1,0 +1,39 @@
+{
+  "case": "netstats-real-eth-fn1-no-public-ip-unitless",
+  "input": "<14>Jul  6 23:02:32 GW-k8s-demo-transit-198.51.100.4-sink /usr/local/bin/avx-gw-state-sync 2026/07/06 23:02:32 AviatrixGwNetStats: timestamp=2026-07-06T23:02:29.087638985 name=k8s-demo-transit alias=k8s-demo-transit  private_ip=10.2.0.85 interface=eth-fn1 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=12.63KB total_tx_cum=21.51KB total_rx_tx_cum=34.14KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=33 conntrack_allowance_available=273615 conntrack_usage_rate=0.03",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "alias": "k8s-demo-transit",
+            "bw_in_limit_exceeded": "0",
+            "bw_out_limit_exceeded": "0",
+            "conntrack_allowance_available": "273615",
+            "conntrack_count": "33",
+            "conntrack_limit_exceeded": "0",
+            "conntrack_usage_rate": "0.03",
+            "gateway": "k8s-demo-transit",
+            "interface": "eth-fn1",
+            "linklocal_limit_exceeded": "0",
+            "pps_limit_exceeded": "0",
+            "private_ip": "10.2.0.85",
+            "syslog": "<14>Jul  6 23:02:32 GW-k8s-demo-transit-198.51.100.4-sink /usr/local/bin/avx-gw-state-sync 2026/07/06 23:02:32 AviatrixGwNetStats: timestamp=2026-07-06T23:02:29.087638985 name=k8s-demo-transit alias=k8s-demo-transit  private_ip=10.2.0.85 interface=eth-fn1 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=12.63KB total_tx_cum=21.51KB total_rx_tx_cum=34.14KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=33 conntrack_allowance_available=273615 conntrack_usage_rate=0.03",
+            "total_rx_cum": "12.63KB",
+            "total_rx_rate": 3.73,
+            "total_rx_tx_cum": "34.14KB",
+            "total_rx_tx_rate": 9.33,
+            "total_tx_cum": "21.51KB",
+            "total_tx_rate": 5.6
+          },
+          "source": "avx-gw-net-stats",
+          "sourcetype": "aviatrix:gateway:network",
+          "time": "YYYY-07-06T23:02:32.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

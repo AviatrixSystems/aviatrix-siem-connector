@@ -1,0 +1,30 @@
+{
+  "case": "cmd-v1-argv-redacted-email-user",
+  "input": "<14>Mar  4 23:08:05 203.0.113.5 Mar  4 23:08:05 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=SETUP_ACCOUNT_PROFILE, argv=['********'], result=Success, reason=, username=ops.user@example.com",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:08:05.000Z",
+          "TimeGenerated": "YYYY-03-04T23:08:05.000Z",
+          "action": "SETUP_ACCOUNT_PROFILE",
+          "args": "['********']",
+          "controller_ip": "10.0.0.120",
+          "gw_hostname": "Controller-10.0.0.120",
+          "ls_timestamp": "YYYY-03-04T23:08:05.000Z",
+          "reason": "",
+          "result": "Success",
+          "tags": [
+            "cmd",
+            "V1Api"
+          ],
+          "unix_time": "YYYY-03-04T23:08:05.000Z (epoch)",
+          "username": "ops.user@example.com"
+        }
+      ],
+      "path": "/azure/azure-cmd"
+    }
+  ]
+}

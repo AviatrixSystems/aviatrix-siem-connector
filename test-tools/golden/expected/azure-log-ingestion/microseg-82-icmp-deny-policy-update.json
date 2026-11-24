@@ -1,0 +1,75 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "10.0"
+  },
+  "case": "microseg-82-icmp-deny-policy-update",
+  "input": "<158>Mar  4 23:02:00 GW-db-spoke-198.51.100.31-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:02:00 AviatrixGwMicrosegPacket: POLICY=0b6e4d3c-91a2-4f7e-8c55-3d2e1f0a9b88 SRC_MAC=02:aa:bb:cc:dd:01 DST_MAC=02:aa:bb:cc:dd:02 IP_SZ=84 SRC_IP=10.40.0.9 DST_IP=10.50.0.7 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=771249900311 SESSION_EVENT=2 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:02:00.000Z",
+          "DstIpAddr": "10.50.0.7",
+          "DstMacAddr": "02:aa:bb:cc:dd:02",
+          "DstPortNumber": 0,
+          "DvcAction": "Deny",
+          "DvcHostname": "db-spoke",
+          "DvcIpAddr": "198.51.100.31",
+          "DvcOriginalAction": "DENY",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-03-04T23:02:00.000Z",
+          "EventOriginalResultDetails": "active",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Failure",
+          "EventSchema": "NetworkSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Low",
+          "EventStartTime": "YYYY-03-04T23:02:00.000Z",
+          "EventSubType": "PolicyUpdate",
+          "EventType": "NetworkSession",
+          "EventVendor": "Aviatrix",
+          "NetworkBytes": 0,
+          "NetworkDuration": 0,
+          "NetworkPackets": 0,
+          "NetworkProtocol": "ICMP",
+          "NetworkRuleName": "0b6e4d3c-91a2-4f7e-8c55-3d2e1f0a9b88",
+          "NetworkSessionId": "771249900311",
+          "SrcIpAddr": "10.40.0.9",
+          "SrcMacAddr": "02:aa:bb:cc:dd:01",
+          "SrcPortNumber": 0,
+          "TimeGenerated": "YYYY-03-04T23:02:00.000Z",
+          "action": "DENY",
+          "dst_ip": "10.50.0.7",
+          "dst_mac": "02:aa:bb:cc:dd:02",
+          "dst_port": 0,
+          "enforced": false,
+          "gw_hostname": "db-spoke",
+          "gw_ip": "198.51.100.31",
+          "ip_size": "84",
+          "proto": "ICMP",
+          "session_byte_cnt": "0",
+          "session_dur": "0",
+          "session_end_reason": "0",
+          "session_end_reason_text": "active",
+          "session_event": "2",
+          "session_event_type": "PolicyUpdate",
+          "session_id": "771249900311",
+          "session_pkt_cnt": "0",
+          "src_ip": "10.40.0.9",
+          "src_mac": "02:aa:bb:cc:dd:01",
+          "src_port": 0,
+          "tags": [
+            "microseg",
+            "ebpf"
+          ],
+          "unix_time": "YYYY-03-04T23:02:00.000Z (epoch)",
+          "uuid": "0b6e4d3c-91a2-4f7e-8c55-3d2e1f0a9b88"
+        }
+      ],
+      "path": "/azure/azure-microseg"
+    }
+  ]
+}

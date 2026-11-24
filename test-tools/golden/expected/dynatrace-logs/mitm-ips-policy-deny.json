@@ -1,0 +1,40 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-ips-policy-deny",
+  "input": "<153>Mar  4 22:57:55 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"IPS_POLICY_DENY\",\"src\":\"10.1.5.205\",\"src_port\":40708,\"dest\":\"23.215.0.138\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"example.com\",\"decrypted_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"session_start\":1772665075787368966,\"session_time\":45620640,\"session_stage\":\"end\",\"session_id\":\"58f0b86a-b3ec-45a8-9ae1-4180c465f097\",\"request_bytes\":92,\"sid\":\"2036237\",\"url\":\"example.com/\",\"timestamp\":1772665075}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "Deny",
+          "aviatrix.dcf.decrypted_by": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "aviatrix.dcf.dst_ip": "23.215.0.138",
+          "aviatrix.dcf.dst_port": 443,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "frontend-eks-spoke",
+          "aviatrix.dcf.layer": "L7",
+          "aviatrix.dcf.policy_uuid": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.reason": "IPS_POLICY_DENY",
+          "aviatrix.dcf.request_bytes": 92,
+          "aviatrix.dcf.session_id": "58f0b86a-b3ec-45a8-9ae1-4180c465f097",
+          "aviatrix.dcf.sid": "2036237",
+          "aviatrix.dcf.sni_hostname": "example.com",
+          "aviatrix.dcf.src_ip": "10.1.5.205",
+          "aviatrix.dcf.src_port": 40708,
+          "aviatrix.dcf.url": "example.com/",
+          "aviatrix.event.type": "WebInspection",
+          "content": "L7 DCF Deny: 10.1.5.205 -> example.com",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-03-04T22:57:55.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

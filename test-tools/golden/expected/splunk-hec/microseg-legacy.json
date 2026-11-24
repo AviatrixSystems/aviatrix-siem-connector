@@ -1,0 +1,35 @@
+{
+  "avx": {
+    "until": "7.2"
+  },
+  "case": "microseg-legacy",
+  "input": "<14>Mar  4 22:54:27 avx-gw-test AviatrixGwMicrosegPacket: SRC_MAC=aa:bb:cc:dd:ee:ff DST_MAC=11:22:33:44:55:66 PROTO=TCP SPT=443 DPT=8080 ACTION=PERMIT",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "PERMIT",
+            "dst_ip": "unknown",
+            "dst_mac": "11:22:33:44:55:66",
+            "dst_port": 8080,
+            "enforced": "unknown",
+            "proto": "TCP",
+            "src_ip": "unknown",
+            "src_mac": "aa:bb:cc:dd:ee:ff",
+            "src_port": 443,
+            "syslog": "<14>Mar  4 22:54:27 avx-gw-test AviatrixGwMicrosegPacket: SRC_MAC=aa:bb:cc:dd:ee:ff DST_MAC=11:22:33:44:55:66 PROTO=TCP SPT=443 DPT=8080 ACTION=PERMIT",
+            "timestamp": "YYYY-03-04T22:54:27.000Z (epoch)",
+            "uuid": "legacy-format"
+          },
+          "source": "avx-l4-fw",
+          "sourcetype": "aviatrix:firewall:l4",
+          "time": "YYYY-03-04T22:54:27.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-real-url-no-sni",
+  "input": "<153>Mar  8 00:20:50 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"POLICY\",\"enforced\":true,\"session_stage\":\"start\",\"src\":\"10.0.4.237\",\"session_id\":\"06cc7aca-43c9-444e-bd40-adc18a1c2eba\",\"dest\":\"10.0.69.227\",\"priority\":\"LOG_ALERT\",\"session_start\":1772929250815846577,\"url\":\"/\",\"decided_by\":\"f8d91e27-a99b-46fe-93ff-8c40758bafd2\",\"src_port\":53330,\"stage\":\"txn\",\"proto\":\"TCP\",\"action\":\"Permit\",\"ids\":true,\"dest_port\":5432,\"timestamp\":1772929250}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Permit",
+              "decided_by": "f8d91e27-a99b-46fe-93ff-8c40758bafd2",
+              "dest": "10.0.69.227",
+              "dest_port": 5432,
+              "enforced": true,
+              "ids": true,
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "POLICY",
+              "session_id": "06cc7aca-43c9-444e-bd40-adc18a1c2eba",
+              "session_stage": "start",
+              "session_start": 1772929250815846577,
+              "src": "10.0.4.237",
+              "src_port": 53330,
+              "stage": "txn",
+              "timestamp": "YYYY-03-08T00:20:50.000Z (epoch)",
+              "url": "/"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-08T00:20:50.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

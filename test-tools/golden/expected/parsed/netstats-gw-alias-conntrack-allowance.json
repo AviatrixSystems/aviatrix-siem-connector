@@ -1,0 +1,45 @@
+{
+  "case": "netstats-gw-alias-conntrack-allowance",
+  "input": "<14>Mar  4 22:55:23 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:23 AviatrixGwNetStats: timestamp=2026-03-04T22:55:23.982609 name=backend-eks-spoke alias=backend-eks-spoke public_ip=18.119.198.171 private_ip=10.20.0.10 interface=eth0 total_rx_rate=519.70Kb total_tx_rate=284.39Kb total_rx_tx_rate=804.09Kb total_rx_cum=1.95GB total_tx_cum=1.85GB total_rx_tx_cum=3.80GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=180 bw_out_limit_exceeded=2094 pps_limit_exceeded=2915 linklocal_limit_exceeded=0 conntrack_count=898 conntrack_allowance_available=51010 conntrack_usage_rate=0.02",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:55:23.000Z",
+          "alias": "backend-eks-spoke",
+          "bw_in_limit_exceeded": "180",
+          "bw_out_limit_exceeded": "2094",
+          "conntrack_allowance_available": "51010",
+          "conntrack_count": "898",
+          "conntrack_limit_exceeded": "0",
+          "conntrack_usage_rate": "0.02",
+          "event": {
+            "original": "<14>Mar  4 22:55:23 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:23 AviatrixGwNetStats: timestamp=2026-03-04T22:55:23.982609 name=backend-eks-spoke alias=backend-eks-spoke public_ip=18.119.198.171 private_ip=10.20.0.10 interface=eth0 total_rx_rate=519.70Kb total_tx_rate=284.39Kb total_rx_tx_rate=804.09Kb total_rx_cum=1.95GB total_tx_cum=1.85GB total_rx_tx_cum=3.80GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=180 bw_out_limit_exceeded=2094 pps_limit_exceeded=2915 linklocal_limit_exceeded=0 conntrack_count=898 conntrack_allowance_available=51010 conntrack_usage_rate=0.02"
+          },
+          "gateway": "backend-eks-spoke",
+          "interface": "eth0",
+          "linklocal_limit_exceeded": "0",
+          "message": "<14>Mar  4 22:55:23 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:23 AviatrixGwNetStats: timestamp=2026-03-04T22:55:23.982609 name=backend-eks-spoke alias=backend-eks-spoke public_ip=18.119.198.171 private_ip=10.20.0.10 interface=eth0 total_rx_rate=519.70Kb total_tx_rate=284.39Kb total_rx_tx_rate=804.09Kb total_rx_cum=1.95GB total_tx_cum=1.85GB total_rx_tx_cum=3.80GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=180 bw_out_limit_exceeded=2094 pps_limit_exceeded=2915 linklocal_limit_exceeded=0 conntrack_count=898 conntrack_allowance_available=51010 conntrack_usage_rate=0.02",
+          "pps_limit_exceeded": "2915",
+          "private_ip": "10.20.0.10",
+          "public_ip": "18.119.198.171",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_net_stats"
+          ],
+          "total_rx_cum": "1.95GB",
+          "total_rx_rate": 532172.8,
+          "total_rx_tx_cum": "3.80GB",
+          "total_rx_tx_rate": 823388.16,
+          "total_tx_cum": "1.85GB",
+          "total_tx_rate": 291215.36,
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:55:23.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "case": "fqdn-deny-rule",
+  "input": "<14>Mar  4 22:59:18 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.10.2.17 D_IP=93.184.215.14 hostname=malware.example.net state=MATCHED drop_reason=BLACKLISTED Rule=*.example.net;0",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:59:18.000Z",
+          "dip": "93.184.215.14",
+          "drop": "BLACKLISTED",
+          "event": {
+            "original": "<14>Mar  4 22:59:18 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.10.2.17 D_IP=93.184.215.14 hostname=malware.example.net state=MATCHED drop_reason=BLACKLISTED Rule=*.example.net;0"
+          },
+          "gateway": "egress-fqdn-gw",
+          "hostname": "malware.example.net",
+          "message": "<14>Mar  4 22:59:18 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.10.2.17 D_IP=93.184.215.14 hostname=malware.example.net state=MATCHED drop_reason=BLACKLISTED Rule=*.example.net;0",
+          "rule": "*.example.net;0",
+          "sip": "10.10.2.17",
+          "state": "MATCHED",
+          "tags": [
+            "fqdn"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:59:18.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

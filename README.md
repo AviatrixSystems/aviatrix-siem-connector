@@ -249,10 +249,31 @@ Metrics are named `aviatrix.gateway.*`; per-core CPU is under `aviatrix.gateway.
 
 ## Upgrading / Breaking Changes
 
-Changes in this release that can affect existing deployments, dashboards or searches:
+Changes that can affect existing deployments, dashboards or searches, newest first.
+
+### v2.1.0
+
+**Parsing fixes** (events that were dropped or lost fields are now forwarded)
+- Tunnel status from 8.0.10+ controllers (`Gateway X reported Tunnel <a,b> ...`) parses; previously every such line was a grok failure. New fields `reporting_gw`, `src_intf`, `dst_intf`; `gateway` (Splunk host) is the reporting gateway. `AviatrixTunnelStatusChanged` (controller event bus) stays unparsed.
+- Microseg on 10.1+ gateways keeps its `SESSION_*` fields (they were silently dropped) and adds `session_start`, `egress_path`. 9.0+ session-timeout lines (empty MACs, `POLICY=UNKNOWN`) and `POLICY=?` lines parse. `session_event_type` / Azure `EventSubType` is `PolicyUpdate` for `SESSION_EVENT=2` (was `End`). Unknown trailing fields tag `_avx_microseg_unknown_fields` and land in `microseg_unparsed_suffix`.
+- `AviatrixAPI`: `action` is the URL path (it held `<url>? host=.. ip=..`); new `http_method`, `client_ip`, `api_host`. Searches or dashboards grouping by `action` will see different values. V1 `AviatrixCMD` parses when the controller hostname is not `Controller-<ip>`.
+- `gw_net_stats` parses without `private_ip` (interface without IPv4, controller with a public eth0 address). Rates with `Pb`/`Eb` units convert. Rates are bits/s (unchanged values; earlier docs said bytes/s).
+- Syslog headers: `<PRI>` is optional, a space after it and an RFC 5424 version (`<158>1 2026-...`) are accepted; L7 lines without `[pid]` or with `traffic-server` parse.
+
+**Outputs**
+- New fields above are in Splunk/webhook payloads and Dynatrace log attributes (`aviatrix.tunnel.reporting_gw|src_intf|dst_intf`, `aviatrix.dcf.session_start|egress_path`, `http.request.method`, `client.ip`, `aviatrix.controller.api_host`).
+- Dynatrace controller audit severity is `INFORMATIONAL` for 2xx V2.5 results (every API call was `WARN`).
+
+**Azure deployments**
+- New columns: netsession `session_start`, `egress_path`, `session_event_type`; cmd `http_method`, `client_ip`, `api_host`; tunnel_status `reporting_gw`, `src_intf`, `dst_intf`. Run `terraform apply` before (or with) the image upgrade; until then the DCR drops these fields.
+
+**Testing**
+- Golden input/output tests (`test-tools/golden/`): 157 cases with exact expected payloads for every output, versioned by Aviatrix release.
+
+### v2.0.0
 
 **Parsed data (all outputs)**
-- `gw_net_stats` `total_rx_rate`, `total_tx_rate`, `total_rx_tx_rate` are now floats in bytes/s (1024-based) instead of truncated integers in mixed units (`186.97Kb` was `186`, is now `191457.28`; Azure rounds to whole bytes/s because its columns are `int`). Values are roughly 1024x larger; rescale dashboards, searches and alerts.
+- `gw_net_stats` `total_rx_rate`, `total_tx_rate`, `total_rx_tx_rate` are now floats in bits/s (1024-based; the gateway reports bits, an earlier version of this note said bytes) instead of truncated integers in mixed units (`186.97Kb` was `186`, is now `191457.28`; Azure rounds to whole bits/s because its columns are `int`). Values are roughly 1024x larger; rescale dashboards, searches and alerts.
 - `cpu_cores_parsed` now includes core `"0"`; `cpu_busy`, `cpu_aggregate_busy_*` and per-core values change for gateways whose list starts with core 0, and `cpu_core_count` goes up by 1.
 - Syslog timestamps without a zone are parsed in `SYSLOG_TIMEZONE` (default `UTC`) instead of the JVM zone.
 - Suricata/MITM events with invalid or truncated JSON are no longer forwarded; they get `_avx_json_parse_failure` + `unparsed`. Grok misses get `_avx_grok_failure_<type>`; untyped events get `unparsed`. Absent MITM fields are omitted instead of holding literal `%{...}` text.

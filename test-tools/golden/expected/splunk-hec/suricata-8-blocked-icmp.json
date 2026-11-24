@@ -1,0 +1,53 @@
+{
+  "avx": {
+    "min": "10.0"
+  },
+  "case": "suricata-8-blocked-icmp",
+  "input": "<174>Mar  4 23:06:10 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"timestamp\":\"2026-03-04T23:06:10.402113+0000\",\"flow_id\":118823401992211,\"in_iface\":\"ids0\",\"event_type\":\"alert\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.50\",\"proto\":\"ICMP\",\"ip_v\":4,\"icmp_type\":8,\"icmp_code\":0,\"pkt_src\":\"wire/pcap\",\"alert\":{\"action\":\"blocked\",\"gid\":1,\"signature_id\":2100366,\"rev\":8,\"signature\":\"GPL ICMP_INFO PING *NIX\",\"category\":\"Misc activity\",\"severity\":3},\"direction\":\"to_server\",\"flow\":{\"pkts_toserver\":1,\"pkts_toclient\":0,\"bytes_toserver\":98,\"bytes_toclient\":0,\"start\":\"2026-03-04T23:06:10.402113+0000\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.50\"}}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "alert": {
+              "action": "blocked",
+              "category": "Misc activity",
+              "gid": 1,
+              "rev": 8,
+              "severity": 3,
+              "signature": "GPL ICMP_INFO PING *NIX",
+              "signature_id": 2100366
+            },
+            "dest_ip": "203.0.113.50",
+            "direction": "to_server",
+            "event_type": "alert",
+            "flow": {
+              "bytes_toclient": 0,
+              "bytes_toserver": 98,
+              "dest_ip": "203.0.113.50",
+              "pkts_toclient": 0,
+              "pkts_toserver": 1,
+              "src_ip": "10.60.1.12",
+              "start": "YYYY-03-04T23:06:10.402113+0000"
+            },
+            "flow_id": 118823401992211,
+            "icmp_code": 0,
+            "icmp_type": 8,
+            "in_iface": "ids0",
+            "ip_v": 4,
+            "pkt_src": "wire/pcap",
+            "proto": "ICMP",
+            "src_ip": "10.60.1.12",
+            "timestamp": "YYYY-03-04T23:06:10.402113+0000"
+          },
+          "source": "avx-ids",
+          "sourcetype": "aviatrix:ids",
+          "time": "YYYY-03-04T23:06:10.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

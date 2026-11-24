@@ -1,0 +1,43 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-lowercase-proto-egress-path",
+  "input": "<153>Nov  3 17:56:16 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"session_stage\":\"start\",\"reason\":\"POLICY\",\"enforced\":true,\"src\":\"10.10.2.113\",\"session_id\":\"1682c7e1-2785-4838-ae17-e7aafeffb00c\",\"dest\":\"203.0.113.37\",\"priority\":\"LOG_ALERT\",\"session_start\":1793728576371733505,\"decided_by\":\"4a2ec33a-cdb3-4820-815a-5a78b8b2731f\",\"src_port\":48842,\"stage\":\"SNI\",\"proto\":\"tcp\",\"action\":\"Deny\",\"ids\":false,\"sni_hostname\":\"example2.com\",\"dest_port\":443,\"timestamp\":1793728576,\"egress_path\":\"EGRESS_PATH_DEFAULT\"}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Deny",
+              "decided_by": "4a2ec33a-cdb3-4820-815a-5a78b8b2731f",
+              "dest": "203.0.113.37",
+              "dest_port": 443,
+              "egress_path": "EGRESS_PATH_DEFAULT",
+              "enforced": true,
+              "ids": false,
+              "priority": "LOG_ALERT",
+              "proto": "tcp",
+              "reason": "POLICY",
+              "session_id": "1682c7e1-2785-4838-ae17-e7aafeffb00c",
+              "session_stage": "start",
+              "session_start": 1793728576371733505,
+              "sni_hostname": "example2.com",
+              "src": "10.10.2.113",
+              "src_port": 48842,
+              "stage": "SNI",
+              "timestamp": "YYYY-11-03T17:56:16.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-11-03T17:56:16.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

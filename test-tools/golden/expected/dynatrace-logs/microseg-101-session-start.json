@@ -1,0 +1,43 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "microseg-101-session-start",
+  "input": "<158>Mar  4 23:01:05 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:01:05 AviatrixGwMicrosegPacket: POLICY=5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70 SRC_MAC=02:11:22:33:44:55 DST_MAC=02:66:77:88:99:aa IP_SZ=60 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=TCP SRC_PORT=51544 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_START=2026-03-04T23:01:05.104512337Z SESSION_ID=9134502218874411021 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0 EGRESS_PATH=EGRESS_PATH_DEFAULT",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "PERMIT",
+          "aviatrix.dcf.dst_ip": "10.30.2.40",
+          "aviatrix.dcf.dst_port": 443,
+          "aviatrix.dcf.egress_path": "EGRESS_PATH_DEFAULT",
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "app-spoke",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.session_byte_cnt": "0",
+          "aviatrix.dcf.session_dur": "0",
+          "aviatrix.dcf.session_end_reason": "0",
+          "aviatrix.dcf.session_end_reason_text": "active",
+          "aviatrix.dcf.session_event": "0",
+          "aviatrix.dcf.session_event_type": "Start",
+          "aviatrix.dcf.session_id": "9134502218874411021",
+          "aviatrix.dcf.session_pkt_cnt": "0",
+          "aviatrix.dcf.session_start": "YYYY-03-04T23:01:05.104512337Z",
+          "aviatrix.dcf.src_ip": "10.20.1.15",
+          "aviatrix.dcf.src_port": 51544,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Allow: 10.20.1.15:51544 -> 10.30.2.40:443 TCP",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:01:05.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "case": "cmd-real-no-username",
+  "input": "<14>Nov  5 12:15:09 Controller-10.0.0.131 run_cloudxd.py[332516]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password'], result=Success, reason=",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.controller.action": "USER_LOGIN_MANAGEMENT",
+          "aviatrix.controller.args": "['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password']",
+          "aviatrix.controller.host": "Controller-10.0.0.131",
+          "aviatrix.controller.result": "Success",
+          "aviatrix.controller.username": "",
+          "aviatrix.event.type": "ControllerAudit",
+          "content": "Controller API: USER_LOGIN_MANAGEMENT - Success",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-11-05T12:15:09.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

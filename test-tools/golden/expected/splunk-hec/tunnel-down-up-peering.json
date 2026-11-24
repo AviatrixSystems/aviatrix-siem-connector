@@ -1,0 +1,28 @@
+{
+  "avx": {
+    "until": "8.1"
+  },
+  "case": "tunnel-down-up-peering",
+  "input": "<14>2026-03-04T22:58:58.130152+00:00 ip-10-2-0-14 cloudxd: AviatrixTunnelStatusChange: src_gw=k8s-transit(AWS us-east-2) dst_gw=k8s-demo-db(AWS us-east-2) old_state=Down new_state=Up",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "dst_gw": "k8s-demo-db(AWS us-east-2)",
+            "new_state": "Up",
+            "old_state": "Down",
+            "src_gw": "k8s-transit(AWS us-east-2)",
+            "syslog": "<14>2026-03-04T22:58:58.130152+00:00 ip-10-2-0-14 cloudxd: AviatrixTunnelStatusChange: src_gw=k8s-transit(AWS us-east-2) dst_gw=k8s-demo-db(AWS us-east-2) old_state=Down new_state=Up"
+          },
+          "source": "avx-tunnel-status",
+          "sourcetype": "aviatrix:tunnel:status",
+          "time": "YYYY-03-04T22:58:58.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "case": "vpn-real-active-client-version-none",
+  "input": "<14>Apr 16 21:09:06 Controller-10.0.0.141 run_cloudxd.py[16576]: AviatrixVPNSession: User=ci-runner, Status=active, Gateway=n7-runners-vpn, GatewayIP=, VPNVirtualIP=192.168.44.6, PublicIP=203.0.113.41, Login=2026-04-16 21:09:05, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=linux, VPNClientVersion=None",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "syslog": "<14>Apr 16 21:09:06 Controller-10.0.0.141 run_cloudxd.py[16576]: AviatrixVPNSession: User=ci-runner, Status=active, Gateway=n7-runners-vpn, GatewayIP=, VPNVirtualIP=192.168.44.6, PublicIP=203.0.113.41, Login=2026-04-16 21:09:05, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=linux, VPNClientVersion=None",
+            "vpn_client_platform": "linux",
+            "vpn_client_version": "None",
+            "vpn_duration": "N/A",
+            "vpn_gateway": "n7-runners-vpn",
+            "vpn_login": "YYYY-04-16 21:09:05",
+            "vpn_logout": "N/A",
+            "vpn_public_ip": "203.0.113.41",
+            "vpn_rx_bytes": "N/A",
+            "vpn_status": "active",
+            "vpn_tx_bytes": "N/A",
+            "vpn_user": "ci-runner",
+            "vpn_virtual_ip": "192.168.44.6"
+          },
+          "source": "avx-vpn-session",
+          "sourcetype": "aviatrix:vpn:session",
+          "time": "YYYY-04-16T21:09:06.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

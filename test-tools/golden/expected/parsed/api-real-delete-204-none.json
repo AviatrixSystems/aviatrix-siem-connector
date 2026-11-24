@@ -1,0 +1,38 @@
+{
+  "case": "api-real-delete-204-none",
+  "input": "<14>Nov  3 20:03:16 Controller-10.0.0.131 run_cloudxd.py[456318]: AviatrixAPI: method=DELETE url=/v2.5/k8s/clusters/6aea18a306f557b62f476c15? host=203.0.113.3 ip=198.51.100.32 user=admin req_data={} resp_status=204 NO CONTENT resp_data=None",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-03T20:03:16.000Z",
+          "action": "/v2.5/k8s/clusters/6aea18a306f557b62f476c15",
+          "api_host": "203.0.113.3",
+          "args": {
+            "__json_string__": {}
+          },
+          "client_ip": "198.51.100.32",
+          "controller_ip": "10.0.0.131",
+          "event": {
+            "original": "<14>Nov  3 20:03:16 Controller-10.0.0.131 run_cloudxd.py[456318]: AviatrixAPI: method=DELETE url=/v2.5/k8s/clusters/6aea18a306f557b62f476c15? host=203.0.113.3 ip=198.51.100.32 user=admin req_data={} resp_status=204 NO CONTENT resp_data=None"
+          },
+          "gw_hostname": "Controller-10.0.0.131",
+          "http_method": "DELETE",
+          "message": "<14>Nov  3 20:03:16 Controller-10.0.0.131 run_cloudxd.py[456318]: AviatrixAPI: method=DELETE url=/v2.5/k8s/clusters/6aea18a306f557b62f476c15? host=203.0.113.3 ip=198.51.100.32 user=admin req_data={} resp_status=204 NO CONTENT resp_data=None",
+          "reason": "None",
+          "result": "204 NO CONTENT",
+          "tags": [
+            "cmd",
+            "V2.5API"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-11-03T20:03:16.000Z (epoch)",
+          "username": "admin"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

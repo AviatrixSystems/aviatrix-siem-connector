@@ -1,0 +1,29 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "fqdn-sink-host-rule-port",
+  "input": "<14>Mar  4 23:07:05 GW-egress-fqdn-gw-198.51.100.60-sink avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.70.2.9 D_IP=203.0.113.72 hostname=cdn.example.org state=MATCHED Rule=*.example.org;1",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "FQDNFilter",
+          "aviatrix.firewall.dst_ip": "203.0.113.72",
+          "aviatrix.firewall.gateway": "egress-fqdn-gw",
+          "aviatrix.firewall.hostname": "cdn.example.org",
+          "aviatrix.firewall.rule": "*.example.org;1",
+          "aviatrix.firewall.src_ip": "10.70.2.9",
+          "aviatrix.firewall.state": "MATCHED",
+          "content": "FQDN Allow: 10.70.2.9 -> cdn.example.org (203.0.113.72) on egress-fqdn-gw",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:07:05.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

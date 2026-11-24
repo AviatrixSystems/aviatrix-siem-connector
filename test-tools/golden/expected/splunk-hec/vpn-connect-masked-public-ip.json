@@ -1,0 +1,32 @@
+{
+  "case": "vpn-connect-masked-public-ip",
+  "input": "<14>Mar 10 12:40:01 203.0.113.5 Mar 10 12:40:01 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=jane.doe@example.com, Status=active, Gateway=vpn-gw-2, GatewayIP=198.51.100.140, VPNVirtualIP=192.168.44.10, PublicIP=<omitted>, Login=2026-03-10 12:39:58, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=, VPNClientVersion=",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "syslog": "<14>Mar 10 12:40:01 203.0.113.5 Mar 10 12:40:01 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=jane.doe@example.com, Status=active, Gateway=vpn-gw-2, GatewayIP=198.51.100.140, VPNVirtualIP=192.168.44.10, PublicIP=<omitted>, Login=2026-03-10 12:39:58, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=, VPNClientVersion=",
+            "vpn_duration": "N/A",
+            "vpn_gateway": "vpn-gw-2",
+            "vpn_gateway_ip": "198.51.100.140",
+            "vpn_login": "YYYY-03-10 12:39:58",
+            "vpn_logout": "N/A",
+            "vpn_public_ip": "<omitted>",
+            "vpn_rx_bytes": "N/A",
+            "vpn_status": "active",
+            "vpn_tx_bytes": "N/A",
+            "vpn_user": "jane.doe@example.com",
+            "vpn_virtual_ip": "192.168.44.10"
+          },
+          "source": "avx-vpn-session",
+          "sourcetype": "aviatrix:vpn:session",
+          "time": "YYYY-03-10T12:40:01.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

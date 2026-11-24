@@ -1,0 +1,34 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "8.2"
+  },
+  "case": "microseg-82-no-session-fields",
+  "input": "<158>Mar  4 22:55:15 GW-frontend-eks-spoke-18.216.17.241-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:15 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=60 SRC_IP=100.64.242.5 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=37412 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "PERMIT",
+          "aviatrix.dcf.dst_ip": "10.5.0.8",
+          "aviatrix.dcf.dst_port": 80,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "frontend-eks-spoke",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "51321a3b-e5e2-4ab3-9594-e97a51799e15",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.src_ip": "100.64.242.5",
+          "aviatrix.dcf.src_port": 37412,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Allow: 100.64.242.5:37412 -> 10.5.0.8:80 TCP",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T22:55:15.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

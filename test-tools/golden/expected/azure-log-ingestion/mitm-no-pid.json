@@ -1,0 +1,57 @@
+{
+  "case": "mitm-no-pid",
+  "input": "<153>Nov 23 10:00:03 GW-frontend-spoke-198.51.100.41-sink traffic_server: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"10.1.5.205\",\"src_port\":40708,\"dest\":\"203.0.113.138\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"SNI\",\"sni_hostname\":\"www.example.com\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"timestamp\":1795428003}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-23T10:00:03.000Z",
+          "DstFqdn": "www.example.com",
+          "DstHostname": "www.example.com",
+          "DstIpAddr": "203.0.113.138",
+          "DstPortNumber": 443,
+          "DvcAction": "Allow",
+          "DvcHostname": "frontend-spoke",
+          "DvcOriginalAction": "Permit",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-11-23T10:00:03.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-11-23T10:00:03.000Z",
+          "EventSubType": "POLICY",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "SrcIpAddr": "10.1.5.205",
+          "SrcPortNumber": 40708,
+          "TimeGenerated": "YYYY-11-23T10:00:03.000Z",
+          "action": "Permit",
+          "dst_ip": "203.0.113.138",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "frontend-spoke",
+          "mitm_ids": "true",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_sni_hostname": "www.example.com",
+          "mitm_stage": "SNI",
+          "proto": "TCP",
+          "src_ip": "10.1.5.205",
+          "src_port": 40708,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-11-23T10:00:03.000Z (epoch)",
+          "uuid": "3822a647-d2b2-4e04-9be3-6808da41110e"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

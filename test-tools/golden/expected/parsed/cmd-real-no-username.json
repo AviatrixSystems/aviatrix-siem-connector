@@ -1,0 +1,32 @@
+{
+  "case": "cmd-real-no-username",
+  "input": "<14>Nov  5 12:15:09 Controller-10.0.0.131 run_cloudxd.py[332516]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password'], result=Success, reason=",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-05T12:15:09.000Z",
+          "action": "USER_LOGIN_MANAGEMENT",
+          "args": "['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password']",
+          "controller_ip": "10.0.0.131",
+          "event": {
+            "original": "<14>Nov  5 12:15:09 Controller-10.0.0.131 run_cloudxd.py[332516]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password'], result=Success, reason="
+          },
+          "gw_hostname": "Controller-10.0.0.131",
+          "message": "<14>Nov  5 12:15:09 Controller-10.0.0.131 run_cloudxd.py[332516]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password'], result=Success, reason=",
+          "reason": "",
+          "result": "Success",
+          "tags": [
+            "cmd",
+            "V1Api"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-11-05T12:15:09.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

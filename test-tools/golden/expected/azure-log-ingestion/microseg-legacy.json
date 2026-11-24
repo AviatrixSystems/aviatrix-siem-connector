@@ -1,0 +1,57 @@
+{
+  "avx": {
+    "until": "7.2"
+  },
+  "case": "microseg-legacy",
+  "input": "<14>Mar  4 22:54:27 avx-gw-test AviatrixGwMicrosegPacket: SRC_MAC=aa:bb:cc:dd:ee:ff DST_MAC=11:22:33:44:55:66 PROTO=TCP SPT=443 DPT=8080 ACTION=PERMIT",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:54:27.000Z",
+          "DstIpAddr": "unknown",
+          "DstMacAddr": "11:22:33:44:55:66",
+          "DstPortNumber": 8080,
+          "DvcAction": "Allow",
+          "DvcHostname": "avx-gw-test",
+          "DvcOriginalAction": "PERMIT",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-03-04T22:54:27.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "NetworkSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-03-04T22:54:27.000Z",
+          "EventType": "NetworkSession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "legacy-format",
+          "SrcIpAddr": "unknown",
+          "SrcMacAddr": "aa:bb:cc:dd:ee:ff",
+          "SrcPortNumber": 443,
+          "TimeGenerated": "YYYY-03-04T22:54:27.000Z",
+          "action": "PERMIT",
+          "dst_ip": "unknown",
+          "dst_mac": "11:22:33:44:55:66",
+          "dst_port": 8080,
+          "enforced": "unknown",
+          "gw_hostname": "avx-gw-test",
+          "proto": "TCP",
+          "src_ip": "unknown",
+          "src_mac": "aa:bb:cc:dd:ee:ff",
+          "src_port": 443,
+          "tags": [
+            "microseg",
+            "ebpf"
+          ],
+          "unix_time": "YYYY-03-04T22:54:27.000Z (epoch)",
+          "uuid": "legacy-format"
+        }
+      ],
+      "path": "/azure/azure-microseg"
+    }
+  ]
+}

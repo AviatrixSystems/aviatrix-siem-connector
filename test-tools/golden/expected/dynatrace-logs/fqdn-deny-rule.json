@@ -1,0 +1,27 @@
+{
+  "case": "fqdn-deny-rule",
+  "input": "<14>Mar  4 22:59:18 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.10.2.17 D_IP=93.184.215.14 hostname=malware.example.net state=MATCHED drop_reason=BLACKLISTED Rule=*.example.net;0",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "FQDNFilter",
+          "aviatrix.firewall.drop_reason": "BLACKLISTED",
+          "aviatrix.firewall.dst_ip": "93.184.215.14",
+          "aviatrix.firewall.gateway": "egress-fqdn-gw",
+          "aviatrix.firewall.hostname": "malware.example.net",
+          "aviatrix.firewall.rule": "*.example.net;0",
+          "aviatrix.firewall.src_ip": "10.10.2.17",
+          "aviatrix.firewall.state": "MATCHED",
+          "content": "FQDN Allow: 10.10.2.17 -> malware.example.net (93.184.215.14) on egress-fqdn-gw",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T22:59:18.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

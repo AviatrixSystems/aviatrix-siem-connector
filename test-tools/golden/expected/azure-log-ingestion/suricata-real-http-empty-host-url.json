@@ -1,0 +1,136 @@
+{
+  "avx": {
+    "min": "10.0"
+  },
+  "case": "suricata-real-http-empty-host-url",
+  "input": "<174>Sep 10 14:32:59 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"pcap_cnt\":393,\"event_type\":\"alert\",\"tc_progress\":\"response_started\",\"app_proto\":\"http\",\"flow_id\":1055309731693262,\"direction\":\"to_server\",\"http\":{\"length\":0,\"hostname\":\"example7.com\",\"http_method\":\"GET\",\"protocol\":\"HTTP/1.1\",\"url\":\"http:///\",\"http_user_agent\":\"curl/8.14.1\"},\"flow\":{\"bytes_toserver\":201,\"pkts_toclient\":1,\"dest_port\":80,\"src_ip\":\"10.10.1.177\",\"dest_ip\":\"198.51.100.41\",\"src_port\":44978,\"pkts_toserver\":3,\"bytes_toclient\":40,\"start\":\"2026-09-10T14:32:59.442316+0000\"},\"dest_ip\":\"198.51.100.41\",\"proto\":\"TCP\",\"tx_id\":0,\"timestamp\":\"2026-09-10T14:32:59.484852+0000\",\"pkt_src\":\"wire/pcap\",\"dest_port\":80,\"ip_v\":4,\"ts_progress\":\"request_complete\",\"src_ip\":\"10.10.1.177\",\"src_port\":44978,\"alert\":{\"metadata\":{\"signature_severity\":[\"Informational\"],\"deployment\":[\"Perimeter\"],\"created_at\":[\"2015_11_13\"],\"mitre_technique_name\":[\"System_Location_Discovery\"],\"updated_at\":[\"2024_11_26\"],\"performance_impact\":[\"Low\"],\"mitre_technique_id\":[\"T1614\"],\"mitre_tactic_id\":[\"TA0007\"],\"confidence\":[\"High\"],\"mitre_tactic_name\":[\"Discovery\"],\"attack_target\":[\"Client_Endpoint\"]},\"severity\":2,\"policy_id\":\"81d10deb-0898-4774-aab1-b7dc5750afa4\",\"signature\":\"ET POLICY External IP Lookup example7.com\",\"rev\":6,\"signature_id\":2022082,\"category\":\"Device Retrieving External IP Address Detected\",\"gid\":1,\"session_id\":\"7ba00e36-cb5e-429a-ad02-cc58ada12d63\"}}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-09-10T14:32:59.000Z",
+          "DstBytes": 40,
+          "DstIpAddr": "198.51.100.41",
+          "DstPackets": 1,
+          "DstPortNumber": 80,
+          "DvcAction": "",
+          "DvcHostname": "egress-spoke",
+          "DvcOriginalAction": "",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-09-10T14:32:59.000Z",
+          "EventProduct": "Suricata IDS",
+          "EventResult": "NA",
+          "EventSchema": "NetworkSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Medium",
+          "EventStartTime": "YYYY-09-10T14:32:59.000Z",
+          "EventType": "IDS",
+          "EventVendor": "Aviatrix",
+          "NetworkApplicationProtocol": "HTTP",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "ET POLICY External IP Lookup example7.com",
+          "NetworkRuleNumber": 2022082,
+          "NetworkSessionId": "1055309731693262",
+          "SrcBytes": 201,
+          "SrcIpAddr": "10.10.1.177",
+          "SrcPackets": 3,
+          "SrcPortNumber": 44978,
+          "ThreatCategory": "Device Retrieving External IP Address Detected",
+          "ThreatId": "2022082",
+          "ThreatName": "ET POLICY External IP Lookup example7.com",
+          "ThreatOriginalRiskLevel": "2",
+          "ThreatRiskLevel": 50,
+          "TimeGenerated": "YYYY-09-10T14:32:59.000Z",
+          "alert": {
+            "category": "Device Retrieving External IP Address Detected",
+            "gid": 1,
+            "metadata": {
+              "attack_target": [
+                "Client_Endpoint"
+              ],
+              "confidence": [
+                "High"
+              ],
+              "created_at": [
+                "2015_11_13"
+              ],
+              "deployment": [
+                "Perimeter"
+              ],
+              "mitre_tactic_id": [
+                "TA0007"
+              ],
+              "mitre_tactic_name": [
+                "Discovery"
+              ],
+              "mitre_technique_id": [
+                "T1614"
+              ],
+              "mitre_technique_name": [
+                "System_Location_Discovery"
+              ],
+              "performance_impact": [
+                "Low"
+              ],
+              "signature_severity": [
+                "Informational"
+              ],
+              "updated_at": [
+                "2024_11_26"
+              ]
+            },
+            "policy_id": "81d10deb-0898-4774-aab1-b7dc5750afa4",
+            "rev": 6,
+            "session_id": "7ba00e36-cb5e-429a-ad02-cc58ada12d63",
+            "severity": 2,
+            "signature": "ET POLICY External IP Lookup example7.com",
+            "signature_id": 2022082
+          },
+          "app_proto": "http",
+          "dest_ip": "198.51.100.41",
+          "dest_port": 80,
+          "direction": "to_server",
+          "event_type": "alert",
+          "flow": {
+            "bytes_toclient": 40,
+            "bytes_toserver": 201,
+            "dest_ip": "198.51.100.41",
+            "dest_port": 80,
+            "pkts_toclient": 1,
+            "pkts_toserver": 3,
+            "src_ip": "10.10.1.177",
+            "src_port": 44978,
+            "start": "YYYY-09-10T14:32:59.442316+0000"
+          },
+          "flow_id": 1055309731693262,
+          "http": {
+            "hostname": "example7.com",
+            "http_method": "GET",
+            "http_user_agent": "curl/8.14.1",
+            "length": 0,
+            "protocol": "HTTP/1.1",
+            "url": "http:///"
+          },
+          "ip_v": 4,
+          "pcap_cnt": 393,
+          "pkt_src": "wire/pcap",
+          "proto": "TCP",
+          "src_ip": "10.10.1.177",
+          "src_port": 44978,
+          "syslog_pri": "174",
+          "tags": [
+            "suricata"
+          ],
+          "tc_progress": "response_started",
+          "timestamp": "YYYY-09-10T14:32:59.484852+0000",
+          "ts_progress": "request_complete",
+          "tx_id": 0,
+          "unix_time": "YYYY-09-10T14:32:59.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-suricata"
+    }
+  ]
+}

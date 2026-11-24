@@ -1,0 +1,5 @@
+{
+  "case": "suricata-real-warning-non-json",
+  "input": "<174>Dec  9 00:00:22 GW-frontend-eks-spoke-203.0.113.1-sink suricata[24063]: Warning: counters: stats are enabled but no loggers are active [StatsInitCtxPostOutput:counters.c:317]",
+  "requests": []
+}

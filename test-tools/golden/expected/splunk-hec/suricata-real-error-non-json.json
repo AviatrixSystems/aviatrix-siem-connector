@@ -1,0 +1,5 @@
+{
+  "case": "suricata-real-error-non-json",
+  "input": "<174>Dec  9 00:00:22 GW-frontend-eks-spoke-203.0.113.1-sink suricata[24063]: Error: affinity: worker-cpu-set: upper bound (2) of cpu set is too high, only 2 cpu(s) [BuildCpusetWithCallback:util-affinity.c:130]",
+  "requests": []
+}

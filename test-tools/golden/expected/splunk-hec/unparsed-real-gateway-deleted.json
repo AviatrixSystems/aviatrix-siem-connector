@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-real-gateway-deleted",
+  "input": "<14>Mar  3 00:57:04 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayDeleted: gwname=dev-agent-vpn-gw vpc_id=vpc-0abc0123456789def lb_name=None",
+  "requests": []
+}

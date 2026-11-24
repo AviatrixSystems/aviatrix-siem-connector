@@ -1,0 +1,28 @@
+{
+  "case": "mitm-unexpected-error-no-endpoints",
+  "input": "<155>Mar  4 22:57:56 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ERR\",\"action\":\"Deny\",\"reason\":\"UNEXPECTED_ERROR\",\"errorcode\":\"INTERNAL\",\"stage\":\"txn\",\"timestamp\":1772665076}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Deny",
+              "errorcode": "INTERNAL",
+              "priority": "LOG_ERR",
+              "reason": "UNEXPECTED_ERROR",
+              "stage": "txn",
+              "timestamp": "YYYY-03-04T22:57:56.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-04T22:57:56.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

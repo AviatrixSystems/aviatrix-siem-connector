@@ -1,0 +1,59 @@
+{
+  "case": "api-v25-no-pri-iso-post",
+  "input": "2023-08-23T15:54:41.859849+00:00 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=POST url=/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159 user=admin req_data={\"name\": \"test-sg\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"name\": \"web-vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"} resp_status=201 CREATED resp_data={\"name\": \"test-sg\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"name\": \"web-vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.controller.action": "/v2.5/app-domains",
+          "aviatrix.controller.api_host": "198.51.100.2",
+          "aviatrix.controller.args": {
+            "__json_string__": {
+              "name": "test-sg",
+              "selector": {
+                "any": [
+                  {
+                    "all": {
+                      "name": "web-vm",
+                      "type": "vm"
+                    }
+                  }
+                ]
+              },
+              "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
+            }
+          },
+          "aviatrix.controller.host": "Controller-10.0.1.118",
+          "aviatrix.controller.reason": {
+            "__json_string__": {
+              "name": "test-sg",
+              "selector": {
+                "any": [
+                  {
+                    "all": {
+                      "name": "web-vm",
+                      "type": "vm"
+                    }
+                  }
+                ]
+              },
+              "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
+            }
+          },
+          "aviatrix.controller.result": "201 CREATED",
+          "aviatrix.controller.username": "admin",
+          "aviatrix.event.type": "ControllerAudit",
+          "client.ip": "203.0.113.159",
+          "content": "Controller API: /v2.5/app-domains by admin - 201 CREATED",
+          "http.request.method": "POST",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-08-23T15:54:41.859Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

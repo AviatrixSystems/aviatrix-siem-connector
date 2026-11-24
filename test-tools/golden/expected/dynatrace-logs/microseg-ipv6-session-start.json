@@ -1,0 +1,30 @@
+{
+  "case": "microseg-ipv6-session-start",
+  "input": "<158>Nov 23 10:00:01 GW-spoke-v6-198.51.100.7-sink /usr/local/bin/avx-gw-state-sync 2026/11/23 10:00:01 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=80 SRC_IP=2001:db8::10 DST_IP=2001:db8:1::20 PROTO=TCP SRC_PORT=37368 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=15625921951502722107 SESSION_EVENT=0",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "PERMIT",
+          "aviatrix.dcf.dst_ip": "2001:db8:1::20",
+          "aviatrix.dcf.dst_port": 443,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "spoke-v6",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "51321a3b-e5e2-4ab3-9594-e97a51799e15",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.src_ip": "2001:db8::10",
+          "aviatrix.dcf.src_port": 37368,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Allow: 2001:db8::10:37368 -> 2001:db8:1::20:443 TCP",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-11-23T10:00:01.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "case": "fqdn-dropped-no-rule",
+  "input": "<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "dip": "104.244.42.1",
+            "gateway": "egress-fqdn-gw",
+            "hostname": "api.twitter.com",
+            "sip": "10.10.1.163",
+            "state": "NO_MATCH",
+            "syslog": "<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED",
+            "timestamp": "YYYY-03-04T22:59:15.000Z (epoch)"
+          },
+          "source": "avx-fqdn",
+          "sourcetype": "aviatrix:firewall:fqdn",
+          "time": "YYYY-03-04T22:59:15.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "case": "api-v25-delete-empty-user-401-none",
+  "input": "<14>Mar  4 23:08:12 203.0.113.5 Mar  4 23:08:12 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=DELETE url=/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78 user= req_data={} resp_status=401 UNAUTHORIZED resp_data=None ",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:08:12.000Z",
+          "action": "/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718",
+          "api_host": "10.0.0.120",
+          "args": {
+            "__json_string__": {}
+          },
+          "client_ip": "198.51.100.78",
+          "controller_ip": "10.0.0.120",
+          "event": {
+            "original": "<14>Mar  4 23:08:12 203.0.113.5 Mar  4 23:08:12 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=DELETE url=/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78 user= req_data={} resp_status=401 UNAUTHORIZED resp_data=None "
+          },
+          "gw_hostname": "Controller-10.0.0.120",
+          "http_method": "DELETE",
+          "message": "<14>Mar  4 23:08:12 203.0.113.5 Mar  4 23:08:12 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=DELETE url=/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78 user= req_data={} resp_status=401 UNAUTHORIZED resp_data=None ",
+          "reason": "None",
+          "result": "401 UNAUTHORIZED",
+          "tags": [
+            "cmd",
+            "V2.5API"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T23:08:12.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

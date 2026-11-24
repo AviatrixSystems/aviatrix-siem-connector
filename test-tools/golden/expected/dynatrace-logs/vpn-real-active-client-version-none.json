@@ -1,0 +1,25 @@
+{
+  "case": "vpn-real-active-client-version-none",
+  "input": "<14>Apr 16 21:09:06 Controller-10.0.0.141 run_cloudxd.py[16576]: AviatrixVPNSession: User=ci-runner, Status=active, Gateway=n7-runners-vpn, GatewayIP=, VPNVirtualIP=192.168.44.6, PublicIP=203.0.113.41, Login=2026-04-16 21:09:05, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=linux, VPNClientVersion=None",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "VPNSession",
+          "aviatrix.vpn.gateway": "n7-runners-vpn",
+          "aviatrix.vpn.gateway_ip": "",
+          "aviatrix.vpn.public_ip": "203.0.113.41",
+          "aviatrix.vpn.status": "active",
+          "aviatrix.vpn.user": "ci-runner",
+          "content": "VPN active: ci-runner on n7-runners-vpn",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-04-16T21:09:06.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

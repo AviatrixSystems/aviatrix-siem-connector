@@ -1,0 +1,40 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-ids-policy-timeout",
+  "input": "<153>Mar  4 22:58:11 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"IDS_POLICY_TIMEOUT\",\"src\":\"10.1.5.205\",\"src_port\":60524,\"dest\":\"23.215.0.138\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"example.com\",\"decrypted_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"session_start\":1772665091280859250,\"session_time\":3983567890,\"session_stage\":\"end\",\"session_id\":\"3ff849d1-b44c-4cce-bc8c-40a71996425e\",\"request_bytes\":98,\"response_bytes\":804,\"url\":\"example.com/\",\"timestamp\":1772665091}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "Permit",
+          "aviatrix.dcf.decrypted_by": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "aviatrix.dcf.dst_ip": "23.215.0.138",
+          "aviatrix.dcf.dst_port": 443,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "frontend-eks-spoke",
+          "aviatrix.dcf.layer": "L7",
+          "aviatrix.dcf.policy_uuid": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.reason": "IDS_POLICY_TIMEOUT",
+          "aviatrix.dcf.request_bytes": 98,
+          "aviatrix.dcf.response_bytes": 804,
+          "aviatrix.dcf.session_id": "3ff849d1-b44c-4cce-bc8c-40a71996425e",
+          "aviatrix.dcf.sni_hostname": "example.com",
+          "aviatrix.dcf.src_ip": "10.1.5.205",
+          "aviatrix.dcf.src_port": 60524,
+          "aviatrix.dcf.url": "example.com/",
+          "aviatrix.event.type": "WebInspection",
+          "content": "L7 DCF Allow: 10.1.5.205 -> example.com",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T22:58:11.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "case": "mitm-truncated-json",
+  "input": "<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"IPS_POLICY_DENY\",\"src\":\"10.1.5.205\",\"src_port\":40708,\"dest\":\"203.0.113.138\",\"dest_po",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:57:55.000Z",
+          "gw_hostname": "frontend-eks-spoke",
+          "message": "<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"IPS_POLICY_DENY\",\"src\":\"10.1.5.205\",\"src_port\":40708,\"dest\":\"203.0.113.138\",\"dest_po",
+          "syslog_pri": "153",
+          "tags": [
+            "_avx_json_parse_failure",
+            "unparsed"
+          ],
+          "unix_time": "YYYY-03-04T22:57:55.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

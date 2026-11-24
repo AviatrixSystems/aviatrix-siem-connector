@@ -1,0 +1,30 @@
+{
+  "avx": {
+    "until": "8.1"
+  },
+  "case": "tunnel-up-down-cross-region",
+  "input": "<14>2026-03-04T22:59:06.719062+00:00 ip-10-2-0-14 cloudxd: AviatrixTunnelStatusChange: src_gw=k8s-transit(AWS us-east-2) dst_gw=west-transit(AWS us-west-2) old_state=Up new_state=Down",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:59:06.719Z",
+          "TimeGenerated": "YYYY-03-04T22:59:06.719Z",
+          "dst_gw": "west-transit(AWS us-west-2)",
+          "gateway": "k8s-transit",
+          "ls_timestamp": "YYYY-03-04T22:59:06.719Z",
+          "new_state": "Down",
+          "old_state": "Up",
+          "src_gw": "k8s-transit(AWS us-east-2)",
+          "tags": [
+            "tunnel_status"
+          ],
+          "unix_time": "YYYY-03-04T22:59:06.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-tunnel-status"
+    }
+  ]
+}

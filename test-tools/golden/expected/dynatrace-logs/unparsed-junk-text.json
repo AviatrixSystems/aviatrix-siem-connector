@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-junk-text",
+  "input": "this is not a syslog line",
+  "requests": []
+}

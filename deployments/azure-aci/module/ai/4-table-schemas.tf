@@ -57,6 +57,10 @@ locals {
       # Added 2026-11: session end reason (EventOriginalResultDetails is read by the ASIM parser)
       { name = "EventOriginalResultDetails", type = "string" },
       { name = "session_end_reason_text", type = "string" },
+      # Added 2026-11: 10.1+ microseg fields and the session event label
+      { name = "session_start", type = "string" },
+      { name = "egress_path", type = "string" },
+      { name = "session_event_type", type = "string" },
     ]
     websession = [
       # ASIM common fields
@@ -226,6 +230,10 @@ locals {
       { name = "tags", type = "dynamic" },
       { name = "unix_time", type = "long" },
       { name = "username", type = "string" },
+      # Added 2026-11: V2.5 API method, client IP and Host header
+      { name = "http_method", type = "string" },
+      { name = "client_ip", type = "string" },
+      { name = "api_host", type = "string" },
     ]
     tunnel_status = [
       { name = "TimeGenerated", type = "datetime" },
@@ -236,6 +244,9 @@ locals {
       { name = "src_gw", type = "string" },
       { name = "tags", type = "dynamic" },
       { name = "unix_time", type = "long" },
+      { name = "reporting_gw", type = "string" },
+      { name = "src_intf", type = "string" },
+      { name = "dst_intf", type = "string" },
     ]
     vpn_session = [
       { name = "TimeGenerated", type = "datetime" },

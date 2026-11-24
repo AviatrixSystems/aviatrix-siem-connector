@@ -1,0 +1,30 @@
+{
+  "case": "cmd-v1-enable-rsyslog",
+  "input": "<14>Mar  4 22:58:33 18.190.163.185 Mar  4 22:58:33 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=ENABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'enable_rsyslog_forwarder', '3.149.191.227', '514', '--index', '1', '--name', 'Sample Data', '--protocol', 'UDP'], result=Success, reason=, username=admin",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:58:33.000Z",
+          "TimeGenerated": "YYYY-03-04T22:58:33.000Z",
+          "action": "ENABLE_RSYSLOG_FORWARDER",
+          "args": "['--rtn_file', '/dev/null', 'enable_rsyslog_forwarder', '3.149.191.227', '514', '--index', '1', '--name', 'Sample Data', '--protocol', 'UDP']",
+          "controller_ip": "10.0.0.120",
+          "gw_hostname": "Controller-10.0.0.120",
+          "ls_timestamp": "YYYY-03-04T22:58:33.000Z",
+          "reason": "",
+          "result": "Success",
+          "tags": [
+            "cmd",
+            "V1Api"
+          ],
+          "unix_time": "YYYY-03-04T22:58:33.000Z (epoch)",
+          "username": "admin"
+        }
+      ],
+      "path": "/azure/azure-cmd"
+    }
+  ]
+}

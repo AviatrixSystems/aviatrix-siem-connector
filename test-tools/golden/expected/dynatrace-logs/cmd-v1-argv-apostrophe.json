@@ -1,0 +1,25 @@
+{
+  "case": "cmd-v1-argv-apostrophe",
+  "input": "<14>Mar  4 23:08:07 203.0.113.5 Mar  4 23:08:07 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=EDIT_GW_TAGS, argv=['--rtn_file', '/dev/null', 'edit_gw_tags', '--gw_name', 'spoke-test-1', '--tags', \"Owner=Pat's team\"], result=Success, reason=, username=admin",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.controller.action": "EDIT_GW_TAGS",
+          "aviatrix.controller.args": "['--rtn_file', '/dev/null', 'edit_gw_tags', '--gw_name', 'spoke-test-1', '--tags', \"Owner=Pat's team\"]",
+          "aviatrix.controller.host": "Controller-10.0.0.120",
+          "aviatrix.controller.result": "Success",
+          "aviatrix.controller.username": "admin",
+          "aviatrix.event.type": "ControllerAudit",
+          "content": "Controller API: EDIT_GW_TAGS by admin - Success",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:08:07.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

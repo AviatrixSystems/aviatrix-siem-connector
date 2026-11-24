@@ -1,0 +1,26 @@
+{
+  "case": "cmd-real-fail-url-double-space",
+  "input": "<14>Sep 30 14:34:46 Controller-10.0.0.131 run_cloudxd.py[2780]: AviatrixCMD: action=EDIT_GW_CONFIG, argv=['--rtn_file', '/dev/null', 'edit_gw_config'], result=Fail, reason=[AVXERR-GATEWAY-0042] Failed to resize Gateway n5-az-spoke-b. (InvalidParameter) The VM size 'Standard_D2s_v6' cannot boot with DiskControllerType 'SCSI'. Please check that the disk controller type provided is one of the supported disk controller types for the VM size 'Standard_D2s_v6'. Please query sku api at https://aka.ms/azure-compute-skus  to determine supported disk controller types for the VM size.",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.controller.action": "EDIT_GW_CONFIG",
+          "aviatrix.controller.args": "['--rtn_file', '/dev/null', 'edit_gw_config']",
+          "aviatrix.controller.host": "Controller-10.0.0.131",
+          "aviatrix.controller.reason": "[AVXERR-GATEWAY-0042] Failed to resize Gateway n5-az-spoke-b. (InvalidParameter) The VM size 'Standard_D2s_v6' cannot boot with DiskControllerType 'SCSI'. Please check that the disk controller type provided is one of the supported disk controller types for the VM size 'Standard_D2s_v6'. Please query sku api at https://aka.ms/azure-compute-skus  to determine supported disk controller types for the VM size.",
+          "aviatrix.controller.result": "Fail",
+          "aviatrix.controller.username": "",
+          "aviatrix.event.type": "ControllerAudit",
+          "content": "Controller API: EDIT_GW_CONFIG - Fail",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-09-30T14:34:46.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

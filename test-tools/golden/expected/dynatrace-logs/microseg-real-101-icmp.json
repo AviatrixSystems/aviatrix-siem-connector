@@ -1,0 +1,43 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "microseg-real-101-icmp",
+  "input": "<158>Nov  3 19:51:15 GW-n3-fs-b-192.0.2.3-sink /usr/local/bin/avx-gw-state-sync 2026/11/03 19:51:15 AviatrixGwMicrosegPacket: POLICY=7f1aea27-fdb5-4635-b651-893b37d9c855 SRC_MAC=12:ff:f7:57:9f:09 DST_MAC=12:ff:cc:7c:ee:a7 IP_SZ=28 SRC_IP=10.11.0.58 DST_IP=10.12.0.41 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_START=2026-11-03T17:10:21.461098724Z SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0 EGRESS_PATH=EGRESS_PATH_DEFAULT",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "DENY",
+          "aviatrix.dcf.dst_ip": "10.12.0.41",
+          "aviatrix.dcf.dst_port": 0,
+          "aviatrix.dcf.egress_path": "EGRESS_PATH_DEFAULT",
+          "aviatrix.dcf.enforced": "",
+          "aviatrix.dcf.gateway": "n3-fs-b",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "7f1aea27-fdb5-4635-b651-893b37d9c855",
+          "aviatrix.dcf.protocol": "ICMP",
+          "aviatrix.dcf.session_byte_cnt": "0",
+          "aviatrix.dcf.session_dur": "0",
+          "aviatrix.dcf.session_end_reason": "0",
+          "aviatrix.dcf.session_end_reason_text": "active",
+          "aviatrix.dcf.session_event": "0",
+          "aviatrix.dcf.session_event_type": "Start",
+          "aviatrix.dcf.session_id": "0",
+          "aviatrix.dcf.session_pkt_cnt": "0",
+          "aviatrix.dcf.session_start": "YYYY-11-03T17:10:21.461098724Z",
+          "aviatrix.dcf.src_ip": "10.11.0.58",
+          "aviatrix.dcf.src_port": 0,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Deny: 10.11.0.58:0 -> 10.12.0.41:0 ICMP",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-11-03T19:51:15.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

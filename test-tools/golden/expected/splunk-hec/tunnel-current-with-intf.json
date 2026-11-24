@@ -1,0 +1,31 @@
+{
+  "avx": {
+    "min": "8.0.10"
+  },
+  "case": "tunnel-current-with-intf",
+  "input": "<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down ",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "dst_gw": "transit-a(AWS us-east-2)",
+            "dst_intf": "eth2",
+            "new_state": "Down",
+            "old_state": "Up",
+            "reporting_gw": "spoke-b",
+            "src_gw": "spoke-b(AWS us-east-2)",
+            "src_intf": "eth1",
+            "syslog": "<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down "
+          },
+          "source": "avx-tunnel-status",
+          "sourcetype": "aviatrix:tunnel:status",
+          "time": "YYYY-03-04T23:10:01.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

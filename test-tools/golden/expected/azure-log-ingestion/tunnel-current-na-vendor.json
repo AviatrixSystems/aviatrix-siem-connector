@@ -1,0 +1,31 @@
+{
+  "avx": {
+    "min": "8.0.10"
+  },
+  "case": "tunnel-current-na-vendor",
+  "input": "<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up ",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:10:05.551Z",
+          "TimeGenerated": "YYYY-03-04T23:10:05.551Z",
+          "dst_gw": "transit-a(Azure ARM East US)",
+          "gateway": "transit-a",
+          "ls_timestamp": "YYYY-03-04T23:10:05.551Z",
+          "new_state": "Up",
+          "old_state": "Down",
+          "reporting_gw": "transit-a",
+          "src_gw": "203.0.113.90(NA NA)",
+          "tags": [
+            "tunnel_status"
+          ],
+          "unix_time": "YYYY-03-04T23:10:05.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-tunnel-status"
+    }
+  ]
+}

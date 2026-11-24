@@ -1,0 +1,25 @@
+{
+  "case": "unparsed-learned-cidr-multiline-head",
+  "input": "<14>Mar  4 23:11:04 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixLearnedCIDRPendingApproval: Request approval for new learned CIDR(s):",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "<receive time>",
+          "event": {
+            "original": "<14>Mar  4 23:11:04 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixLearnedCIDRPendingApproval: Request approval for new learned CIDR(s):"
+          },
+          "message": "<14>Mar  4 23:11:04 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixLearnedCIDRPendingApproval: Request approval for new learned CIDR(s):",
+          "tags": [
+            "unparsed"
+          ],
+          "type": "syslog",
+          "unix_time": "<receive time>"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

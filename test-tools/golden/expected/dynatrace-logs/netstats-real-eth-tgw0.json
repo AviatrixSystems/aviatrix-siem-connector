@@ -1,0 +1,5 @@
+{
+  "case": "netstats-real-eth-tgw0",
+  "input": "<14>Nov  3 18:56:57 GW-n3-transit-hagw-203.0.113.4-sink /usr/local/bin/avx-gw-state-sync 2026/11/03 18:56:57 AviatrixGwNetStats: timestamp=2026-11-03T18:56:54.557776383 name=n3-transit-hagw alias=n3-transit-hagw  private_ip=10.13.0.92 interface=eth-tgw0 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=2.65KB total_tx_cum=6.14KB total_rx_tx_cum=8.80KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=103 conntrack_allowance_available=51296 conntrack_usage_rate=-0.00",
+  "requests": []
+}

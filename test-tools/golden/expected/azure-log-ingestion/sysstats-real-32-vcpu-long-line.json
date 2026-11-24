@@ -1,0 +1,132 @@
+{
+  "case": "sysstats-real-32-vcpu-long-line",
+  "input": "<14>Oct  2 00:25:11 GW-cust-transit-euc1-198.51.100.6-sink /usr/local/bin/avx-gw-state-sync 2026/10/02 00:25:11 AviatrixGwSysStats: timestamp=2026-10-02T00:25:08.518824492 name=cust-transit-euc1 alias=cust-transit-euc1 cpu_idle=100 memory_free=57313492 memory_available=61998968 memory_total=64012496 disk_total=65842432 disk_free=56799416 cpu_cores=[name:24 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:2 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:-1 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:21 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:20 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:16 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:8 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:23 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:15 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:7 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:12 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:31 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:18 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:1 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:17 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:4 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:10 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:26 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:11 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:22 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:19 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:6 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:3 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:28 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:9 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:5 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:30 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:25 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:27 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:14 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:29 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}} name:13 busy:{start:{seconds:1790900665 nanos:675460355} end:{seconds:1790900705 nanos:675973064}}]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-10-02T00:25:11.000Z",
+          "TimeGenerated": "YYYY-10-02T00:25:11.000Z",
+          "alias": "cust-transit-euc1",
+          "cpu_core_count": 32,
+          "cpu_cores_parsed": [
+            {
+              "name": "24"
+            },
+            {
+              "name": "2"
+            },
+            {
+              "name": "-1"
+            },
+            {
+              "name": "21"
+            },
+            {
+              "name": "20"
+            },
+            {
+              "name": "16"
+            },
+            {
+              "name": "8"
+            },
+            {
+              "name": "23"
+            },
+            {
+              "name": "15"
+            },
+            {
+              "name": "7"
+            },
+            {
+              "name": "12"
+            },
+            {
+              "name": "31"
+            },
+            {
+              "name": "18"
+            },
+            {
+              "name": "1"
+            },
+            {
+              "name": "17"
+            },
+            {
+              "name": "4"
+            },
+            {
+              "name": "10"
+            },
+            {
+              "name": "26"
+            },
+            {
+              "name": "0"
+            },
+            {
+              "name": "11"
+            },
+            {
+              "name": "22"
+            },
+            {
+              "name": "19"
+            },
+            {
+              "name": "6"
+            },
+            {
+              "name": "3"
+            },
+            {
+              "name": "28"
+            },
+            {
+              "name": "9"
+            },
+            {
+              "name": "5"
+            },
+            {
+              "name": "30"
+            },
+            {
+              "name": "25"
+            },
+            {
+              "name": "27"
+            },
+            {
+              "name": "14"
+            },
+            {
+              "name": "29"
+            },
+            {
+              "name": "13"
+            }
+          ],
+          "cpu_idle": 100,
+          "disk_free": 56799416,
+          "disk_total": 65842432,
+          "gateway": "cust-transit-euc1",
+          "ls_timestamp": "YYYY-10-02T00:25:11.000Z",
+          "memory_available": 61998968,
+          "memory_free": 57313492,
+          "memory_total": 64012496,
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "unix_time": "YYYY-10-02T00:25:11.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-gw-sys-stats"
+    }
+  ]
+}

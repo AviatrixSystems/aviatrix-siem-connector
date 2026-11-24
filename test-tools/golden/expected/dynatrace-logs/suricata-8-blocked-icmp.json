@@ -1,0 +1,40 @@
+{
+  "avx": {
+    "min": "10.0"
+  },
+  "case": "suricata-8-blocked-icmp",
+  "input": "<174>Mar  4 23:06:10 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"timestamp\":\"2026-03-04T23:06:10.402113+0000\",\"flow_id\":118823401992211,\"in_iface\":\"ids0\",\"event_type\":\"alert\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.50\",\"proto\":\"ICMP\",\"ip_v\":4,\"icmp_type\":8,\"icmp_code\":0,\"pkt_src\":\"wire/pcap\",\"alert\":{\"action\":\"blocked\",\"gid\":1,\"signature_id\":2100366,\"rev\":8,\"signature\":\"GPL ICMP_INFO PING *NIX\",\"category\":\"Misc activity\",\"severity\":3},\"direction\":\"to_server\",\"flow\":{\"pkts_toserver\":1,\"pkts_toclient\":0,\"bytes_toserver\":98,\"bytes_toclient\":0,\"start\":\"2026-03-04T23:06:10.402113+0000\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.50\"}}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "IDSAlert",
+          "aviatrix.ids.category": "Misc activity",
+          "aviatrix.ids.dst_ip": "203.0.113.50",
+          "aviatrix.ids.dst_port": "",
+          "aviatrix.ids.event_type": "alert",
+          "aviatrix.ids.flow.bytes_toclient": 0,
+          "aviatrix.ids.flow.bytes_toserver": 98,
+          "aviatrix.ids.flow.pkts_toclient": 0,
+          "aviatrix.ids.flow.pkts_toserver": 1,
+          "aviatrix.ids.gateway": "egress-spoke",
+          "aviatrix.ids.gid": 1,
+          "aviatrix.ids.protocol": "ICMP",
+          "aviatrix.ids.rev": 8,
+          "aviatrix.ids.severity": 3,
+          "aviatrix.ids.signature": "GPL ICMP_INFO PING *NIX",
+          "aviatrix.ids.signature_id": 2100366,
+          "aviatrix.ids.src_ip": "10.60.1.12",
+          "aviatrix.ids.src_port": "",
+          "content": "IDS Alert: GPL ICMP_INFO PING *NIX (Misc activity) 10.60.1.12: -> 203.0.113.50:",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:06:10.402113+0000"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

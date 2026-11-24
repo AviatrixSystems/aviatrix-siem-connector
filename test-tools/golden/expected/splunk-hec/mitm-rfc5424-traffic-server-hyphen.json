@@ -1,0 +1,39 @@
+{
+  "case": "mitm-rfc5424-traffic-server-hyphen",
+  "input": "<153>1 2026-11-23T10:00:02.123456Z hostname traffic-server 2 - - {\"priority\":\"LOG_ALERT\",\"action\":\"PERMIT\",\"reason\":\"POLICY\",\"src\":\"10.21.0.36\",\"src_port\":42148,\"dest\":\"203.0.113.21\",\"dest_port\":443,\"enforced\":false,\"ids\":false,\"stage\":\"SNI\",\"sni_hostname\":\"www.example.com\",\"decided_by\":\"21018422-0b45-4226-9694-d2cfab39a382\",\"proto\":\"TCP\",\"timestamp\":1795428002,\"session_id\":\"00000000-0000-0000-0000-000000000000\",\"session_start\":1795428002,\"session_stage\":\"start\"}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "PERMIT",
+              "decided_by": "21018422-0b45-4226-9694-d2cfab39a382",
+              "dest": "203.0.113.21",
+              "dest_port": 443,
+              "enforced": false,
+              "ids": false,
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "POLICY",
+              "session_id": "00000000-0000-0000-0000-000000000000",
+              "session_stage": "start",
+              "session_start": 1795428002,
+              "sni_hostname": "www.example.com",
+              "src": "10.21.0.36",
+              "src_port": 42148,
+              "stage": "SNI",
+              "timestamp": "YYYY-11-23T10:00:02.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-11-23T10:00:02.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

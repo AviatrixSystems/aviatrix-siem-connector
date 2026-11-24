@@ -1,0 +1,9 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "10.0"
+  },
+  "case": "mitm-truncated-8k-limit",
+  "input": "<153>Mar  4 23:05:02 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"10.60.1.12\",\"src_port\":40313,\"dest\":\"203.0.113.11\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"app.example.com\",\"url\":\"app.example.com/search?q=aaaaaaaaaaaaaaaaaaaaaaaa",
+  "requests": []
+}

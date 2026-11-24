@@ -1,0 +1,27 @@
+{
+  "case": "cmd-v1-argv-redacted-email-user",
+  "input": "<14>Mar  4 23:08:05 203.0.113.5 Mar  4 23:08:05 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=SETUP_ACCOUNT_PROFILE, argv=['********'], result=Success, reason=, username=ops.user@example.com",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "SETUP_ACCOUNT_PROFILE",
+            "args": "['********']",
+            "reason": "",
+            "result": "Success",
+            "syslog": "<14>Mar  4 23:08:05 203.0.113.5 Mar  4 23:08:05 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=SETUP_ACCOUNT_PROFILE, argv=['********'], result=Success, reason=, username=ops.user@example.com",
+            "timestamp": "YYYY-03-04T23:08:05.000Z (epoch)",
+            "username": "ops.user@example.com"
+          },
+          "source": "avx-cmd",
+          "sourcetype": "aviatrix:controller:audit",
+          "time": "YYYY-03-04T23:08:05.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

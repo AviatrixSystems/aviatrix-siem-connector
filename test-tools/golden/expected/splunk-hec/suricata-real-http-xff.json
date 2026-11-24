@@ -1,0 +1,92 @@
+{
+  "case": "suricata-real-http-xff",
+  "input": "<174>Mar 25 16:16:03 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"flow_id\":1103538019779224,\"event_type\":\"alert\",\"dest_ip\":\"10.1.3.5\",\"proto\":\"TCP\",\"alert\":{\"policy_id\":\"87eb7aa4-5c63-4479-b5ae-bc35105c69e2\",\"severity\":1,\"signature_id\":2024364,\"rev\":4,\"signature\":\"ET SCAN Possible Nmap User-Agent Observed\",\"gid\":1,\"category\":\"Web Application Attack\",\"metadata\":{\"reviewed_at\":[\"2024_05_06\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2020_08_06\"],\"confidence\":[\"Medium\"],\"attack_target\":[\"Client_and_Server\"],\"affected_product\":[\"Any\"],\"deployment\":[\"Perimeter\"],\"performance_impact\":[\"Low\"],\"created_at\":[\"2017_06_08\"]},\"action\":\"allowed\"},\"src_port\":80,\"tx_id\":0,\"flow\":{\"dest_port\":80,\"bytes_toclient\":80,\"dest_ip\":\"10.2.1.10\",\"src_port\":53160,\"pkts_toserver\":3,\"bytes_toserver\":486,\"pkts_toclient\":2,\"start\":\"2026-03-25T16:16:03.453545+0000\",\"src_ip\":\"10.1.3.5\"},\"http\":{\"http_method\":\"HEAD\",\"protocol\":\"HTTP/1.1\",\"length\":0,\"hostname\":\"localhost.localdomain\",\"http_user_agent\":\"Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)\",\"xff\":\"127.0.0.1:49498\",\"url\":\"http:///\"},\"app_proto\":\"http\",\"direction\":\"to_client\",\"timestamp\":\"2026-03-25T16:16:03.496548+0000\",\"pkt_src\":\"wire/pcap\",\"src_ip\":\"10.2.1.10\",\"dest_port\":53160,\"pcap_cnt\":37448}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "alert": {
+              "action": "allowed",
+              "category": "Web Application Attack",
+              "gid": 1,
+              "metadata": {
+                "affected_product": [
+                  "Any"
+                ],
+                "attack_target": [
+                  "Client_and_Server"
+                ],
+                "confidence": [
+                  "Medium"
+                ],
+                "created_at": [
+                  "2017_06_08"
+                ],
+                "deployment": [
+                  "Perimeter"
+                ],
+                "performance_impact": [
+                  "Low"
+                ],
+                "reviewed_at": [
+                  "2024_05_06"
+                ],
+                "signature_severity": [
+                  "Informational"
+                ],
+                "updated_at": [
+                  "2020_08_06"
+                ]
+              },
+              "policy_id": "87eb7aa4-5c63-4479-b5ae-bc35105c69e2",
+              "rev": 4,
+              "severity": 1,
+              "signature": "ET SCAN Possible Nmap User-Agent Observed",
+              "signature_id": 2024364
+            },
+            "app_proto": "http",
+            "dest_ip": "10.1.3.5",
+            "dest_port": 53160,
+            "direction": "to_client",
+            "event_type": "alert",
+            "flow": {
+              "bytes_toclient": 80,
+              "bytes_toserver": 486,
+              "dest_ip": "10.2.1.10",
+              "dest_port": 80,
+              "pkts_toclient": 2,
+              "pkts_toserver": 3,
+              "src_ip": "10.1.3.5",
+              "src_port": 53160,
+              "start": "YYYY-03-25T16:16:03.453545+0000"
+            },
+            "flow_id": 1103538019779224,
+            "http": {
+              "hostname": "localhost.localdomain",
+              "http_method": "HEAD",
+              "http_user_agent": "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)",
+              "length": 0,
+              "protocol": "HTTP/1.1",
+              "url": "http:///",
+              "xff": "127.0.0.1:49498"
+            },
+            "pcap_cnt": 37448,
+            "pkt_src": "wire/pcap",
+            "proto": "TCP",
+            "src_ip": "10.2.1.10",
+            "src_port": 80,
+            "timestamp": "YYYY-03-25T16:16:03.496548+0000",
+            "tx_id": 0
+          },
+          "source": "avx-ids",
+          "sourcetype": "aviatrix:ids",
+          "time": "YYYY-03-25T16:16:03.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

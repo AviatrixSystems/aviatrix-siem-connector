@@ -1,0 +1,32 @@
+{
+  "avx": {
+    "until": "8.1"
+  },
+  "case": "tunnel-legacy-with-intf",
+  "input": "<14>2026-03-04T23:10:12.330001+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: src_gw=spoke-b(AWS us-east-2) src_intf=eth1 dst_gw=transit-a(AWS us-east-2) dst_intf=eth2 old_state=Down new_state=Up ",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:10:12.330Z",
+          "TimeGenerated": "YYYY-03-04T23:10:12.330Z",
+          "dst_gw": "transit-a(AWS us-east-2)",
+          "dst_intf": "eth2",
+          "gateway": "spoke-b",
+          "ls_timestamp": "YYYY-03-04T23:10:12.330Z",
+          "new_state": "Up",
+          "old_state": "Down",
+          "src_gw": "spoke-b(AWS us-east-2)",
+          "src_intf": "eth1",
+          "tags": [
+            "tunnel_status"
+          ],
+          "unix_time": "YYYY-03-04T23:10:12.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-tunnel-status"
+    }
+  ]
+}

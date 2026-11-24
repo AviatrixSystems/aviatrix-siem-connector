@@ -1,0 +1,129 @@
+{
+  "case": "suricata-real-flow-timeout-empty-http",
+  "input": "<174>Dec  9 00:11:28 GW-backend-eks-spoke-198.51.100.38-sink suricata[4]: {\"timestamp\":\"2025-12-09T00:11:28.038198+0000\",\"flow_id\":2225331147839834,\"event_type\":\"alert\",\"src_ip\":\"198.51.100.40\",\"src_port\":80,\"dest_ip\":\"100.64.93.36\",\"dest_port\":48696,\"proto\":\"TCP\",\"pkt_src\":\"stream (flow timeout)\",\"tx_id\":1,\"tx_guessed\":true,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2,\"metadata\":{\"confidence\":[\"Medium\"],\"created_at\":[\"2010_09_23\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2019_07_26\"]}},\"http\":{},\"app_proto\":\"http\",\"direction\":\"to_client\",\"flow\":{\"pkts_toserver\":6,\"pkts_toclient\":6,\"bytes_toserver\":339,\"bytes_toclient\":778,\"start\":\"2025-12-09T00:10:23.976877+0000\",\"src_ip\":\"100.64.93.36\",\"dest_ip\":\"198.51.100.40\",\"src_port\":48696,\"dest_port\":80}}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-12-09T00:11:28.000Z",
+          "event": {
+            "original": "<174>Dec  9 00:11:28 GW-backend-eks-spoke-198.51.100.38-sink suricata[4]: {\"timestamp\":\"2025-12-09T00:11:28.038198+0000\",\"flow_id\":2225331147839834,\"event_type\":\"alert\",\"src_ip\":\"198.51.100.40\",\"src_port\":80,\"dest_ip\":\"100.64.93.36\",\"dest_port\":48696,\"proto\":\"TCP\",\"pkt_src\":\"stream (flow timeout)\",\"tx_id\":1,\"tx_guessed\":true,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2,\"metadata\":{\"confidence\":[\"Medium\"],\"created_at\":[\"2010_09_23\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2019_07_26\"]}},\"http\":{},\"app_proto\":\"http\",\"direction\":\"to_client\",\"flow\":{\"pkts_toserver\":6,\"pkts_toclient\":6,\"bytes_toserver\":339,\"bytes_toclient\":778,\"start\":\"2025-12-09T00:10:23.976877+0000\",\"src_ip\":\"100.64.93.36\",\"dest_ip\":\"198.51.100.40\",\"src_port\":48696,\"dest_port\":80}}"
+          },
+          "gw_hostname": "backend-eks-spoke",
+          "message": "<174>Dec  9 00:11:28 GW-backend-eks-spoke-198.51.100.38-sink suricata[4]: {\"timestamp\":\"2025-12-09T00:11:28.038198+0000\",\"flow_id\":2225331147839834,\"event_type\":\"alert\",\"src_ip\":\"198.51.100.40\",\"src_port\":80,\"dest_ip\":\"100.64.93.36\",\"dest_port\":48696,\"proto\":\"TCP\",\"pkt_src\":\"stream (flow timeout)\",\"tx_id\":1,\"tx_guessed\":true,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2,\"metadata\":{\"confidence\":[\"Medium\"],\"created_at\":[\"2010_09_23\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2019_07_26\"]}},\"http\":{},\"app_proto\":\"http\",\"direction\":\"to_client\",\"flow\":{\"pkts_toserver\":6,\"pkts_toclient\":6,\"bytes_toserver\":339,\"bytes_toclient\":778,\"start\":\"2025-12-09T00:10:23.976877+0000\",\"src_ip\":\"100.64.93.36\",\"dest_ip\":\"198.51.100.40\",\"src_port\":48696,\"dest_port\":80}}",
+          "suricataData": {
+            "__json_string__": {
+              "alert": {
+                "action": "allowed",
+                "category": "Potentially Bad Traffic",
+                "gid": 1,
+                "metadata": {
+                  "confidence": [
+                    "Medium"
+                  ],
+                  "created_at": [
+                    "2010_09_23"
+                  ],
+                  "signature_severity": [
+                    "Informational"
+                  ],
+                  "updated_at": [
+                    "2019_07_26"
+                  ]
+                },
+                "rev": 7,
+                "severity": 2,
+                "signature": "GPL ATTACK_RESPONSE id check returned root",
+                "signature_id": 2100498
+              },
+              "app_proto": "http",
+              "dest_ip": "100.64.93.36",
+              "dest_port": 48696,
+              "direction": "to_client",
+              "event_type": "alert",
+              "flow": {
+                "bytes_toclient": 778,
+                "bytes_toserver": 339,
+                "dest_ip": "198.51.100.40",
+                "dest_port": 80,
+                "pkts_toclient": 6,
+                "pkts_toserver": 6,
+                "src_ip": "100.64.93.36",
+                "src_port": 48696,
+                "start": "YYYY-12-09T00:10:23.976877+0000"
+              },
+              "flow_id": 2225331147839834,
+              "http": {},
+              "pkt_src": "stream (flow timeout)",
+              "proto": "TCP",
+              "src_ip": "198.51.100.40",
+              "src_port": 80,
+              "timestamp": "YYYY-12-09T00:11:28.038198+0000",
+              "tx_guessed": true,
+              "tx_id": 1
+            }
+          },
+          "suricataDataJson": {
+            "alert": {
+              "action": "allowed",
+              "category": "Potentially Bad Traffic",
+              "gid": 1,
+              "metadata": {
+                "confidence": [
+                  "Medium"
+                ],
+                "created_at": [
+                  "2010_09_23"
+                ],
+                "signature_severity": [
+                  "Informational"
+                ],
+                "updated_at": [
+                  "2019_07_26"
+                ]
+              },
+              "rev": 7,
+              "severity": 2,
+              "signature": "GPL ATTACK_RESPONSE id check returned root",
+              "signature_id": 2100498
+            },
+            "app_proto": "http",
+            "dest_ip": "100.64.93.36",
+            "dest_port": 48696,
+            "direction": "to_client",
+            "event_type": "alert",
+            "flow": {
+              "bytes_toclient": 778,
+              "bytes_toserver": 339,
+              "dest_ip": "198.51.100.40",
+              "dest_port": 80,
+              "pkts_toclient": 6,
+              "pkts_toserver": 6,
+              "src_ip": "100.64.93.36",
+              "src_port": 48696,
+              "start": "YYYY-12-09T00:10:23.976877+0000"
+            },
+            "flow_id": 2225331147839834,
+            "http": {},
+            "pkt_src": "stream (flow timeout)",
+            "proto": "TCP",
+            "src_ip": "198.51.100.40",
+            "src_port": 80,
+            "timestamp": "YYYY-12-09T00:11:28.038198+0000",
+            "tx_guessed": true,
+            "tx_id": 1
+          },
+          "syslog_pri": "174",
+          "tags": [
+            "suricata"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-12-09T00:11:28.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

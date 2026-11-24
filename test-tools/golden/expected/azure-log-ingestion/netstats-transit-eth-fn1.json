@@ -1,0 +1,40 @@
+{
+  "case": "netstats-transit-eth-fn1",
+  "input": "<14>Mar  4 22:55:39 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:39 AviatrixGwNetStats: timestamp=2026-03-04T22:55:39.414707 name=k8s-transit alias=k8s-transit  private_ip=10.2.0.90 interface=eth-fn1 total_rx_rate=3.73 total_tx_rate=5.60 total_rx_tx_rate=9.33 total_rx_cum=13.45KB total_tx_cum=23.15KB total_rx_tx_cum=36.60KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=833 conntrack_allowance_available=205207 conntrack_usage_rate=0.02",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:55:39.000Z",
+          "TimeGenerated": "YYYY-03-04T22:55:39.000Z",
+          "alias": "k8s-transit",
+          "bw_in_limit_exceeded": "0",
+          "bw_out_limit_exceeded": "0",
+          "conntrack_allowance_available": "205207",
+          "conntrack_count": "833",
+          "conntrack_limit_exceeded": "0",
+          "conntrack_usage_rate": "0.02",
+          "gateway": "k8s-transit",
+          "interface": "eth-fn1",
+          "linklocal_limit_exceeded": "0",
+          "ls_timestamp": "YYYY-03-04T22:55:39.000Z",
+          "pps_limit_exceeded": "0",
+          "private_ip": "10.2.0.90",
+          "tags": [
+            "gw_net_stats"
+          ],
+          "total_rx_cum": "13.45KB",
+          "total_rx_rate": 4,
+          "total_rx_tx_cum": "36.60KB",
+          "total_rx_tx_rate": 9,
+          "total_tx_cum": "23.15KB",
+          "total_tx_rate": 6,
+          "unix_time": "YYYY-03-04T22:55:39.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-gw-net-stats"
+    }
+  ]
+}

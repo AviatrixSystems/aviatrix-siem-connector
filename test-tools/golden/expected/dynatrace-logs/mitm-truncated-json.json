@@ -1,0 +1,5 @@
+{
+  "case": "mitm-truncated-json",
+  "input": "<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"IPS_POLICY_DENY\",\"src\":\"10.1.5.205\",\"src_port\":40708,\"dest\":\"203.0.113.138\",\"dest_po",
+  "requests": []
+}

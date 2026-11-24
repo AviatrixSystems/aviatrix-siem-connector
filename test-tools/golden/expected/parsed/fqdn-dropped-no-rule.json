@@ -1,0 +1,31 @@
+{
+  "case": "fqdn-dropped-no-rule",
+  "input": "<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:59:15.000Z",
+          "dip": "104.244.42.1",
+          "drop": "NOT_WHITELISTED",
+          "event": {
+            "original": "<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED"
+          },
+          "gateway": "egress-fqdn-gw",
+          "hostname": "api.twitter.com",
+          "message": "<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED",
+          "sip": "10.10.1.163",
+          "state": "NO_MATCH",
+          "tags": [
+            "fqdn"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:59:15.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

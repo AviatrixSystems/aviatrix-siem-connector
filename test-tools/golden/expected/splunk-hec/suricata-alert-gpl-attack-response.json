@@ -1,0 +1,78 @@
+{
+  "case": "suricata-alert-gpl-attack-response",
+  "input": "<174>Mar  4 22:57:01 GW-backend-eks-spoke-18.119.198.171-sink suricata[4]: {\"timestamp\":\"2026-03-04T22:57:01.661154+0000\",\"flow_id\":255638648850226,\"pcap_cnt\":88796,\"event_type\":\"alert\",\"src_ip\":\"3.170.131.31\",\"src_port\":80,\"dest_ip\":\"100.64.59.124\",\"dest_port\":42324,\"proto\":\"TCP\",\"pkt_src\":\"wire/pcap\",\"tx_id\":0,\"tx_guessed\":true,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2,\"metadata\":{\"confidence\":[\"Medium\"],\"created_at\":[\"2010_09_23\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2019_07_26\"]},\"policy_id\":\"\"},\"http\":{\"hostname\":\"testmynids.org\",\"url\":\"http:///uid/index.html\",\"http_user_agent\":\"curl/8.17.0\",\"http_content_type\":\"text/html\",\"http_method\":\"GET\",\"protocol\":\"HTTP/1.1\",\"status\":200,\"length\":40},\"files\":[{\"filename\":\"/uid/index.html\",\"gaps\":true,\"state\":\"TRUNCATED\",\"stored\":false,\"size\":40,\"tx_id\":0}],\"app_proto\":\"http\",\"direction\":\"to_client\",\"flow\":{\"pkts_toserver\":5,\"pkts_toclient\":5,\"bytes_toserver\":299,\"bytes_toclient\":738,\"start\":\"2026-03-04T22:57:01.573850+0000\",\"src_ip\":\"100.64.59.124\",\"dest_ip\":\"3.170.131.31\",\"src_port\":42324,\"dest_port\":80}}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "alert": {
+              "action": "allowed",
+              "category": "Potentially Bad Traffic",
+              "gid": 1,
+              "metadata": {
+                "confidence": [
+                  "Medium"
+                ],
+                "created_at": [
+                  "2010_09_23"
+                ],
+                "signature_severity": [
+                  "Informational"
+                ],
+                "updated_at": [
+                  "2019_07_26"
+                ]
+              },
+              "policy_id": "",
+              "rev": 7,
+              "severity": 2,
+              "signature": "GPL ATTACK_RESPONSE id check returned root",
+              "signature_id": 2100498
+            },
+            "app_proto": "http",
+            "dest_ip": "100.64.59.124",
+            "dest_port": 42324,
+            "direction": "to_client",
+            "event_type": "alert",
+            "flow": {
+              "bytes_toclient": 738,
+              "bytes_toserver": 299,
+              "dest_ip": "3.170.131.31",
+              "dest_port": 80,
+              "pkts_toclient": 5,
+              "pkts_toserver": 5,
+              "src_ip": "100.64.59.124",
+              "src_port": 42324,
+              "start": "YYYY-03-04T22:57:01.573850+0000"
+            },
+            "flow_id": 255638648850226,
+            "http": {
+              "hostname": "testmynids.org",
+              "http_content_type": "text/html",
+              "http_method": "GET",
+              "http_user_agent": "curl/8.17.0",
+              "length": 40,
+              "protocol": "HTTP/1.1",
+              "status": 200,
+              "url": "http:///uid/index.html"
+            },
+            "pcap_cnt": 88796,
+            "pkt_src": "wire/pcap",
+            "proto": "TCP",
+            "src_ip": "3.170.131.31",
+            "src_port": 80,
+            "timestamp": "YYYY-03-04T22:57:01.661154+0000",
+            "tx_id": 0
+          },
+          "source": "avx-ids",
+          "sourcetype": "aviatrix:ids",
+          "time": "YYYY-03-04T22:57:01.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

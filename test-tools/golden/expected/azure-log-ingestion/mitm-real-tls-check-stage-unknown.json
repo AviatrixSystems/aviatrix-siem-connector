@@ -1,0 +1,62 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-tls-check-stage-unknown",
+  "input": "<153>Mar  4 00:18:45 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"TLS_PROFILE\",\"enforced\":true,\"session_stage\":\"tls_check\",\"src\":\"10.0.2.246\",\"session_id\":\"7061dc2e-057e-40c9-98a5-108f44926d47\",\"dest\":\"203.0.113.32\",\"priority\":\"LOG_ALERT\",\"message\":\"Failed to get origin cert\",\"session_start\":1772583448132494898,\"session_time\":76946121741,\"decided_by\":\"e569594b-d4da-46fe-85cf-a66f32c73dee\",\"src_port\":48386,\"stage\":\"Unknown\",\"proto\":\"TCP\",\"ids\":false,\"action\":\"Deny\",\"dest_port\":443,\"timestamp\":1772583525}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T00:18:45.000Z",
+          "DstIpAddr": "203.0.113.32",
+          "DstPortNumber": 443,
+          "DvcAction": "Deny",
+          "DvcHostname": "app-spoke",
+          "DvcOriginalAction": "Deny",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-03-04T00:18:45.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Failure",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Low",
+          "EventStartTime": "YYYY-03-04T00:18:45.000Z",
+          "EventSubType": "TLS_PROFILE",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "e569594b-d4da-46fe-85cf-a66f32c73dee",
+          "NetworkSessionId": "7061dc2e-057e-40c9-98a5-108f44926d47",
+          "SrcIpAddr": "10.0.2.246",
+          "SrcPortNumber": 48386,
+          "TimeGenerated": "YYYY-03-04T00:18:45.000Z",
+          "action": "Deny",
+          "dst_ip": "203.0.113.32",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "app-spoke",
+          "mitm_ids": "false",
+          "mitm_message": "Failed to get origin cert",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "TLS_PROFILE",
+          "mitm_session_id": "7061dc2e-057e-40c9-98a5-108f44926d47",
+          "mitm_session_stage": "tls_check",
+          "mitm_session_time": "76946121741",
+          "mitm_stage": "Unknown",
+          "proto": "TCP",
+          "src_ip": "10.0.2.246",
+          "src_port": 48386,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-03-04T00:18:45.000Z (epoch)",
+          "uuid": "e569594b-d4da-46fe-85cf-a66f32c73dee"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

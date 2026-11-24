@@ -1,0 +1,5 @@
+{
+  "case": "netstats-gw-petabit-unit",
+  "input": "<14>Mar  4 23:09:07 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:07 AviatrixGwNetStats: timestamp=2026-03-04T23:09:07.5 name=transit-1 alias=transit-1  private_ip=10.80.0.20 interface=eth1 total_rx_rate=1.10Pb total_tx_rate=0.00 total_rx_tx_rate=1.10Pb total_rx_cum=3.20PB total_tx_cum=0.00B total_rx_tx_cum=3.20PB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=12",
+  "requests": []
+}

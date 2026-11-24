@@ -1,0 +1,41 @@
+{
+  "case": "suricata-real-http-files-tx-guessed",
+  "input": "<174>Dec  9 00:10:24 GW-backend-eks-spoke-198.51.100.38-sink suricata[4]: {\"timestamp\":\"2025-12-09T00:10:24.067396+0000\",\"flow_id\":2225331147839834,\"pcap_cnt\":21598,\"event_type\":\"alert\",\"src_ip\":\"198.51.100.40\",\"src_port\":80,\"dest_ip\":\"100.64.93.36\",\"dest_port\":48696,\"proto\":\"TCP\",\"pkt_src\":\"wire/pcap\",\"tx_id\":0,\"tx_guessed\":true,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2,\"metadata\":{\"confidence\":[\"Medium\"],\"created_at\":[\"2010_09_23\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2019_07_26\"]},\"policy_id\":\"\"},\"http\":{\"hostname\":\"example3.com\",\"url\":\"http:///uid/index.html\",\"http_user_agent\":\"curl/7.81.0\",\"http_content_type\":\"text/html\",\"http_method\":\"GET\",\"protocol\":\"HTTP/1.1\",\"status\":200,\"length\":40},\"files\":[{\"filename\":\"/uid/index.html\",\"gaps\":true,\"state\":\"TRUNCATED\",\"stored\":false,\"size\":40,\"tx_id\":0}],\"app_proto\":\"http\",\"direction\":\"to_client\",\"flow\":{\"pkts_toserver\":5,\"pkts_toclient\":5,\"bytes_toserver\":299,\"bytes_toclient\":738,\"start\":\"2025-12-09T00:10:23.976877+0000\",\"src_ip\":\"100.64.93.36\",\"dest_ip\":\"198.51.100.40\",\"src_port\":48696,\"dest_port\":80}}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "IDSAlert",
+          "aviatrix.ids.category": "Potentially Bad Traffic",
+          "aviatrix.ids.dst_ip": "100.64.93.36",
+          "aviatrix.ids.dst_port": "48696",
+          "aviatrix.ids.event_type": "alert",
+          "aviatrix.ids.flow.bytes_toclient": 738,
+          "aviatrix.ids.flow.bytes_toserver": 299,
+          "aviatrix.ids.flow.pkts_toclient": 5,
+          "aviatrix.ids.flow.pkts_toserver": 5,
+          "aviatrix.ids.gateway": "backend-eks-spoke",
+          "aviatrix.ids.gid": 1,
+          "aviatrix.ids.http.hostname": "example3.com",
+          "aviatrix.ids.http.method": "GET",
+          "aviatrix.ids.http.status": 200,
+          "aviatrix.ids.http.url": "http:///uid/index.html",
+          "aviatrix.ids.protocol": "TCP",
+          "aviatrix.ids.rev": 7,
+          "aviatrix.ids.severity": 2,
+          "aviatrix.ids.signature": "GPL ATTACK_RESPONSE id check returned root",
+          "aviatrix.ids.signature_id": 2100498,
+          "aviatrix.ids.src_ip": "198.51.100.40",
+          "aviatrix.ids.src_port": "80",
+          "content": "IDS Alert: GPL ATTACK_RESPONSE id check returned root (Potentially Bad Traffic) 198.51.100.40:80 -> 100.64.93.36:48696",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-12-09T00:10:24.067396+0000"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

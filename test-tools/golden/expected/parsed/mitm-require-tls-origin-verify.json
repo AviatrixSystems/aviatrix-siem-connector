@@ -1,0 +1,39 @@
+{
+  "case": "mitm-require-tls-origin-verify",
+  "input": "<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"POLICY_REQUIRE_TLS\",\"errorcode\":\"TLS_REQUIRED\",\"src\":\"10.1.5.205\",\"src_port\":40712,\"dest\":\"203.0.113.138\",\"dest_port\":80,\"enforced\":true,\"ids\":false,\"stage\":\"SNI_ORIGIN_VERIFY\",\"sni_hostname\":\"plain.example.com\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"session_start\":1772665075787368966,\"session_time\":1200,\"session_stage\":\"end\",\"session_id\":\"58f0b86a-b3ec-45a8-9ae1-4180c465f001\",\"timestamp\":1772665075}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:57:55.000Z",
+          "action": "Deny",
+          "dst_ip": "203.0.113.138",
+          "dst_port": 80,
+          "enforced": true,
+          "gw_hostname": "frontend-eks-spoke",
+          "message": "<153>Mar  4 22:57:55 GW-frontend-eks-spoke-198.51.100.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"POLICY_REQUIRE_TLS\",\"errorcode\":\"TLS_REQUIRED\",\"src\":\"10.1.5.205\",\"src_port\":40712,\"dest\":\"203.0.113.138\",\"dest_port\":80,\"enforced\":true,\"ids\":false,\"stage\":\"SNI_ORIGIN_VERIFY\",\"sni_hostname\":\"plain.example.com\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"session_start\":1772665075787368966,\"session_time\":1200,\"session_stage\":\"end\",\"session_id\":\"58f0b86a-b3ec-45a8-9ae1-4180c465f001\",\"timestamp\":1772665075}",
+          "mitm_ids": "false",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY_REQUIRE_TLS",
+          "mitm_session_id": "58f0b86a-b3ec-45a8-9ae1-4180c465f001",
+          "mitm_session_stage": "end",
+          "mitm_session_time": "1200",
+          "mitm_sni_hostname": "plain.example.com",
+          "mitm_stage": "SNI_ORIGIN_VERIFY",
+          "proto": "TCP",
+          "src_ip": "10.1.5.205",
+          "src_port": 40712,
+          "syslog_pri": "153",
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-03-04T22:57:55.000Z (epoch)",
+          "uuid": "3822a647-d2b2-4e04-9be3-6808da41110e"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "avx": {
+    "until": "8.1"
+  },
+  "case": "tunnel-down-up-external",
+  "input": "<14>2026-03-04T22:58:43.573005+00:00 ip-172-32-0-226 cloudxd: AviatrixTunnelStatusChange: src_gw=oregon-transit(AWS us-west-2) dst_gw=100.20.53.124(NA NA) old_state=Down new_state=Up",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:58:43.573Z",
+          "dst_gw": "100.20.53.124(NA NA)",
+          "event": {
+            "original": "<14>2026-03-04T22:58:43.573005+00:00 ip-172-32-0-226 cloudxd: AviatrixTunnelStatusChange: src_gw=oregon-transit(AWS us-west-2) dst_gw=100.20.53.124(NA NA) old_state=Down new_state=Up"
+          },
+          "gateway": "oregon-transit",
+          "message": "<14>2026-03-04T22:58:43.573005+00:00 ip-172-32-0-226 cloudxd: AviatrixTunnelStatusChange: src_gw=oregon-transit(AWS us-west-2) dst_gw=100.20.53.124(NA NA) old_state=Down new_state=Up",
+          "new_state": "Up",
+          "old_state": "Down",
+          "src_gw": "oregon-transit(AWS us-west-2)",
+          "tags": [
+            "tunnel_status"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:58:43.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

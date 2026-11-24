@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-charon-ike-established",
+  "input": "<86>Mar  4 23:11:05 GW-transit-1-198.51.100.90-sink charon: 13[IKE] <peer-198.51.100.200|7> IKE_SA peer-198.51.100.200[7] established with SPIs 1a2b3c4d5e6f7081_i 8192a3b4c5d6e7f8_r",
+  "requests": []
+}

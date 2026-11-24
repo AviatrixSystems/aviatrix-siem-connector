@@ -1,0 +1,27 @@
+{
+  "case": "cmd-v1-disable-rsyslog",
+  "input": "<14>Mar  4 22:58:33 18.190.163.185 Mar  4 22:58:33 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=DISABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'disable_rsyslog_forwarder', '--index', '1'], result=Success, reason=, username=admin",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "DISABLE_RSYSLOG_FORWARDER",
+            "args": "['--rtn_file', '/dev/null', 'disable_rsyslog_forwarder', '--index', '1']",
+            "reason": "",
+            "result": "Success",
+            "syslog": "<14>Mar  4 22:58:33 18.190.163.185 Mar  4 22:58:33 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=DISABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'disable_rsyslog_forwarder', '--index', '1'], result=Success, reason=, username=admin",
+            "timestamp": "YYYY-03-04T22:58:33.000Z (epoch)",
+            "username": "admin"
+          },
+          "source": "avx-cmd",
+          "sourcetype": "aviatrix:controller:audit",
+          "time": "YYYY-03-04T22:58:33.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

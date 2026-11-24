@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-gw-state-sync-daemon",
+  "input": "<32>May 14 03:46:16 GW-UdpGateway-198.51.100.173 avx-gw-state-sync[11249]: warn#011gateway_launcher/gateway_launcher.go:212#011daemon exited",
+  "requests": []
+}
