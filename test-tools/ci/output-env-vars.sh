@@ -52,9 +52,9 @@ case "$OUTPUT_TYPE" in
         echo "-e ZABBIX_PORT=10051"
         ;;
     azure-log-ingestion)
-        echo "-e client_app_id=dummy-client-id"
+        echo "-e client_app_id=00000000-0000-4000-8000-000000000001"
         echo "-e client_app_secret=dummy-client-secret"
-        echo "-e tenant_id=dummy-tenant-id"
+        echo "-e tenant_id=00000000-0000-4000-8000-000000000002"
         echo "-e data_collection_endpoint=https://dummy.ingest.monitor.azure.com"
         echo "-e azure_dcr_netsession_id=dcr-dummy1"
         echo "-e azure_dcr_websession_id=dcr-dummy2"
