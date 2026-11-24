@@ -17,9 +17,32 @@ variable "container_name" {
 }
 
 variable "container_image" {
-  description = "Docker image for the container"
+  description = "Logstash image WITH the microsoft-sentinel-log-analytics-logstash-output-plugin installed (see ../logstash-container-build/). Required: the stock Elastic image cannot load the Azure pipeline."
   type        = string
-  default     = "docker.elastic.co/logstash/logstash:8.16.2"
+
+  validation {
+    condition     = !startswith(var.container_image, "docker.elastic.co/logstash/")
+    error_message = "container_image must be a custom image with the Microsoft Sentinel output plugin installed; the stock docker.elastic.co/logstash image cannot load the Azure pipeline. Build one with deployments/azure-aci/logstash-container-build/."
+  }
+}
+
+variable "container_registry_server" {
+  description = "Optional private registry login server for container_image (e.g. myacr.azurecr.io). When set, ACI pulls with the credentials below instead of requiring anonymous pull on the registry."
+  type        = string
+  default     = null
+}
+
+variable "container_registry_username" {
+  description = "Registry username (ACR admin user, ACR token name, or service principal client ID). Used only when container_registry_server is set."
+  type        = string
+  default     = null
+}
+
+variable "container_registry_password" {
+  description = "Registry password. Used only when container_registry_server is set."
+  type        = string
+  default     = null
+  sensitive   = true
 }
 
 variable "cpu_cores" {
@@ -113,28 +136,49 @@ variable "use_existing_spn" {
 }
 
 variable "client_app_id" {
-  description = "Client Application ID for authentication"
+  description = "Client (application) ID of the existing service principal. Required when use_existing_spn = true."
   type        = string
-  default     = "dummy"
+  default     = null
+
+  validation {
+    condition     = var.client_app_id == null || can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.client_app_id))
+    error_message = "client_app_id must be a GUID."
+  }
 }
 
 variable "client_app_secret" {
-  description = "Client Application Secret for authentication"
+  description = "Client secret of the existing service principal. Required when use_existing_spn = true."
   type        = string
-  default     = "dummy"
+  default     = null
   sensitive   = true
 }
 
 variable "tenant_id" {
-  description = "Tenant ID for authentication"
+  description = "Entra ID tenant ID of the existing service principal. Required when use_existing_spn = true."
   type        = string
-  default     = "dummy"
+  default     = null
+
+  validation {
+    condition     = var.tenant_id == null || can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.tenant_id))
+    error_message = "tenant_id must be a GUID."
+  }
+}
+
+variable "spn_secret_rotation_days" {
+  description = "When use_existing_spn = false, rotate the generated SPN secret after this many days (takes effect on the next terraform apply after that date; the old secret stays valid 30 more days)."
+  type        = number
+  default     = 180
 }
 
 variable "azure_cloud" {
-  description = "Azure cloud environment (e.g., 'AzureCloud', 'AzureChinaCloud', 'AzureUSGovernment')"
+  description = "Azure cloud environment for the Sentinel output plugin. This root targets Azure China only (providers use environment = \"china\"); use ../deploy-public for AzureCloud or AzureUSGovernment."
   type        = string
   default     = "AzureChinaCloud"
+
+  validation {
+    condition     = var.azure_cloud == "AzureChinaCloud"
+    error_message = "deploy-china only supports azure_cloud = \"AzureChinaCloud\". Use deploy-public for AzureCloud or AzureUSGovernment."
+  }
 }
 
 variable "log_analytics_subscription_id" {

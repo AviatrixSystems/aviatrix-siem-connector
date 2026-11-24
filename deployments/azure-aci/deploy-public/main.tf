@@ -44,6 +44,11 @@ module "deployment" {
   container_port     = var.container_port
   container_protocol = var.container_protocol
 
+  # Optional private registry credentials (instead of anonymous ACR pull)
+  container_registry_server   = var.container_registry_server
+  container_registry_username = var.container_registry_username
+  container_registry_password = var.container_registry_password
+
   # Storage Configuration
   storage_account_name = var.storage_account_name
   file_share_quota_gb  = var.file_share_quota_gb
@@ -52,15 +57,16 @@ module "deployment" {
   environment_variables = var.environment_variables
 
   # Log Analytics Configuration
-  log_analytics_workspace           = var.log_analytics_subscription_id == "dummy" ? module.log_analytics_same_subscription[0].log_analytics_workspace : module.log_analytics_diff_subscription[0].log_analytics_workspace
-  log_analytics_resource_group_name = var.log_analytics_resource_group_name
+  log_analytics_workspace = var.log_analytics_subscription_id == "dummy" ? module.log_analytics_same_subscription[0].log_analytics_workspace : module.log_analytics_diff_subscription[0].log_analytics_workspace
 
-  # If you use your own EntraID Service Principal, uncomment the below and insert appropriate value
-  client_app_id     = var.client_app_id
-  client_app_secret = var.client_app_secret
-  tenant_id         = var.tenant_id
-  use_existing_spn  = var.use_existing_spn
-  azure_cloud       = var.azure_cloud
+  # Service principal: existing (use_existing_spn = true, set all three
+  # credentials) or created by Terraform (use_existing_spn = false)
+  client_app_id            = var.client_app_id
+  client_app_secret        = var.client_app_secret
+  tenant_id                = var.tenant_id
+  use_existing_spn         = var.use_existing_spn
+  spn_secret_rotation_days = var.spn_secret_rotation_days
+  azure_cloud              = var.azure_cloud
 
   # Tags
   tags = var.tags

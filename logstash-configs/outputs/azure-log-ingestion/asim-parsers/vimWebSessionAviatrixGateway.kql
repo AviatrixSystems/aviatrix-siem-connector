@@ -3,7 +3,14 @@
 //
 // Usage:
 //   vimWebSessionAviatrixGateway()
-//   _Im_WebSession | where EventVendor == "Aviatrix"
+//   vimWebSessionAviatrixGateway(starttime=ago(1h), url_has_any=dynamic(["github.com"]))
+//
+// NOTE: Saving this function does NOT by itself make Aviatrix rows appear in
+// the built-in unifying parser (_Im_WebSession). ASIM only includes
+// custom source parsers that are referenced from the schema's workspace
+// custom unifying parser. See "ASIM integration" in
+// deployments/azure-aci/README.md and Microsoft's "Manage ASIM parsers" guide:
+// https://learn.microsoft.com/azure/sentinel/normalization-manage-parsers
 //
 // Deployment (Azure CLI):
 //   az monitor log-analytics workspace saved-search create \
@@ -48,7 +55,9 @@ let parser = (
         Src = SrcIpAddr,
         Dst = DstIpAddr,
         IpAddr = SrcIpAddr,
-        Rule = NetworkRuleName
+        Rule = NetworkRuleName,
+        // NetworkSessionId was added to AviatrixWebSession_CL in 2026-11
+        SessionId = column_ifexists("NetworkSessionId", "")
 };
 parser(
     starttime=starttime,

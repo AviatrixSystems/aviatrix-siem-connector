@@ -32,7 +32,12 @@ fi
 echo "✅ Azure Sentinel output plugin found in config"
 
 # Check for required environment variables in config
-REQUIRED_VARS=("client_app_id" "client_app_secret" "tenant_id" "data_collection_endpoint" "azure_dcr_ids_id" "azure_dcr_netsession_id" "azure_dcr_websession_id" "azure_stream_ids" "azure_stream_netsession" "azure_stream_websession" "azure_cloud")
+# All 8 DCR/stream pairs: Logstash resolves every ${VAR} at pipeline compile
+# time, so each one must be referenced here and injected by the module.
+REQUIRED_VARS=("client_app_id" "client_app_secret" "tenant_id" "data_collection_endpoint" "azure_cloud")
+for t in ids netsession websession gw_net_stats gw_sys_stats cmd tunnel_status vpn_session; do
+    REQUIRED_VARS+=("azure_dcr_${t}_id" "azure_stream_${t}")
+done
 MISSING_VARS=0
 for var in "${REQUIRED_VARS[@]}"; do
     if ! grep -q "\${$var}" "$ASSEMBLED_CONFIG"; then

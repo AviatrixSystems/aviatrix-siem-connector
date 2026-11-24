@@ -1,6 +1,11 @@
 # DOCKER RUN FOR AZURE LOG INGESTION OUTPUT
 # NOTE: The stock Elastic image does NOT include the Sentinel plugin.
 # You must build a custom image. See deployments/azure-aci/logstash-container-build/README.md
+# REQUIRED template variable: logstash_image (your custom image, e.g.
+# myacr.azurecr.io/aviatrix-logstash-sentinel:1.0). Set it in
+# logstash_config_variables; if it is missing, terraform plan fails with
+# "vars map does not contain key logstash_image" instead of booting an
+# instance whose docker run cannot pull a placeholder image.
 docker run -d --restart=always \
   -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
   -v /logstash/patterns:/usr/share/logstash/patterns \
@@ -31,6 +36,6 @@ docker run -d --restart=always \
   -e XPACK_MONITORING_ENABLED=false \
   -e CONFIG_RELOAD_AUTOMATIC=true \
   -e LS_JAVA_OPTS="-Xmx1g -Xms1g" \
-  your-registry.azurecr.io/aviatrix-logstash-sentinel:latest
+  ${logstash_image}
 
 # Note: Use 'AzureCloud', 'AzureChinaCloud', or 'AzureUSGovernment' for azure_cloud

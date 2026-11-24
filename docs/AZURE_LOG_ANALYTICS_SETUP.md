@@ -1,164 +1,91 @@
+# Azure Log Analytics: Troubleshooting Missing Fields
 
----
+Setup and deployment are covered in
+[deployments/azure-aci/README.md](../deployments/azure-aci/README.md) (Terraform) and
+[logstash-configs/outputs/azure-log-ingestion/README.md](../logstash-configs/outputs/azure-log-ingestion/README.md)
+(output config, manual setup). This page only covers one recurring problem: a field
+that Logstash sends never shows up in Log Analytics.
 
-## Troubleshooting: Missing Fields in Azure Queries
+> This page previously described a pre-ASIM `AviatrixMicroseg_CL` table and an
+> `aviatrix-microseg-dcr` DCR. Neither exists in current deployments; do not run
+> commands against those names.
 
-### Problem: Fields like SNI hostname not appearing in Azure Log Analytics
+## Why fields go missing
 
-If you're sending logs with fields like `mitm_sni_hostname` but they're not appearing when you query Azure Log Analytics, the issue is that **the table schema doesn't include those columns**.
+The pipeline sends events through the Logs Ingestion API to one Data Collection
+Rule (DCR) per log type. Each DCR has a stream declaration (`Custom-<Table>`) and a
+pass-through transform (`transformKql: "source"`). Ingestion keeps only the
+properties that are declared in **both**:
 
-Azure Log Analytics custom tables require explicit schema definition. Any fields not in the schema are silently dropped during ingestion.
+1. the DCR stream declaration, and
+2. the destination table schema.
 
-### Solution: Update Table Schema
+Anything else is dropped silently, with no error in Logstash or Azure.
 
-Use the `az monitor log-analytics workspace table update` command to add the missing fields. You must provide the **complete** column list including all existing and new fields.
+| Log type | Table | DCR (Terraform) | Schema key |
+|---|---|---|---|
+| L4 microseg | `AviatrixNetworkSession_CL` | `aviatrix-netsession-dcr` | `netsession` |
+| L7 MITM/DCF | `AviatrixWebSession_CL` | `aviatrix-websession-dcr` | `websession` |
+| Suricata IDS | `AviatrixIDS_CL` | `aviatrix-ids-dcr` | `ids` |
+| Gateway net stats | `AviatrixGwNetStats_CL` | `aviatrix-gw-net-stats-dcr` | `gw_net_stats` |
+| Gateway sys stats | `AviatrixGwSysStats_CL` | `aviatrix-gw-sys-stats-dcr` | `gw_sys_stats` |
+| Controller CMD/API | `AviatrixCmd_CL` | `aviatrix-cmd-dcr` | `cmd` |
+| Tunnel status | `AviatrixTunnelStatus_CL` | `aviatrix-tunnel-status-dcr` | `tunnel_status` |
+| VPN session | `AviatrixVPNSession_CL` | `aviatrix-vpn-session-dcr` | `vpn_session` |
 
-**Example: Adding MITM fields to existing AviatrixMicroseg_CL table:**
+## Fix (Terraform deployments)
+
+Both the table columns and the DCR stream columns are generated from a single list
+per table in
+[`deployments/azure-aci/module/ai/4-table-schemas.tf`](../deployments/azure-aci/module/ai/4-table-schemas.tf).
+
+1. Add the column to the right list (append at the end), e.g.
+   `{ name = "my_new_field", type = "string" },`
+   Types: `string`, `int`, `long`, `real`, `boolean`, `datetime`, `dynamic`.
+2. `terraform apply` from `deployments/azure-aci/deploy-public` (or `deploy-china`).
+   This updates the table and the DCR in place.
+3. Send new events. Rows ingested before the change are not backfilled.
+
+Do not hand-edit the table or DCR in the portal or CLI for a Terraform-managed
+deployment; the next apply reverts it.
+
+## Fix (manual deployments)
+
+Add the column to the table **and** to the DCR stream declaration, keeping both
+identical to the list in `4-table-schemas.tf`:
 
 ```bash
+# Table: pass the complete column list (the helper is in the output README)
 az monitor log-analytics workspace table update \
-    --resource-group "aviatrix-siem-connector" \
-    --workspace-name "aviatrix-siem-workspace" \
-    --name "AviatrixMicroseg_CL" \
-    --columns \
-        TimeGenerated=datetime \
-        Computer=string \
-        RawData=string \
-        action=string \
-        proto=string \
-        src_ip=string \
-        src_port=string \
-        dst_ip=string \
-        dst_port=string \
-        enforced=string \
-        uuid=string \
-        gw_ip=string \
-        src_mac=string \
-        dst_mac=string \
-        ip_size=string \
-        session_id=string \
-        session_event=string \
-        session_end_reason=string \
-        session_pkt_cnt=string \
-        session_byte_cnt=string \
-        session_dur=string \
-        direction=string \
-        mitm_sni_hostname=string \
-        mitm_url_parts=string \
-        mitm_decrypted_by=string \
-        gw_hostname=string \
-        message=string \
-        unix_time=long
+    --resource-group <rg> --workspace-name <workspace> \
+    --name "AviatrixWebSession_CL" --columns $(cols websession)
+
+# DCR: export, edit the stream declaration columns, and PUT it back
+az monitor data-collection rule show --resource-group <rg> --name <dcr-name> -o json > dcr.json
+# edit dcr.json: add the column under
+#   streamDeclarations."Custom-AviatrixWebSession_CL".columns
+# (depending on your az CLI version the key is at the top level or under .properties)
 ```
 
-### Finding Your Workspace Details
+## Verify
 
-If you're not sure which workspace or resource group to use:
+Column names are stored exactly as declared. DCR-based custom tables do **not** add
+type suffixes such as `_s` or `_d` (those apply only to the legacy HTTP Data
+Collector API), so query the bare name:
+
+```kql
+AviatrixWebSession_CL
+| where TimeGenerated > ago(1h)
+| project TimeGenerated, DvcHostname, DstFqdn, NetworkSessionId, ThreatId, EventSubType
+| take 10
+```
+
+Check what a DCR currently declares:
 
 ```bash
-# Find workspace by customerId (from queries)
-az monitor log-analytics workspace list \
-    --query "[?customerId=='<your-workspace-id>'].{name:name, resourceGroup:resourceGroup}" \
-    --output table
+az monitor data-collection rule show --resource-group <rg> --name aviatrix-websession-dcr \
+    --query "streamDeclarations.\"Custom-AviatrixWebSession_CL\".columns[].name" -o tsv
 ```
 
-### Verification
-
-After updating the schema, query for the new fields (remember Azure appends type suffixes):
-
-```bash
-az monitor log-analytics query \
-    --workspace "<workspace-id>" \
-    --analytics-query "AviatrixMicroseg_CL | where TimeGenerated > ago(1h) and isnotempty(mitm_sni_hostname_s) | project TimeGenerated, mitm_sni_hostname_s" \
-    --output table
-```
-
-**Note:** Schema changes may take a few minutes to propagate. New logs sent after the schema update will include the new fields.
-
----
-
-## Schema Update History
-
-### 2026-02-03: Added MITM/L7 DCF Fields
-
-Added three fields to support L7 TLS inspection logs:
-- `mitm_sni_hostname` - SNI hostname from TLS handshake
-- `mitm_url_parts` - Full URL if available  
-- `mitm_decrypted_by` - Gateway that decrypted the traffic
-
-**Workspace:** aviatrix-siem-workspace  
-**Resource Group:** aviatrix-siem-connector  
-**Command:** See complete schema above
-
-### Updating the Data Collection Rule (DCR)
-
-**IMPORTANT:** After updating the table schema, you **must also update the DCR** to include the new fields in its stream declaration. The DCR acts as a filter - even if the table has the columns, the DCR won't pass fields through that aren't in its stream definition.
-
-**Steps to update the DCR:**
-
-1. Get the current DCR configuration:
-```bash
-az monitor data-collection rule show \
-    --resource-group "aviatrix-siem-connector" \
-    --name "aviatrix-microseg-dcr" \
-    --output json > dcr-config.json
-```
-
-2. Update the stream declaration to include all fields (matching the table schema).  You can use `jq` to programmatically update it, or manually edit the JSON file.
-
-3. Update the DCR using Azure REST API:
-```bash
-# Create the API payload with proper structure
-cat dcr-config.json | jq '{
-  location: .location,
-  kind: .kind,
-  properties: {
-    dataCollectionEndpointId: .dataCollectionEndpointId,
-    streamDeclarations: .streamDeclarations,
-    dataSources: .dataSources,
-    destinations: .destinations,
-    dataFlows: .dataFlows
-  }
-}' > dcr-api-payload.json
-
-# Apply the update
-az rest --method PUT \
-    --uri "https://management.azure.com/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Insights/dataCollectionRules/<dcr-name>?api-version=2022-06-01" \
-    --body @dcr-api-payload.json
-```
-
-**Example: Adding MITM fields to the DCR stream declaration:**
-
-The stream declaration in the DCR should match the table schema. For `Custom-AviatrixMicroseg_CL`, it should include all 26 columns including the MITM fields:
-
-```json
-{
-  "Custom-AviatrixMicroseg_CL": {
-    "columns": [
-      {"name": "TimeGenerated", "type": "datetime"},
-      {"name": "action", "type": "string"},
-      ...
-      {"name": "mitm_sni_hostname", "type": "string"},
-      {"name": "mitm_url_parts", "type": "string"},
-      {"name": "mitm_decrypted_by", "type": "string"},
-      ...
-    ]
-  }
-}
-```
-
-**Verification:**
-
-After updating the DCR, send test logs and verify the new fields appear:
-
-```bash
-# Check stream declaration was updated
-az monitor data-collection rule show \
-    --resource-group "aviatrix-siem-connector" \
-    --name "aviatrix-microseg-dcr" \
-    --query "properties.streamDeclarations.\"Custom-AviatrixMicroseg_CL\".columns | length(@)"
-
-# Should show 26 (or your total column count)
-```
-
-Send new test logs after the DCR update, and the MITM fields should now appear in Azure Log Analytics queries.
+If that returns nothing, retry the query with the `properties.` prefix
+(`properties.streamDeclarations...`); the output shape differs between az CLI versions.

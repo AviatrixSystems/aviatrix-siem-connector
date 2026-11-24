@@ -20,5 +20,5 @@ output "container_group_name" {
 
 output "attach_container_command" {
   description = "Copy / Past that command to attach to container"
-  value = "az container attach --resource-group ${azurerm_resource_group.aci_rg.name} --name ${azurerm_container_group.logstash.name}"
+  value       = "az container attach --resource-group ${azurerm_resource_group.aci_rg.name} --name ${azurerm_container_group.logstash.name}"
 }

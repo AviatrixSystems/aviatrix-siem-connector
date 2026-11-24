@@ -25,6 +25,7 @@ DEFAULT_LOCATION="eastus"
 DEFAULT_ACR_NAME="avxlogstashacr"
 DEFAULT_IMAGE_NAME="aviatrix-logstash-sentinel"
 DEFAULT_IMAGE_TAG="latest"
+DEFAULT_PLUGIN_VERSION=""
 
 # Prompt for values or use defaults
 echo -e "${YELLOW}Enter configuration (press Enter to use defaults):${NC}"
@@ -45,12 +46,29 @@ IMAGE_NAME=${IMAGE_NAME:-$DEFAULT_IMAGE_NAME}
 read -p "Image Tag [$DEFAULT_IMAGE_TAG]: " IMAGE_TAG
 IMAGE_TAG=${IMAGE_TAG:-$DEFAULT_IMAGE_TAG}
 
+read -p "Sentinel plugin version to pin (empty = latest, not reproducible) [$DEFAULT_PLUGIN_VERSION]: " PLUGIN_VERSION
+PLUGIN_VERSION=${PLUGIN_VERSION:-$DEFAULT_PLUGIN_VERSION}
+
+read -p "Enable ANONYMOUS pull on the registry (makes every repo in it public)? (y/N): " ANON_PULL
+ANON_PULL=${ANON_PULL:-N}
+
+# Registry login server suffix differs in Azure China
+if [ "$(az cloud show --query name -o tsv 2>/dev/null)" = "AzureChinaCloud" ]; then
+    ACR_SUFFIX="azurecr.cn"
+else
+    ACR_SUFFIX="azurecr.io"
+fi
+LOGIN_SERVER="${ACR_NAME}.${ACR_SUFFIX}"
+
 echo ""
 echo -e "${GREEN}Configuration:${NC}"
 echo "  Resource Group: $RESOURCE_GROUP"
 echo "  Location: $LOCATION"
 echo "  ACR Name: $ACR_NAME"
 echo "  Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+echo "  Plugin version: ${PLUGIN_VERSION:-latest}"
+echo "  Anonymous pull: ${ANON_PULL}"
+echo "  Login server: ${LOGIN_SERVER}"
 echo ""
 
 read -p "Proceed with this configuration? (y/n): " -n 1 -r
@@ -83,9 +101,16 @@ else
 fi
 
 echo ""
-echo -e "${BLUE}Step 3: Enabling anonymous pull access...${NC}"
-az acr update --name $ACR_NAME --anonymous-pull-enabled true
-echo -e "${GREEN}✅ Anonymous pull enabled${NC}"
+if [[ $ANON_PULL =~ ^[Yy]$ ]]; then
+    echo -e "${BLUE}Step 3: Enabling anonymous pull access...${NC}"
+    az acr update --name "$ACR_NAME" --anonymous-pull-enabled true
+    echo -e "${GREEN}✅ Anonymous pull enabled${NC}"
+else
+    echo -e "${BLUE}Step 3: Skipping anonymous pull (recommended).${NC}"
+    echo -e "${YELLOW}   Set container_registry_server/username/password in terraform.tfvars so ACI can pull.${NC}"
+    echo -e "${YELLOW}   e.g. create a pull-only ACR token:${NC}"
+    echo "   az acr token create --name aci-pull --registry $ACR_NAME --scope-map _repositories_pull"
+fi
 
 echo ""
 echo -e "${BLUE}Step 4: Logging in to ACR...${NC}"
@@ -95,8 +120,9 @@ echo -e "${GREEN}✅ Logged in to ACR${NC}"
 echo ""
 echo -e "${BLUE}Step 5: Building and pushing image to ACR...${NC}"
 echo -e "${YELLOW}This may take several minutes...${NC}"
-az acr build --registry $ACR_NAME \
-    --image ${IMAGE_NAME}:${IMAGE_TAG} \
+az acr build --registry "$ACR_NAME" \
+    --image "${IMAGE_NAME}:${IMAGE_TAG}" \
+    --build-arg "SENTINEL_PLUGIN_VERSION=${PLUGIN_VERSION}" \
     --file Dockerfile \
     .
 echo -e "${GREEN}✅ Image built and pushed successfully${NC}"
@@ -114,7 +140,12 @@ echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo ""
 echo "1. Update your terraform.tfvars with:"
-echo -e "   ${BLUE}container_image = \"${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}\"${NC}"
+echo -e "   ${BLUE}container_image = \"${LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}\"${NC}"
+if [[ ! $ANON_PULL =~ ^[Yy]$ ]]; then
+    echo -e "   ${BLUE}container_registry_server   = \"${LOGIN_SERVER}\"${NC}"
+    echo -e "   ${BLUE}container_registry_username = \"<token or admin user>\"${NC}"
+    echo -e "   ${BLUE}container_registry_password = \"<password>\"${NC}"
+fi
 echo ""
 echo "2. Run the deployment:"
 echo "   cd ../deploy-public"
@@ -124,7 +155,7 @@ echo "   terraform plan"
 echo "   terraform apply"
 echo ""
 echo -e "${YELLOW}Registry Details:${NC}"
-echo "  Registry: ${ACR_NAME}.azurecr.io"
+echo "  Registry: ${LOGIN_SERVER}"
 echo "  Image: ${IMAGE_NAME}:${IMAGE_TAG}"
-echo "  Full Path: ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}"
+echo "  Full Path: ${LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
 echo ""
