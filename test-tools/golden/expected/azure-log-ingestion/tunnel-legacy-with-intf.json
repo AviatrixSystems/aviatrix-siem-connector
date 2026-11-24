@@ -13,11 +13,13 @@
           "@timestamp": "YYYY-03-04T23:10:12.330Z",
           "TimeGenerated": "YYYY-03-04T23:10:12.330Z",
           "dst_gw": "transit-a(AWS us-east-2)",
+          "dst_intf": "eth2",
           "gateway": "spoke-b",
           "ls_timestamp": "YYYY-03-04T23:10:12.330Z",
           "new_state": "Up",
           "old_state": "Down",
           "src_gw": "spoke-b(AWS us-east-2)",
+          "src_intf": "eth1",
           "tags": [
             "tunnel_status"
           ],

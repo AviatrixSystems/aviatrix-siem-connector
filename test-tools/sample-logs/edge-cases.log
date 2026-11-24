@@ -317,18 +317,16 @@ this is not a syslog line
 # form is current since 8.0.10 / 8.1.10; src_gw=/dst_gw= is 8.0.0 / 8.1.0 and older.
 
 # --- Current format with interfaces ---
-# KNOWN BUG: our pattern only knows src_gw=/dst_gw= -> grok failure for EVERY
-# tunnel status line from 8.0.10+ controllers.
+# Parsed by the current-format pattern: src_gw/dst_gw from the tunnel endpoints,
+# plus reporting_gw, src_intf, dst_intf.
 # @case tunnel-current-with-intf avx=8.0.10
 <14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down 
 
 # --- Current format, no interfaces, NA vendor/region, vendor with spaces ---
-# KNOWN BUG: grok failure (see above).
 # @case tunnel-current-na-vendor avx=8.0.10
 <14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up 
 
 # --- Current format, teardown (new_state=Deleted), HA gateway, GCP ---
-# KNOWN BUG: grok failure (see above).
 # @case tunnel-current-deleted-hagw avx=8.0.10
 <14>2026-03-04T23:10:09.000117+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-c-hagw reported Tunnel <spoke-c-hagw(Gcloud us-central1),transit-g(Gcloud us-central1)> old_state=Up new_state=Deleted 
 
@@ -354,8 +352,8 @@ this is not a syslog line
 <14>Mar 10 13:12:07 203.0.113.5 Mar 10 13:12:07 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixLicenseVPNUsers: users=3 
 
 # --- Event-bus "AviatrixTunnelStatusChanged" (note the trailing d) ---
-# KNOWN BUG: contains the substring AviatrixTunnelStatusChange, so filter 16
-# picks it up and tags _avx_grok_failure_tunnel_status instead of unparsed.
+# Contains the substring AviatrixTunnelStatusChange; the filter gate requires the
+# colon ("AviatrixTunnelStatusChange:") so this stays unparsed, not a grok failure.
 # @case unparsed-event-tunnel-status-changed
 <14>Mar  4 23:11:00 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixTunnelStatusChanged: gwname=spoke-b src_intf=eth1 peer=transit-a dst_intf=eth2 old_state=Up new_state=Down detected=2026-03-04 23:10:58 modified=2026-03-04 23:10:59 origin=gateway
 

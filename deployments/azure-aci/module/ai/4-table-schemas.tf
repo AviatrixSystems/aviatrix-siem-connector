@@ -236,6 +236,9 @@ locals {
       { name = "src_gw", type = "string" },
       { name = "tags", type = "dynamic" },
       { name = "unix_time", type = "long" },
+      { name = "reporting_gw", type = "string" },
+      { name = "src_intf", type = "string" },
+      { name = "dst_intf", type = "string" },
     ]
     vpn_session = [
       { name = "TimeGenerated", type = "datetime" },

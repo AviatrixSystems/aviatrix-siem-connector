@@ -4,5 +4,31 @@
   },
   "case": "tunnel-current-na-vendor",
   "input": "<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up ",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "TunnelStatus",
+          "aviatrix.tunnel.dst_cloud": "azure",
+          "aviatrix.tunnel.dst_gw": "transit-a",
+          "aviatrix.tunnel.dst_region": "ARM East US",
+          "aviatrix.tunnel.new_state": "Up",
+          "aviatrix.tunnel.old_state": "Down",
+          "aviatrix.tunnel.reporting_gw": "transit-a",
+          "aviatrix.tunnel.src_cloud": "na",
+          "aviatrix.tunnel.src_gw": "203.0.113.90",
+          "aviatrix.tunnel.src_region": "NA",
+          "cloud.provider": "na",
+          "cloud.region": "NA",
+          "content": "Tunnel Up: 203.0.113.90(NA NA) -> transit-a(Azure ARM East US)",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:10:05.551Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
 }

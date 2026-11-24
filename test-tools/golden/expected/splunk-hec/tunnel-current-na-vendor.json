@@ -4,5 +4,26 @@
   },
   "case": "tunnel-current-na-vendor",
   "input": "<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up ",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "dst_gw": "transit-a(Azure ARM East US)",
+            "new_state": "Up",
+            "old_state": "Down",
+            "reporting_gw": "transit-a",
+            "src_gw": "203.0.113.90(NA NA)",
+            "syslog": "<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up "
+          },
+          "source": "avx-tunnel-status",
+          "sourcetype": "aviatrix:tunnel:status",
+          "time": "YYYY-03-04T23:10:05.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
 }

@@ -12,9 +12,11 @@
         {
           "event": {
             "dst_gw": "transit-a(AWS us-east-2)",
+            "dst_intf": "eth2",
             "new_state": "Up",
             "old_state": "Down",
             "src_gw": "spoke-b(AWS us-east-2)",
+            "src_intf": "eth1",
             "syslog": "<14>2026-03-04T23:10:12.330001+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: src_gw=spoke-b(AWS us-east-2) src_intf=eth1 dst_gw=transit-a(AWS us-east-2) dst_intf=eth2 old_state=Down new_state=Up "
           },
           "source": "avx-tunnel-status",

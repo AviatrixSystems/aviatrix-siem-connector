@@ -4,5 +4,26 @@
   },
   "case": "tunnel-current-deleted-hagw",
   "input": "<14>2026-03-04T23:10:09.000117+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-c-hagw reported Tunnel <spoke-c-hagw(Gcloud us-central1),transit-g(Gcloud us-central1)> old_state=Up new_state=Deleted ",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "dst_gw": "transit-g(Gcloud us-central1)",
+            "new_state": "Deleted",
+            "old_state": "Up",
+            "reporting_gw": "spoke-c-hagw",
+            "src_gw": "spoke-c-hagw(Gcloud us-central1)",
+            "syslog": "<14>2026-03-04T23:10:09.000117+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-c-hagw reported Tunnel <spoke-c-hagw(Gcloud us-central1),transit-g(Gcloud us-central1)> old_state=Up new_state=Deleted "
+          },
+          "source": "avx-tunnel-status",
+          "sourcetype": "aviatrix:tunnel:status",
+          "time": "YYYY-03-04T23:10:09.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
 }

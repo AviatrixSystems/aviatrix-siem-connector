@@ -13,7 +13,6 @@
           },
           "message": "<14>Mar  4 23:11:00 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixTunnelStatusChanged: gwname=spoke-b src_intf=eth1 peer=transit-a dst_intf=eth2 old_state=Up new_state=Down detected=2026-03-04 23:10:58 modified=2026-03-04 23:10:59 origin=gateway",
           "tags": [
-            "_avx_grok_failure_tunnel_status",
             "unparsed"
           ],
           "type": "syslog",

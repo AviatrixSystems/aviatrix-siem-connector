@@ -10,17 +10,22 @@
       "content_type": "application/json",
       "events": [
         {
-          "@timestamp": "<receive time>",
+          "@timestamp": "YYYY-03-04T23:10:05.551Z",
+          "dst_gw": "transit-a(Azure ARM East US)",
           "event": {
             "original": "<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up "
           },
+          "gateway": "transit-a",
           "message": "<14>2026-03-04T23:10:05.551902+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway transit-a reported Tunnel <203.0.113.90(NA NA),transit-a(Azure ARM East US)> old_state=Down new_state=Up ",
+          "new_state": "Up",
+          "old_state": "Down",
+          "reporting_gw": "transit-a",
+          "src_gw": "203.0.113.90(NA NA)",
           "tags": [
-            "_avx_grok_failure_tunnel_status",
-            "unparsed"
+            "tunnel_status"
           ],
           "type": "syslog",
-          "unix_time": "<receive time>"
+          "unix_time": "YYYY-03-04T23:10:05.000Z (epoch)"
         }
       ],
       "path": "/parsed"
