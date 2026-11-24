@@ -17,6 +17,9 @@ Handles every timestamp format in the sample file:
   8. cpu_cores:     seconds:1765240053 ... seconds:1765240093  (start/end pairs)
   9. CMD dual:      "Dec  9 00:45:08 1.2.3.4 Dec  9 00:45:07"
  10. ISO syslog:    2026-02-14T21:16:45.718808+00:00  (tunnel status, RFC 5424)
+ 11. VPN session:   "Login=2026-03-10 12:37:39" / "Logout=2026-03-10 12:38:16"
+                    (Login = base - 37s, Logout = base - 2s, so both stay before
+                    the syslog header time)
 """
 
 import argparse
@@ -48,6 +51,11 @@ def iso_fmt(dt: datetime) -> str:
 def suricata_iso_fmt(dt: datetime) -> str:
     """Format as '2026-02-14T09:32:05.699696+0000'."""
     return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{random.randint(100000, 999999)}+0000"
+
+
+def vpn_fmt(dt: datetime) -> str:
+    """Format as '2026-02-14 09:32:05' (VPN session Login/Logout)."""
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def iso_syslog_fmt(dt: datetime) -> str:
@@ -143,6 +151,17 @@ def rewrite_line(line: str, base_epoch: int) -> str:
         return f"seconds:{seen_seconds[old_val]}"
 
     line = re.sub(r"seconds:(\d{10})", replace_seconds, line)
+
+    # --- 11. VPN session Login/Logout: "Login=YYYY-MM-DD HH:MM:SS" ---
+    # Logout=N/A (still connected) is left as is.
+    vpn_offsets = {"Login": 37, "Logout": 2}
+    line = re.sub(
+        r"\b(Login|Logout)=\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}",
+        lambda m: m.group(1) + "=" + vpn_fmt(
+            datetime.fromtimestamp(base_epoch - vpn_offsets[m.group(1)], tz=timezone.utc)
+        ),
+        line,
+    )
 
     # --- 9. cpu_cores nanos (keep as random realistic values) ---
     line = re.sub(

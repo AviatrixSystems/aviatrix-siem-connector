@@ -13,7 +13,8 @@
 #     - IDS_POLICY_ALERT (8.2 Suricata signature alert)
 #     - IDS_POLICY_TIMEOUT (8.2 Suricata unavailable)
 #     - CONNECTION_SYN_ONLY_TIMEOUT (8.2 TCP SYN-only stall)
-# - AviatrixCMD (Controller API/Command logs)
+# - AviatrixCMD / AviatrixAPI (Controller V1 command and V2.5 API logs)
+# - AviatrixFQDNRule (Egress FQDN filter rule hits)
 # - AviatrixTunnelStatusChange (Tunnel state changes)
 # - AviatrixVPNSession (VPN connect/disconnect events)
 
@@ -44,6 +45,10 @@
 
 # --- Port 8080 traffic (app to app communication) ---
 <158>Mar  4 22:55:13 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:13 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.240.131 DST_IP=10.10.1.108 PROTO=TCP SRC_PORT=53290 DST_PORT=8080 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=11813502966478450463 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
+
+# --- 8.2+ Format without session fields (first packet of a flow, no SESSION_* fields) ---
+# Synthetic: built from the 8.2 samples above with the SESSION_* suffix removed.
+<158>Mar  4 22:55:15 GW-frontend-eks-spoke-18.216.17.241-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:15 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=60 SRC_IP=100.64.242.5 DST_IP=10.5.0.8 PROTO=TCP SRC_PORT=37412 DST_PORT=80 DATA=0x ACT=PERMIT ENFORCED=true
 
 
 ###############################################################################
@@ -107,6 +112,10 @@
 
 # --- Suricata IDS alert - GPL ATTACK_RESPONSE (full JSON format) ---
 <174>Mar  4 22:57:01 GW-backend-eks-spoke-18.119.198.171-sink suricata[4]: {"timestamp":"2026-03-04T22:57:01.661154+0000","flow_id":255638648850226,"pcap_cnt":88796,"event_type":"alert","src_ip":"3.170.131.31","src_port":80,"dest_ip":"100.64.59.124","dest_port":42324,"proto":"TCP","pkt_src":"wire/pcap","tx_id":0,"tx_guessed":true,"alert":{"action":"allowed","gid":1,"signature_id":2100498,"rev":7,"signature":"GPL ATTACK_RESPONSE id check returned root","category":"Potentially Bad Traffic","severity":2,"metadata":{"confidence":["Medium"],"created_at":["2010_09_23"],"signature_severity":["Informational"],"updated_at":["2019_07_26"]},"policy_id":""},"http":{"hostname":"testmynids.org","url":"http:///uid/index.html","http_user_agent":"curl/8.17.0","http_content_type":"text/html","http_method":"GET","protocol":"HTTP/1.1","status":200,"length":40},"files":[{"filename":"/uid/index.html","gaps":true,"state":"TRUNCATED","stored":false,"size":40,"tx_id":0}],"app_proto":"http","direction":"to_client","flow":{"pkts_toserver":5,"pkts_toclient":5,"bytes_toserver":299,"bytes_toclient":738,"start":"2026-03-04T22:57:01.573850+0000","src_ip":"100.64.59.124","dest_ip":"3.170.131.31","src_port":42324,"dest_port":80}}
+
+# --- Suricata stats event (event_type=stats; dropped by the suricata-stats-drop filter) ---
+# Synthetic, trimmed: real stats events carry many more counters.
+<174>Mar  4 22:57:03 GW-backend-eks-spoke-18.119.198.171-sink suricata[4]: {"timestamp":"2026-03-04T22:57:03.000412+0000","event_type":"stats","stats":{"uptime":86412,"capture":{"kernel_packets":1203941,"kernel_drops":0},"decoder":{"pkts":1203941,"bytes":982341120,"ipv4":1203876,"tcp":1150233,"udp":53643},"flow":{"memuse":7474304}}}
 
 
 ###############################################################################
@@ -174,6 +183,12 @@
 # --- Enable rsyslog forwarder with exclude list ---
 <14>Mar  4 22:58:40 18.190.163.185 Mar  4 22:58:40 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=ENABLE_RSYSLOG_FORWARDER, argv=['--rtn_file', '/dev/null', 'enable_rsyslog_forwarder', '3.149.191.227', '514', '--index', '1', '--name', 'Sample Data', '--protocol', 'UDP', '--exclude_list', 'backend-eks-spoke,frontend-eks-spoke,k8s-demo-db,k8s-transit'], result=Success, reason=, username=admin
 
+# --- V2.5 API call (AviatrixAPI) ---
+# Synthetic: laid out to match the 14-cmd.conf V2.5 pattern
+# (url=, user=, req_data=, resp_status=, resp_data=). Replace with a captured
+# AviatrixAPI line when one is available.
+<14>Mar  4 22:58:42 18.190.163.185 Mar  4 22:58:42 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=POST url=/v2.5/api/gateways/spoke/backend-eks-spoke/size user=admin req_data={"gw_name": "backend-eks-spoke", "gw_size": "t3.medium"} resp_status=200 resp_data={"return": true, "results": "Gateway backend-eks-spoke resized to t3.medium"}
+
 
 ###############################################################################
 # TUNNEL STATUS LOGS - AviatrixTunnelStatusChange
@@ -211,11 +226,17 @@
 
 
 ###############################################################################
-# ADDITIONAL LOG TYPES (not found in source sample)
+# FQDN FILTER LOGS - AviatrixFQDNRule (egress FQDN filtering)
 ###############################################################################
+# Synthetic: modelled on the AviatrixFQDNRule format in the Aviatrix egress FQDN
+# documentation, with a syslog header added. Replace with captured lines when
+# available (see test-tools/syslog-collector).
 
-# NOTE: The following log types were NOT present in the source messages.log file:
-# - AviatrixFQDNRule (DNS/FQDN Firewall rules)
-#
-# If you need samples of these log types, capture them from a controller/gateway
-# with those features enabled.
+# --- Allowed: hostname matched a whitelist rule (state + Rule, no drop_reason) ---
+<14>Mar  4 22:59:12 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=140.82.112.3 hostname=github.com state=MATCHED Rule=*.github.com;1
+
+# --- Dropped: no rule matched (state + drop_reason, no Rule) ---
+<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED
+
+# --- Dropped by a deny rule (state + drop_reason + Rule) ---
+<14>Mar  4 22:59:18 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule1[CRIT]nfq_http_handle_request() L#160  Gateway=egress-fqdn-gw S_IP=10.10.2.17 D_IP=93.184.215.14 hostname=malware.example.net state=MATCHED drop_reason=BLACKLISTED Rule=*.example.net;0

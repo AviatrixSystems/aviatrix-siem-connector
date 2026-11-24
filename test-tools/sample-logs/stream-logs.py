@@ -143,6 +143,7 @@ Log type filters:
   netstats   - AviatrixGwNetStats gateway network stats
   sysstats   - AviatrixGwSysStats gateway system stats
   tunnel     - AviatrixTunnelStatusChange tunnel state
+  vpn        - AviatrixVPNSession VPN connect/disconnect
 
 Examples:
   ./stream-logs.py                           # Stream all to localhost:5000 UDP
