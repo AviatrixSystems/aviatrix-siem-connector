@@ -50,12 +50,17 @@ Dimensions: `gateway`, `alias`, `source`
 
 ### Per-Core CPU Metrics
 
-Same metric keys as aggregate, with an added `core` dimension:
+Sent under separate `cpu.core.*` keys with an added `core` dimension, so that
+`avg(aviatrix.gateway.cpu.usage)` by gateway is not mixed with per-core series:
 
 | Metric | Dimension | Description |
 |--------|-----------|-------------|
-| `aviatrix.gateway.cpu.idle` | `core="0"`, `core="1"`, ... | Per-core idle (100 - busy_avg) |
-| `aviatrix.gateway.cpu.usage` | `core="0"`, `core="aggregate"` | Per-core usage (busy_avg) |
+| `aviatrix.gateway.cpu.core.idle` | `core="0"`, `core="1"`, ..., `core="aggregate"` | Per-core idle (100 - busy_avg) |
+| `aviatrix.gateway.cpu.core.usage` | `core="0"`, `core="1"`, ..., `core="aggregate"` | Per-core usage (busy_avg) |
+
+`core="aggregate"` is the gateway's all-core busy average from `cpu_cores`.
+Before this change these series used the `aviatrix.gateway.cpu.idle/usage`
+keys; update any dashboard that filtered those keys on `core`.
 
 ### Network Statistics (`AviatrixGwNetStats`)
 
@@ -98,7 +103,7 @@ Filter 94 (`94-save-raw-net-rates.conf`) saves the original string values to `[@
 timeseries avg(aviatrix.gateway.cpu.usage), by:{gateway}
 
 # Per-core CPU hotspots
-timeseries max(aviatrix.gateway.cpu.usage), by:{gateway, core}
+timeseries max(aviatrix.gateway.cpu.core.usage), by:{gateway, core}
 | filter core != "aggregate"
 
 # Network throughput

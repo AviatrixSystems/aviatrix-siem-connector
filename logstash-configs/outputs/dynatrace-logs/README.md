@@ -39,6 +39,7 @@ This creates `assembled/dynatrace-logs-full.conf`.
 | `microseg` | `DCFPolicyEvent` | DENY=WARN, ALLOW=INFORMATIONAL | `L4 DCF Deny: 10.0.0.1:8080 -> 10.0.0.2:443 TCP` |
 | `fqdn` | `FQDNFilter` | blocked=WARN, else=INFORMATIONAL | `FQDN Allow: 10.0.0.1 -> api.example.com (1.2.3.4) on gw1` |
 | `cmd` | `ControllerAudit` | result!=Success=WARN, else=INFORMATIONAL | `Controller API: setup_gateway by admin - Success` |
+| `vpn_session` | `VPNSession` | INFORMATIONAL | `VPN connected: alice on vpn-gw-1` |
 
 ### Networking Events (LOG_PROFILE: `networking` or `all`)
 
@@ -87,6 +88,9 @@ This creates `assembled/dynatrace-logs-full.conf`.
 | `aviatrix.dcf.gateway` | Reporting gateway hostname |
 | `aviatrix.dcf.sni_hostname` | TLS SNI hostname (L7 only) |
 | `aviatrix.dcf.url` | URL parts (L7 only) |
+| `aviatrix.dcf.decrypted_by` | Decrypting component (L7 only, if present) |
+| `aviatrix.dcf.reason` / `session_id` / `sid` | L7 decision reason and session identifiers (if present) |
+| `aviatrix.dcf.request_bytes` / `response_bytes` | L7 request/response sizes (if present) |
 | `aviatrix.dcf.session_*` | Session fields (8.2+ L4 only) |
 
 ### IDS Alert Attributes (suricata)
@@ -124,6 +128,15 @@ This creates `assembled/dynatrace-logs-full.conf`.
 | `aviatrix.controller.result` | Success/Failure |
 | `aviatrix.controller.username` | User who performed action |
 | `aviatrix.controller.reason` | Failure reason (if any) |
+
+### VPN Session Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `aviatrix.vpn.user` | VPN user name |
+| `aviatrix.vpn.status` | Session status (connect/disconnect) |
+| `aviatrix.vpn.gateway` / `gateway_ip` | VPN gateway name and IP |
+| `aviatrix.vpn.public_ip` | Client public IP (omitted when `N/A`) |
 
 ## DQL Query Examples
 
