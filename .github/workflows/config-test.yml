@@ -1,0 +1,128 @@
+name: Config Test
+
+# Reusable: called by test-pipeline.yml (PRs / main) and release.yml (tags).
+# - static-checks: committed assembled/ configs match a fresh assembly, the
+#   combined Dynatrace output is the union of its two fragments, shell syntax.
+# - image-config-test: builds the GHCR image (all plugins, real entrypoint) and
+#   runs --config.test_and_exit for EVERY output type found under
+#   logstash-configs/outputs/, including azure-log-ingestion and zabbix.
+# - tls-sidecar-test: builds the stunnel sidecar and smoke-tests its entrypoint.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assembled configs match a fresh assembly
+        run: logstash-configs/scripts/check-assembled.sh
+
+      - name: Dynatrace combined output is the union of metrics + logs
+        run: python3 test-tools/ci/check-dynatrace-union.py
+
+      - name: Shell syntax
+        run: |
+          for f in logstash-configs/scripts/*.sh container-build/*.sh tls-sidecar/build.sh test-tools/ci/*.sh; do
+            bash -n "$f"
+          done
+          sh -n tls-sidecar/entrypoint.sh
+          shellcheck -S error logstash-configs/scripts/*.sh container-build/*.sh test-tools/ci/*.sh
+          shellcheck -S error -s sh tls-sidecar/entrypoint.sh
+
+  image-config-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare build context
+        run: container-build/prepare-context.sh "$RUNNER_TEMP/ghcr-context"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build GHCR image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ runner.temp }}/ghcr-context
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: siem-connector:ci
+          cache-from: type=gha,scope=ghcr-image
+          cache-to: type=gha,scope=ghcr-image,mode=max
+
+      - name: Config test every output type in the image
+        run: |
+          set -uo pipefail
+          CONFIGS="$RUNNER_TEMP/ghcr-context/configs"
+          failed=""
+          for t in $(logstash-configs/scripts/assemble-config.sh --list); do
+            echo "::group::config test: $t"
+            test-tools/ci/output-env-vars.sh "$t" "$CONFIGS/$t-full.conf" | sed 's/^-e //' > "$RUNNER_TEMP/$t.env"
+            # timeout: if the entrypoint ever drops args again, Logstash would
+            # start a full pipeline instead of exiting.
+            if timeout 300 docker run --rm --env-file "$RUNNER_TEMP/$t.env" -e OUTPUT_TYPE="$t" \
+                 siem-connector:ci --config.test_and_exit; then
+              echo "PASS: $t"
+            else
+              echo "::error::config test failed for output type $t"
+              failed="$failed $t"
+            fi
+            echo "::endgroup::"
+          done
+          if [[ -n "$failed" ]]; then
+            echo "Failed output types:$failed"
+            exit 1
+          fi
+
+      - name: Unknown OUTPUT_TYPE fails fast
+        run: |
+          if timeout 60 docker run --rm -e OUTPUT_TYPE=does-not-exist siem-connector:ci; then
+            echo "::error::entrypoint accepted an unknown OUTPUT_TYPE"
+            exit 1
+          fi
+
+  tls-sidecar-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build TLS sidecar
+        run: docker build -t siem-connector-tls:ci tls-sidecar
+
+      - name: Rejects partial env certs
+        run: |
+          if docker run --rm -e TLS_SERVER_CERT=x siem-connector-tls:ci; then
+            echo "::error::sidecar started with only TLS_SERVER_CERT set"
+            exit 1
+          fi
+
+      - name: Starts with valid env certs
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1 -subj /CN=ci 2>/dev/null
+          docker run -d --name tls-ci \
+            -e TLS_SERVER_CERT="$(cat cert.pem)" \
+            -e TLS_SERVER_KEY="$(cat key.pem)" \
+            -e TLS_CA_CERT="$(cat cert.pem)" \
+            siem-connector-tls:ci
+          for _ in $(seq 1 20); do
+            if docker logs tls-ci 2>&1 | grep -q "Configuration successful"; then break; fi
+            sleep 1
+          done
+          sleep 2
+          docker logs tls-ci 2>&1
+          test "$(docker inspect -f '{{.State.Running}}' tls-ci)" = "true"
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f tls-ci 2>/dev/null || true

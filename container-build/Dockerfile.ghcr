@@ -1,11 +1,20 @@
 FROM docker.elastic.co/logstash/logstash:8.16.2
-LABEL org.opencontainers.image.source="https://github.com/aviatrixsystems/log-integration-engine"
+LABEL org.opencontainers.image.source="https://github.com/AviatrixSystems/aviatrix-siem-connector"
 LABEL org.opencontainers.image.description="Aviatrix SIEM Connector - Logstash ETL pipeline"
 
-# Install all output plugins that aren't bundled with Logstash
-RUN logstash-plugin install \
-    logstash-output-zabbix \
-    microsoft-sentinel-log-analytics-logstash-output-plugin
+# Install all output plugins that aren't bundled with Logstash.
+# For reproducible builds, pin the plugin versions with build args, e.g.
+#   --build-arg ZABBIX_PLUGIN_VERSION=<ver> --build-arg SENTINEL_PLUGIN_VERSION=<ver>
+# Empty means "latest at build time".
+ARG ZABBIX_PLUGIN_VERSION=""
+ARG SENTINEL_PLUGIN_VERSION=""
+RUN set -e; \
+    install_plugin() { \
+      if [ -n "$2" ]; then logstash-plugin install --version "$2" "$1"; \
+      else logstash-plugin install "$1"; fi; \
+    }; \
+    install_plugin logstash-output-zabbix "$ZABBIX_PLUGIN_VERSION"; \
+    install_plugin microsoft-sentinel-log-analytics-logstash-output-plugin "$SENTINEL_PLUGIN_VERSION"
 
 # Bake all assembled configs into /opt/configs/
 COPY --chmod=644 configs/ /opt/configs/
@@ -13,7 +22,8 @@ COPY --chmod=644 configs/ /opt/configs/
 # Custom grok patterns
 COPY --chmod=644 patterns/ /usr/share/logstash/patterns/
 
-# Custom entrypoint for OUTPUT_TYPE selection
+# OUTPUT_TYPE selection; hands off to the stock /usr/local/bin/docker-entrypoint
+# (env2yaml) and passes container args through to Logstash.
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

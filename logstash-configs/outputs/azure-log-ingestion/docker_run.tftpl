@@ -6,11 +6,13 @@
 # logstash_config_variables; if it is missing, terraform plan fails with
 # "vars map does not contain key logstash_image" instead of booting an
 # instance whose docker run cannot pull a placeholder image.
+# Module-provided vars: log_profile, syslog_port (see the splunk-hec template).
 docker run -d --restart=always \
   -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
   -v /logstash/patterns:/usr/share/logstash/patterns \
-  -p 5000:5000/tcp \
-  -p 5000:5000/udp \
+  -p ${syslog_port}:${syslog_port}/tcp \
+  -p ${syslog_port}:${syslog_port}/udp \
+  -e SYSLOG_PORT=${syslog_port} \
   -e LOG_PROFILE=${log_profile} \
   -e client_app_id="${client_app_id}" \
   -e client_app_secret="${client_app_secret}" \

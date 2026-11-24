@@ -1,0 +1,15 @@
+# Keeps workflow actions and Dockerfile base images current. Action refs are
+# still major tags (v4, v6, ...); pinning them to commit SHAs is a followup
+# that Dependabot will then keep bumped.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directories:
+      - /container-build
+      - /tls-sidecar
+    schedule:
+      interval: weekly

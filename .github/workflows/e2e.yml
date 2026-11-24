@@ -1,0 +1,120 @@
+name: E2E Pipeline Test
+
+# Reusable: called by test-pipeline.yml (PRs / main) and release.yml (tags).
+# Streams test-tools/sample-logs/test-samples.log through the ci-test output
+# and validates exact per-tag counts with test-tools/ci/validate-output.sh.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  LOGSTASH_IMAGE: docker.elastic.co/logstash/logstash:8.16.2
+
+jobs:
+  e2e-pipeline-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Assemble ci-test config
+        run: |
+          mkdir -p "$RUNNER_TEMP/config"
+          logstash-configs/scripts/assemble-config.sh ci-test "$RUNNER_TEMP/config/ci-test-full.conf"
+
+      - name: Refresh sample log timestamps
+        run: cd test-tools/sample-logs && python3 update-timestamps.py --overwrite
+
+      - name: Pull Logstash image
+        run: docker pull "$LOGSTASH_IMAGE"
+
+      - name: Start Logstash
+        run: |
+          mkdir -p "$RUNNER_TEMP/logstash-output" && chmod 777 "$RUNNER_TEMP/logstash-output"
+          docker run -d --name logstash-ci \
+            -v "$RUNNER_TEMP/config":/config \
+            -v "$GITHUB_WORKSPACE/logstash-configs/patterns":/usr/share/logstash/patterns \
+            -v "$RUNNER_TEMP/logstash-output":/tmp/logstash-output \
+            -p 5000:5000/udp \
+            -e XPACK_MONITORING_ENABLED=false \
+            "$LOGSTASH_IMAGE" \
+            logstash -f /config/ci-test-full.conf
+
+      - name: Wait for Logstash and the UDP listener
+        run: |
+          # UDP datagrams sent before the listener binds are dropped silently,
+          # so wait for the udp input's own log line, not only for
+          # "Pipelines running".
+          running_at=""
+          for i in $(seq 1 90); do
+            LOGS="$(docker logs logstash-ci 2>&1)"
+            if grep -q "Starting UDP listener" <<< "$LOGS"; then
+              echo "UDP listener ready (attempt $i)"
+              exit 0
+            fi
+            if [[ -z "$running_at" ]] && grep -q "Pipelines running" <<< "$LOGS"; then
+              running_at=$i
+            fi
+            if [[ -n "$running_at" && $((i - running_at)) -ge 10 ]]; then
+              echo "WARNING: pipelines running but no 'Starting UDP listener' line; continuing"
+              exit 0
+            fi
+            if ! docker ps -q -f name=logstash-ci | grep -q .; then
+              echo "ERROR: Logstash container exited"
+              echo "$LOGS"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "ERROR: Logstash not ready within 180 seconds"
+          docker logs logstash-ci 2>&1 | tail -100
+          exit 1
+
+      - name: Stream sample logs
+        run: cd test-tools/sample-logs && python3 stream-logs.py --port 5000 -v
+
+      - name: Wait for output to stabilize
+        run: |
+          # Poll until the line count is non-zero and unchanged across two
+          # consecutive checks (timeout 90s) instead of fixed sleeps.
+          OUT="$RUNNER_TEMP/logstash-output/logstash-output.jsonl"
+          prev=-1; stable=0
+          for i in $(seq 1 30); do
+            sleep 3
+            cur=$( [[ -f "$OUT" ]] && wc -l < "$OUT" | tr -d ' ' || echo 0 )
+            echo "check $i: $cur lines"
+            if [[ "$cur" -gt 0 && "$cur" -eq "$prev" ]]; then
+              stable=$((stable + 1))
+              if [[ "$stable" -ge 2 ]]; then exit 0; fi
+            else
+              stable=0
+            fi
+            prev=$cur
+          done
+          if [[ ! -s "$OUT" ]]; then
+            echo "ERROR: no output written"
+            exit 1
+          fi
+          echo "WARNING: output still changing after 90s; validating what is there"
+
+      - name: Validate output
+        run: |
+          test-tools/ci/validate-output.sh \
+            "$RUNNER_TEMP/logstash-output/logstash-output.jsonl" \
+            test-tools/sample-logs/test-samples.log
+
+      - name: Show Logstash logs on failure
+        if: failure()
+        run: docker logs logstash-ci 2>&1 | tail -100
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f logstash-ci 2>/dev/null || true

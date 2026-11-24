@@ -3,24 +3,23 @@
 # Combines input, filter, and output modules into a single deployable config file
 #
 # Usage: ./assemble-config.sh <output-type> [destination]
+#        ./assemble-config.sh --all [destination-dir]
+#        ./assemble-config.sh --list
 # Example: ./assemble-config.sh splunk-hec
 # Example: ./assemble-config.sh azure-log-ingestion ./custom-output.conf
+# Example: ./assemble-config.sh --all            # every output type into assembled/
 #
-# Available output types:
-#   splunk-hec          - Splunk HTTP Event Collector
-#   azure-log-ingestion - Azure Log Analytics via DCR
-#   dynatrace-metrics   - Dynatrace Metrics Ingest (MINT protocol)
-#   dynatrace-logs      - Dynatrace Logs Ingest (JSON)
-#   dynatrace           - Dynatrace Combined (metrics + logs)
-#   zabbix              - Zabbix Trapper (Dependent Items pattern)
+# Output types are discovered from logstash-configs/outputs/<type>/output.conf;
+# run with --list to print them.
+#
+# The result is deterministic (no timestamp), so a fresh assembly can be diffed
+# against the committed assembled/ files (see scripts/check-assembled.sh).
 
-set -e
+set -euo pipefail
+shopt -s nullglob
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
-
-OUTPUT_TYPE="${1:-}"
-DEST="${2:-}"
 
 # Color output helpers
 RED='\033[0;31m'
@@ -28,39 +27,70 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Print every output type that has an output.conf, one per line (sorted).
+list_output_types() {
+    local dir
+    for dir in "$CONFIG_DIR"/outputs/*/; do
+        if [[ -f "$dir/output.conf" ]]; then
+            basename "$dir"
+        fi
+    done
+}
+
 print_usage() {
     echo "Usage: $0 <output-type> [destination]"
+    echo "       $0 --all [destination-dir]"
+    echo "       $0 --list"
     echo ""
     echo "Available output types:"
-    echo "  splunk-hec          - Splunk HTTP Event Collector"
-    echo "  azure-log-ingestion - Azure Log Analytics via DCR"
-    echo "  dynatrace-metrics   - Dynatrace Metrics Ingest (MINT protocol)"
-    echo "  dynatrace-logs      - Dynatrace Logs Ingest (JSON)"
-    echo "  dynatrace           - Dynatrace Combined (metrics + logs)"
-    echo "  zabbix              - Zabbix Trapper (Dependent Items pattern)"
+    list_output_types | sed 's/^/  /'
     echo ""
     echo "Examples:"
     echo "  $0 splunk-hec"
     echo "  $0 dynatrace"
     echo "  $0 azure-log-ingestion ./custom-output.conf"
+    echo "  $0 --all"
 }
 
-if [[ -z "$OUTPUT_TYPE" ]]; then
-    echo -e "${RED}Error: Output type is required${NC}"
-    print_usage
-    exit 1
-fi
+OUTPUT_TYPE="${1:-}"
+DEST="${2:-}"
+
+case "$OUTPUT_TYPE" in
+    "")
+        echo -e "${RED}Error: Output type is required${NC}" >&2
+        print_usage >&2
+        exit 1
+        ;;
+    -h|--help)
+        print_usage
+        exit 0
+        ;;
+    --list)
+        list_output_types
+        exit 0
+        ;;
+    --all)
+        DEST_DIR="${DEST:-$CONFIG_DIR/assembled}"
+        mkdir -p "$DEST_DIR"
+        TYPES=()
+        while IFS= read -r t; do TYPES+=("$t"); done < <(list_output_types)
+        if [[ ${#TYPES[@]} -eq 0 ]]; then
+            echo -e "${RED}Error: no output types found under $CONFIG_DIR/outputs${NC}" >&2
+            exit 1
+        fi
+        for t in "${TYPES[@]}"; do
+            "$0" "$t" "$DEST_DIR/${t}-full.conf" >/dev/null
+            echo "  Assembled: $t"
+        done
+        exit 0
+        ;;
+esac
 
 # Validate output type exists
-if [[ ! -d "$CONFIG_DIR/outputs/$OUTPUT_TYPE" ]]; then
-    echo -e "${RED}Error: Unknown output type '$OUTPUT_TYPE'${NC}"
-    echo "Available types:"
-    ls -1 "$CONFIG_DIR/outputs/" 2>/dev/null || echo "  (none found)"
-    exit 1
-fi
-
 if [[ ! -f "$CONFIG_DIR/outputs/$OUTPUT_TYPE/output.conf" ]]; then
-    echo -e "${RED}Error: Output config not found at $CONFIG_DIR/outputs/$OUTPUT_TYPE/output.conf${NC}"
+    echo -e "${RED}Error: Unknown output type '$OUTPUT_TYPE' (no outputs/$OUTPUT_TYPE/output.conf)${NC}" >&2
+    echo "Available types:" >&2
+    list_output_types | sed 's/^/  /' >&2
     exit 1
 fi
 
@@ -70,15 +100,32 @@ if [[ -z "$DEST" ]]; then
     DEST="$CONFIG_DIR/assembled/${OUTPUT_TYPE}-full.conf"
 fi
 
+INPUT_FILES=("$CONFIG_DIR"/inputs/*.conf)
+FILTER_FILES=("$CONFIG_DIR"/filters/*.conf)   # glob expansion is sorted
+if [[ ${#INPUT_FILES[@]} -eq 0 ]]; then
+    echo -e "${RED}Error: no input modules found in $CONFIG_DIR/inputs/${NC}" >&2
+    exit 1
+fi
+if [[ ${#FILTER_FILES[@]} -eq 0 ]]; then
+    echo -e "${RED}Error: no filter modules found in $CONFIG_DIR/filters/${NC}" >&2
+    exit 1
+fi
+
 echo -e "${YELLOW}Assembling Logstash config for: $OUTPUT_TYPE${NC}"
 echo "Output file: $DEST"
 echo ""
 
-# Create/clear the output file with a header
-cat > "$DEST" << EOF
+# Write to a temp file next to DEST and move it into place at the end, so an
+# interrupted run never leaves a truncated config behind.
+TMP="$(mktemp "$(dirname "$DEST")/.assemble.XXXXXX")"
+trap 'rm -f "$TMP"' EXIT
+
+# Config text goes to the temp file; progress messages go to fd 3 (stdout).
+exec 3>&1
+{
+cat << EOF
 # Aviatrix SIEM Connector - Assembled Configuration
 # Output Type: $OUTPUT_TYPE
-# Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
 #
 # This file was automatically generated by assemble-config.sh
 # Do not edit directly - modify the source modules instead:
@@ -91,51 +138,48 @@ cat > "$DEST" << EOF
 EOF
 
 # Assemble inputs
-echo -e "${GREEN}Adding inputs...${NC}"
-echo "# ============================================================================" >> "$DEST"
-echo "# INPUT CONFIGURATION" >> "$DEST"
-echo "# ============================================================================" >> "$DEST"
-echo "" >> "$DEST"
+echo -e "${GREEN}Adding inputs...${NC}" >&3
+echo "# ============================================================================"
+echo "# INPUT CONFIGURATION"
+echo "# ============================================================================"
+echo ""
 
-for input_file in "$CONFIG_DIR/inputs/"*.conf; do
-    if [[ -f "$input_file" ]]; then
-        echo "  - $(basename "$input_file")"
-        cat "$input_file" >> "$DEST"
-        echo "" >> "$DEST"
-    fi
+for input_file in "${INPUT_FILES[@]}"; do
+    echo "  - $(basename "$input_file")" >&3
+    cat "$input_file"
+    echo ""
 done
 
 # Assemble filters (in sorted order)
-echo -e "${GREEN}Adding filters...${NC}"
-echo "# ============================================================================" >> "$DEST"
-echo "# FILTER CONFIGURATION" >> "$DEST"
-echo "# ============================================================================" >> "$DEST"
-echo "" >> "$DEST"
+echo -e "${GREEN}Adding filters...${NC}" >&3
+echo "# ============================================================================"
+echo "# FILTER CONFIGURATION"
+echo "# ============================================================================"
+echo ""
 
-for filter_file in $(ls "$CONFIG_DIR/filters/"*.conf 2>/dev/null | sort); do
-    if [[ -f "$filter_file" ]]; then
-        echo "  - $(basename "$filter_file")"
-        cat "$filter_file" >> "$DEST"
-        echo "" >> "$DEST"
-    fi
+for filter_file in "${FILTER_FILES[@]}"; do
+    echo "  - $(basename "$filter_file")" >&3
+    cat "$filter_file"
+    echo ""
 done
 
 # Assemble output
-echo -e "${GREEN}Adding output ($OUTPUT_TYPE)...${NC}"
-echo "# ============================================================================" >> "$DEST"
-echo "# OUTPUT CONFIGURATION ($OUTPUT_TYPE)" >> "$DEST"
-echo "# ============================================================================" >> "$DEST"
-echo "" >> "$DEST"
+echo -e "${GREEN}Adding output ($OUTPUT_TYPE)...${NC}" >&3
+echo "# ============================================================================"
+echo "# OUTPUT CONFIGURATION ($OUTPUT_TYPE)"
+echo "# ============================================================================"
+echo ""
 
-cat "$CONFIG_DIR/outputs/$OUTPUT_TYPE/output.conf" >> "$DEST"
+cat "$CONFIG_DIR/outputs/$OUTPUT_TYPE/output.conf"
+} > "$TMP"
+exec 3>&-
 
-# Copy docker_run.tftpl to assembled directory (needed by Terraform deployments)
-DEST_DIR="$(dirname "$DEST")"
-if [[ -f "$CONFIG_DIR/outputs/$OUTPUT_TYPE/docker_run.tftpl" ]]; then
-    echo -e "${GREEN}Copying docker_run.tftpl...${NC}"
-    cp "$CONFIG_DIR/outputs/$OUTPUT_TYPE/docker_run.tftpl" "$DEST_DIR/docker_run.tftpl"
-    echo "  - docker_run.tftpl → $DEST_DIR/docker_run.tftpl"
-fi
+chmod 644 "$TMP"
+mv -f "$TMP" "$DEST"
+trap - EXIT
+
+# Deployments read outputs/<type>/docker_run.tftpl directly; nothing is copied
+# into the destination directory any more.
 
 echo ""
 echo -e "${GREEN}Assembly complete!${NC}"
@@ -143,5 +187,5 @@ echo "Output written to: $DEST"
 echo ""
 
 # Show file size
-FILE_SIZE=$(wc -l < "$DEST")
+FILE_SIZE=$(wc -l < "$DEST" | tr -d ' ')
 echo "Total lines: $FILE_SIZE"
