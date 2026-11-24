@@ -7,17 +7,32 @@
       "content_type": "application/json",
       "events": [
         {
-          "@timestamp": "<receive time>",
+          "@timestamp": "YYYY-03-04T23:09:03.000Z",
+          "alias": "transit-1",
+          "bw_in_limit_exceeded": "0",
+          "bw_out_limit_exceeded": "0",
+          "conntrack_count": "10",
+          "conntrack_limit_exceeded": "0",
           "event": {
             "original": "<14>Mar  4 23:09:03 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:03 AviatrixGwNetStats: timestamp=2026-03-04T23:09:03.123456789 name=transit-1 alias=transit-1  private_ip= interface=eth2 total_rx_rate=1.02Kb total_tx_rate=0.00 total_rx_tx_rate=1.02Kb total_rx_cum=4.50KB total_tx_cum=0.00B total_rx_tx_cum=4.50KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=10"
           },
+          "gateway": "transit-1",
+          "interface": "eth2",
+          "linklocal_limit_exceeded": "0",
           "message": "<14>Mar  4 23:09:03 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:03 AviatrixGwNetStats: timestamp=2026-03-04T23:09:03.123456789 name=transit-1 alias=transit-1  private_ip= interface=eth2 total_rx_rate=1.02Kb total_tx_rate=0.00 total_rx_tx_rate=1.02Kb total_rx_cum=4.50KB total_tx_cum=0.00B total_rx_tx_cum=4.50KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=10",
+          "pps_limit_exceeded": "0",
+          "syslog_pri": "14",
           "tags": [
-            "_avx_grok_failure_gw_net_stats",
-            "unparsed"
+            "gw_net_stats"
           ],
+          "total_rx_cum": "4.50KB",
+          "total_rx_rate": 1044.48,
+          "total_rx_tx_cum": "4.50KB",
+          "total_rx_tx_rate": 1044.48,
+          "total_tx_cum": "0.00B",
+          "total_tx_rate": 0,
           "type": "syslog",
-          "unix_time": "<receive time>"
+          "unix_time": "YYYY-03-04T23:09:03.000Z (epoch)"
         }
       ],
       "path": "/parsed"

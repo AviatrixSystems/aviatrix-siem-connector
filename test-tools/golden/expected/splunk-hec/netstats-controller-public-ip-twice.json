@@ -1,5 +1,31 @@
 {
   "case": "netstats-controller-public-ip-twice",
   "input": "<14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "conntrack_count": "211",
+            "gateway": "controller",
+            "interface": "eth0",
+            "public_ip": "203.0.113.20",
+            "syslog": "<14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211",
+            "total_rx_cum": "1.0GB",
+            "total_rx_rate": 25600,
+            "total_rx_tx_cum": "1.5GB",
+            "total_rx_tx_rate": 25600,
+            "total_tx_cum": "512.0MB",
+            "total_tx_rate": 0
+          },
+          "source": "avx-gw-net-stats",
+          "sourcetype": "aviatrix:gateway:network",
+          "time": "YYYY-03-04T23:09:04.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
 }

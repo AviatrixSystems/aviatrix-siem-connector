@@ -27,9 +27,9 @@
             "gw_net_stats"
           ],
           "total_rx_cum": "3.20PB",
-          "total_rx_rate": "1.10Pb",
+          "total_rx_rate": 1238489897526886.5,
           "total_rx_tx_cum": "3.20PB",
-          "total_rx_tx_rate": "1.10Pb",
+          "total_rx_tx_rate": 1238489897526886.5,
           "total_tx_cum": "0.00B",
           "total_tx_rate": 0,
           "type": "syslog",

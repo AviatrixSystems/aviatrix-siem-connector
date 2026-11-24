@@ -280,8 +280,8 @@ this is not a syslog line
 # ----- GATEWAY / CONTROLLER STATS -----------------------------------------------
 # [cloudn] gateway: gateway-conduit/vmsysmon_service.go:306-375 (unchanged 8.2-10.1)
 #          controller: cloudx-common/vmsysmon/perfmon.py:385-485
-# NOTE: rates are bits/s (Kb = kilobits, base 1024); 95-field-conversion labels
-# them bytes/s. Pb/Eb units are not matched by the conversion regex.
+# NOTE: rates are bits/s (Kb = kilobits, base 1024); 95-field-conversion converts
+# them to a number in bits/s, including Pb/Eb.
 
 # --- eth1, empty alias, Gb/TB values, negative conntrack_usage_rate, no public_ip (double space) ---
 # @case netstats-gw-eth1-empty-alias-negative-usage
@@ -292,12 +292,12 @@ this is not a syslog line
 <14>Mar  4 23:09:02 GW-private-spoke-10.81.0.10-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:02 AviatrixGwNetStats: timestamp=2026-03-04T23:09:02 name=private-spoke alias=private-spoke public_ip= private_ip=10.81.0.10 interface=eth0 total_rx_rate=0.00 total_tx_rate=0.00 total_rx_tx_rate=0.00 total_rx_cum=0.00B total_tx_cum=512.00B total_rx_tx_cum=512.00B conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=3
 
 # --- Interface without IPv4: private_ip empty ---
-# KNOWN BUG: private_ip is required by the pattern -> grok failure.
+# Parses with no private_ip.
 # @case netstats-gw-no-ipv4-empty-private-ip
 <14>Mar  4 23:09:03 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:03 AviatrixGwNetStats: timestamp=2026-03-04T23:09:03.123456789 name=transit-1 alias=transit-1  private_ip= interface=eth2 total_rx_rate=1.02Kb total_tx_rate=0.00 total_rx_tx_rate=1.02Kb total_rx_cum=4.50KB total_tx_cum=0.00B total_rx_tx_cum=4.50KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=10
 
 # --- Controller with a public IP on eth0: public_ip twice, no private_ip, 1-decimal values ---
-# KNOWN BUG: private_ip is required by the pattern -> grok failure.
+# Parses with public_ip set and no private_ip.
 # @case netstats-controller-public-ip-twice
 <14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211
 

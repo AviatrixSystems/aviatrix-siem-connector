@@ -71,7 +71,7 @@ logstash-configs/
 │   ├── 18-vpn-session.conf              # VPN session connect/disconnect
 │   ├── 90-timestamp.conf                # Date normalization (SYSLOG_TIMEZONE, default UTC)
 │   ├── 94-save-raw-net-rates.conf       # Raw net-rate strings → [@metadata]
-│   ├── 95-field-conversion.conf         # Type conversions (net rates → float bytes/s)
+│   ├── 95-field-conversion.conf         # Type conversions (net rates → float bits/s)
 │   ├── 96-sys-stats-hec.conf            # gw_sys_stats HEC payload builder
 │   └── 97-tag-unparsed.conf             # Tag events with no type tag as "unparsed"
 ├── outputs/                             # Output-specific configs

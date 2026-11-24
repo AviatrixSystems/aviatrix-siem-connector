@@ -1,5 +1,37 @@
 {
   "case": "netstats-gw-no-ipv4-empty-private-ip",
   "input": "<14>Mar  4 23:09:03 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:03 AviatrixGwNetStats: timestamp=2026-03-04T23:09:03.123456789 name=transit-1 alias=transit-1  private_ip= interface=eth2 total_rx_rate=1.02Kb total_tx_rate=0.00 total_rx_tx_rate=1.02Kb total_rx_cum=4.50KB total_tx_cum=0.00B total_rx_tx_cum=4.50KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=10",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:09:03.000Z",
+          "TimeGenerated": "YYYY-03-04T23:09:03.000Z",
+          "alias": "transit-1",
+          "bw_in_limit_exceeded": "0",
+          "bw_out_limit_exceeded": "0",
+          "conntrack_count": "10",
+          "conntrack_limit_exceeded": "0",
+          "gateway": "transit-1",
+          "interface": "eth2",
+          "linklocal_limit_exceeded": "0",
+          "ls_timestamp": "YYYY-03-04T23:09:03.000Z",
+          "pps_limit_exceeded": "0",
+          "tags": [
+            "gw_net_stats"
+          ],
+          "total_rx_cum": "4.50KB",
+          "total_rx_rate": 1044,
+          "total_rx_tx_cum": "4.50KB",
+          "total_rx_tx_rate": 1044,
+          "total_tx_cum": "0.00B",
+          "total_tx_rate": 0,
+          "unix_time": "YYYY-03-04T23:09:03.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-gw-net-stats"
+    }
+  ]
 }
