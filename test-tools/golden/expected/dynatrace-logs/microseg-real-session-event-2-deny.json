@@ -24,7 +24,7 @@
           "aviatrix.dcf.session_end_reason": "0",
           "aviatrix.dcf.session_end_reason_text": "active",
           "aviatrix.dcf.session_event": "2",
-          "aviatrix.dcf.session_event_type": "End",
+          "aviatrix.dcf.session_event_type": "PolicyUpdate",
           "aviatrix.dcf.session_id": "4296001445883337582",
           "aviatrix.dcf.session_pkt_cnt": "0",
           "aviatrix.dcf.src_ip": "10.60.11.20",

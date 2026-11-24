@@ -48,7 +48,9 @@
 <133>May 14 03:46:16 GW-aws-usw1-0a330200-gw-198.51.100.58 syslog 2022-05-14T03:46:10.257442+00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[5432]: 2022/05/14 03:46:10 AviatrixGwMicrosegPacket: POLICY=96438983-a98c-9938-fcbc-73f72e83f089 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.4.221.148 DST_IP=10.235.240.155 PROTO=TCP SRC_PORT=42948 DST_PORT=2000 DATA=0x
 
 # --- IPv6 source and destination, session start, no pid on the process ---
-# [copilot] synthetic from avxlogs.conf alternatives
+# [copilot] synthetic from avxlogs.conf alternatives. The session block is incomplete
+# (no SESSION_END_REASON..SESSION_DUR), so it lands in microseg_unparsed_suffix and
+# the event is tagged _avx_microseg_unknown_fields (still forwarded).
 # @case microseg-ipv6-session-start
 <158>Nov 23 10:00:01 GW-spoke-v6-198.51.100.7-sink /usr/local/bin/avx-gw-state-sync 2026/11/23 10:00:01 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=80 SRC_IP=2001:db8::10 DST_IP=2001:db8:1::20 PROTO=TCP SRC_PORT=37368 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=15625921951502722107 SESSION_EVENT=0
 
@@ -152,8 +154,8 @@ this is not a syslog line
 
 # --- 10.1+ format: SESSION_START between ENFORCED and SESSION_ID, EGRESS_PATH at end ---
 # [cloudn] gateway-conduit/microseg.go:245-262 (AVX-75609, AVX-77573)
-# KNOWN BUG: the optional session group no longer matches, so every SESSION_*
-# field is silently dropped (no failure tag); SESSION_START/EGRESS_PATH never captured.
+# All SESSION_* fields plus session_start and egress_path are captured. (Before the
+# fix the optional session group stopped matching and they were silently dropped.)
 # @case microseg-101-session-start avx=10.1
 <158>Mar  4 23:01:05 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:01:05 AviatrixGwMicrosegPacket: POLICY=5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70 SRC_MAC=02:11:22:33:44:55 DST_MAC=02:66:77:88:99:aa IP_SZ=60 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=TCP SRC_PORT=51544 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_START=2026-03-04T23:01:05.104512337Z SESSION_ID=9134502218874411021 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0 EGRESS_PATH=EGRESS_PATH_DEFAULT
 
@@ -164,14 +166,14 @@ this is not a syslog line
 
 # --- 9.0-10.0: session-cleaner timeout (empty MACs, POLICY=UNKNOWN, ACT=UNSPECIFIED, IP_SZ=0) ---
 # [cloudn] microseg_session_cleaner.go:439-504
-# KNOWN BUG: %{UUID} and %{MAC} fail -> _avx_grok_failure_microseg. Real lines
-# before AVX-80147 (10.2) also have byte-swapped IPs/ports; this sample does not.
+# Parses with no src_mac/dst_mac and uuid=UNKNOWN. Real lines before AVX-80147
+# (10.2) also have byte-swapped IPs/ports; this sample does not.
 # @case microseg-90-cleaner-timeout avx=9.0 until=10.0
 <158>Mar  4 23:03:40 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:40 AviatrixGwMicrosegPacket: POLICY=UNKNOWN SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=UDP SRC_PORT=40122 DST_PORT=53 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=12004417735561230099 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=2 SESSION_BYTE_CNT=164 SESSION_DUR=120000412339
 
 # --- 10.1+: session-cleaner timeout with SESSION_START/EGRESS_PATH and known policy ---
 # [cloudn] microseg_session_cleaner.go + microseg.go:245-262
-# KNOWN BUG: empty MACs fail grok.
+# Parses with no src_mac/dst_mac.
 # @case microseg-101-cleaner-timeout avx=10.1
 <158>Mar  4 23:03:41 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:41 AviatrixGwMicrosegPacket: POLICY=5f0c2a9e-7d41-4c1b-9a3e-2b8f6d1e4a70 SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=TCP SRC_PORT=51577 DST_PORT=8443 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_START=2026-03-04T23:01:41.552019Z SESSION_ID=9134502218874419988 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=6 SESSION_BYTE_CNT=902 SESSION_DUR=120004771210 EGRESS_PATH=EGRESS_PATH_DEFAULT
 
@@ -182,7 +184,7 @@ this is not a syslog line
 
 # --- 8.2-10.0 datapath: policy UUID undecodable (POLICY=?), PROTO=UNKNOWN ---
 # [cloudn] microseg.go toLog()
-# KNOWN BUG: %{UUID} fails -> _avx_grok_failure_microseg.
+# Parses with uuid="?".
 # @case microseg-82-policy-unknown-uuid avx=8.2 until=10.0
 <158>Mar  4 23:02:03 GW-db-spoke-198.51.100.31-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:02:03 AviatrixGwMicrosegPacket: POLICY=? SRC_MAC=02:aa:bb:cc:dd:01 DST_MAC=02:aa:bb:cc:dd:02 IP_SZ=52 SRC_IP=10.40.0.9 DST_IP=10.50.0.7 PROTO=UNKNOWN SRC_PORT=0 DST_PORT=0 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
 

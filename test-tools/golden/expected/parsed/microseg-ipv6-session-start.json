@@ -18,6 +18,7 @@
           "gw_ip": "198.51.100.7",
           "ip_size": "80",
           "message": "<158>Nov 23 10:00:01 GW-spoke-v6-198.51.100.7-sink /usr/local/bin/avx-gw-state-sync 2026/11/23 10:00:01 AviatrixGwMicrosegPacket: POLICY=51321a3b-e5e2-4ab3-9594-e97a51799e15 SRC_MAC=02:64:c0:e4:c9:b1 DST_MAC=02:55:21:72:8c:63 IP_SZ=80 SRC_IP=2001:db8::10 DST_IP=2001:db8:1::20 PROTO=TCP SRC_PORT=37368 DST_PORT=443 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=15625921951502722107 SESSION_EVENT=0",
+          "microseg_unparsed_suffix": "SESSION_ID=15625921951502722107 SESSION_EVENT=0",
           "proto": "TCP",
           "src_ip": "2001:db8::10",
           "src_mac": "02:64:c0:e4:c9:b1",
@@ -25,7 +26,8 @@
           "syslog_pri": "158",
           "tags": [
             "microseg",
-            "ebpf"
+            "ebpf",
+            "_avx_microseg_unknown_fields"
           ],
           "unix_time": "YYYY-11-23T10:00:01.000Z (epoch)",
           "uuid": "51321a3b-e5e2-4ab3-9594-e97a51799e15"

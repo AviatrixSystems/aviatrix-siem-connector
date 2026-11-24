@@ -5,5 +5,38 @@
   },
   "case": "microseg-90-cleaner-timeout",
   "input": "<158>Mar  4 23:03:40 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:40 AviatrixGwMicrosegPacket: POLICY=UNKNOWN SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=UDP SRC_PORT=40122 DST_PORT=53 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=12004417735561230099 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=2 SESSION_BYTE_CNT=164 SESSION_DUR=120000412339",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "UNSPECIFIED",
+          "aviatrix.dcf.dst_ip": "10.30.2.40",
+          "aviatrix.dcf.dst_port": 53,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "app-spoke",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "UNKNOWN",
+          "aviatrix.dcf.protocol": "UDP",
+          "aviatrix.dcf.session_byte_cnt": "164",
+          "aviatrix.dcf.session_dur": "120000412339",
+          "aviatrix.dcf.session_end_reason": "3",
+          "aviatrix.dcf.session_end_reason_text": "timeout",
+          "aviatrix.dcf.session_event": "1",
+          "aviatrix.dcf.session_event_type": "End",
+          "aviatrix.dcf.session_id": "12004417735561230099",
+          "aviatrix.dcf.session_pkt_cnt": "2",
+          "aviatrix.dcf.src_ip": "10.20.1.15",
+          "aviatrix.dcf.src_port": 40122,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Allow: 10.20.1.15:40122 -> 10.30.2.40:53 UDP",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:03:40.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
 }

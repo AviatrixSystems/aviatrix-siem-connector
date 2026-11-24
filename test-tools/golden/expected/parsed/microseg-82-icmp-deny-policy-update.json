@@ -28,7 +28,7 @@
           "session_end_reason": "0",
           "session_end_reason_text": "active",
           "session_event": "2",
-          "session_event_type": "End",
+          "session_event_type": "PolicyUpdate",
           "session_id": "771249900311",
           "session_pkt_cnt": "0",
           "src_ip": "10.40.0.9",

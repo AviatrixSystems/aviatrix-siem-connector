@@ -39,13 +39,15 @@
           "gw_hostname": "spoke-v6",
           "gw_ip": "198.51.100.7",
           "ip_size": "80",
+          "microseg_unparsed_suffix": "SESSION_ID=15625921951502722107 SESSION_EVENT=0",
           "proto": "TCP",
           "src_ip": "2001:db8::10",
           "src_mac": "02:64:c0:e4:c9:b1",
           "src_port": 37368,
           "tags": [
             "microseg",
-            "ebpf"
+            "ebpf",
+            "_avx_microseg_unknown_fields"
           ],
           "unix_time": "YYYY-11-23T10:00:01.000Z (epoch)",
           "uuid": "51321a3b-e5e2-4ab3-9594-e97a51799e15"

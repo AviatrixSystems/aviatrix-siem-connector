@@ -11,17 +11,34 @@
       "content_type": "application/json",
       "events": [
         {
-          "@timestamp": "<receive time>",
-          "event": {
-            "original": "<158>Mar  4 23:03:40 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:40 AviatrixGwMicrosegPacket: POLICY=UNKNOWN SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=UDP SRC_PORT=40122 DST_PORT=53 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=12004417735561230099 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=2 SESSION_BYTE_CNT=164 SESSION_DUR=120000412339"
-          },
+          "@timestamp": "YYYY-03-04T23:03:40.000Z",
+          "action": "UNSPECIFIED",
+          "data_hex": "0x",
+          "dst_ip": "10.30.2.40",
+          "dst_port": 53,
+          "enforced": true,
+          "gw_hostname": "app-spoke",
+          "gw_ip": "198.51.100.20",
+          "ip_size": "0",
           "message": "<158>Mar  4 23:03:40 GW-app-spoke-198.51.100.20-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:03:40 AviatrixGwMicrosegPacket: POLICY=UNKNOWN SRC_MAC= DST_MAC= IP_SZ=0 SRC_IP=10.20.1.15 DST_IP=10.30.2.40 PROTO=UDP SRC_PORT=40122 DST_PORT=53 DATA=0x ACT=UNSPECIFIED ENFORCED=true SESSION_ID=12004417735561230099 SESSION_EVENT=1 SESSION_END_REASON=3 SESSION_PKT_CNT=2 SESSION_BYTE_CNT=164 SESSION_DUR=120000412339",
+          "proto": "UDP",
+          "session_byte_cnt": "164",
+          "session_dur": "120000412339",
+          "session_end_reason": "3",
+          "session_end_reason_text": "timeout",
+          "session_event": "1",
+          "session_event_type": "End",
+          "session_id": "12004417735561230099",
+          "session_pkt_cnt": "2",
+          "src_ip": "10.20.1.15",
+          "src_port": 40122,
+          "syslog_pri": "158",
           "tags": [
-            "_avx_grok_failure_microseg",
-            "unparsed"
+            "microseg",
+            "ebpf"
           ],
-          "type": "syslog",
-          "unix_time": "<receive time>"
+          "unix_time": "YYYY-03-04T23:03:40.000Z (epoch)",
+          "uuid": "UNKNOWN"
         }
       ],
       "path": "/parsed"

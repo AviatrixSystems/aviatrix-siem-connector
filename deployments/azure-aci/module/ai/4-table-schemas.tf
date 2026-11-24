@@ -57,6 +57,10 @@ locals {
       # Added 2026-11: session end reason (EventOriginalResultDetails is read by the ASIM parser)
       { name = "EventOriginalResultDetails", type = "string" },
       { name = "session_end_reason_text", type = "string" },
+      # Added 2026-11: 10.1+ microseg fields and the session event label
+      { name = "session_start", type = "string" },
+      { name = "egress_path", type = "string" },
+      { name = "session_event_type", type = "string" },
     ]
     websession = [
       # ASIM common fields
