@@ -24,6 +24,30 @@ Aviatrix Gateways/Controllers
 
 > **ACI protocol limitation**: Azure Container Instances can expose only one protocol (TCP or UDP) per port. This deployment defaults to **TCP**, which is recommended for syslog reliability. Set `container_protocol = "UDP"` in tfvars if your gateways use UDP. You cannot expose both TCP and UDP on port 5000 simultaneously.
 
+### Network Exposure (read before production use)
+
+The container group uses a **public IP** (`ip_address_type = "Public"`) and the
+syslog port is **unauthenticated**. ACI public IPs cannot have a Network Security
+Group, so there is no source-IP filtering: anyone who can reach the FQDN/IP can
+send forged Aviatrix log lines, which land in Sentinel as normalized security
+events (poisoning analytics rules and adding ingestion cost). The DNS label has a
+random suffix, but the IP can still be scanned.
+
+Options, from least to most change:
+
+1. **Accept for lab/demo use only**, and destroy the deployment when done.
+2. **VNet-injected ACI (private IP)**: deploy the container group into a delegated
+   subnet (`ip_address_type = "Private"` with `subnet_ids`, no `dns_name_label`) and
+   attach an NSG to that subnet that allows TCP/UDP 5000 only from the Aviatrix
+   gateway and controller egress IPs. Gateways reach it over peering/VPN/ExpressRoute,
+   or through an Azure Load Balancer / Firewall DNAT you control. This module does
+   not implement the private mode today; it requires a VNet, a subnet delegated to
+   `Microsoft.ContainerInstance/containerGroups`, and changing the container group
+   (which recreates it).
+3. **TLS/mTLS in front of Logstash**: the AWS deployments ship a stunnel TLS sidecar
+   (`tls-sidecar/`) that only accepts clients with a trusted certificate. A similar
+   sidecar container can be added to the ACI container group, but is not wired up here.
+
 ## What Terraform Creates
 
 | # | Resource | Description |
@@ -108,18 +132,24 @@ export IMAGE="aviatrix-logstash-sentinel:latest"
 # Create ACR (if needed)
 az group create --name $RESOURCE_GROUP --location eastus
 az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku Standard
-az acr update --name $ACR_NAME --anonymous-pull-enabled true
-
-# Build and push
+# Build and push (pin the plugin version for reproducible builds)
 az acr login --name $ACR_NAME
 az acr build --registry $ACR_NAME --image $IMAGE \
+  --build-arg SENTINEL_PLUGIN_VERSION=<x.y.z> \
   --file deployments/azure-aci/logstash-container-build/Dockerfile \
   deployments/azure-aci/logstash-container-build/
+
+# Pull-only credentials for ACI (instead of enabling anonymous pull, which makes
+# every repository in the registry public)
+az acr token create --name aci-pull --registry $ACR_NAME --scope-map _repositories_pull
 ```
 
-After building, set `container_image` in your `terraform.tfvars`:
+After building, set `container_image` and the pull credentials in your `terraform.tfvars`:
 ```hcl
-container_image = "yourregistryname.azurecr.io/aviatrix-logstash-sentinel:latest"
+container_image             = "yourregistryname.azurecr.io/aviatrix-logstash-sentinel:latest"
+container_registry_server   = "yourregistryname.azurecr.io"
+container_registry_username = "aci-pull"
+container_registry_password = "<token password>"
 ```
 
 See [`logstash-container-build/README.md`](logstash-container-build/README.md) for Azure China instructions.
@@ -163,7 +193,16 @@ terraform apply
 | `log_analytics_subscription_id` | Workspace subscription (if different from deployment) |
 | `use_existing_spn` | `true` to provide existing SPN credentials, `false` to auto-create |
 | `client_app_id` / `client_app_secret` / `tenant_id` | SPN credentials (when `use_existing_spn = true`) |
-| `azure_cloud` | `AzureCloud`, `AzureChinaCloud`, or `AzureUSGovernment` |
+| `container_registry_server` / `_username` / `_password` | Optional private-registry pull credentials (use instead of ACR anonymous pull) |
+| `spn_secret_rotation_days` | Auto-created SPN only: rotate the secret after N days (default 180) on the next `terraform apply` |
+| `azure_cloud` | deploy-public: `AzureCloud` (default) or `AzureUSGovernment` (also switches the Terraform providers to US Gov). deploy-china: `AzureChinaCloud` only |
+| `file_share_quota_gb` | Quota of the two config file shares (default 5) |
+
+> `container_image` has no default and must be your custom image; the stock `docker.elastic.co/logstash/*` image is rejected at plan time because it lacks the Sentinel plugin.
+>
+> With `use_existing_spn = true` (default), `client_app_id`, `client_app_secret` and `tenant_id` must all be set (GUIDs for the IDs); plan fails otherwise. The secret is passed to ACI as a **secure** environment variable, so it is not shown by `az container show` or the portal.
+>
+> With `use_existing_spn = false`, the generated SPN secret expires `spn_secret_rotation_days + 30` days after it was created. Run `terraform apply` at least once inside that 30-day window after each rotation date (for example from a scheduled pipeline); the apply mints a new secret and recreates the container with it.
 
 > Stream names (`azure_stream_*`) and DCR IDs (`azure_dcr_*_id`) are injected automatically by the module. Do not set them in `terraform.tfvars` or `environment_variables`.
 
@@ -202,9 +241,26 @@ Three KQL ASIM parser files are provided for Sentinel integration in [`logstash-
 | `vimWebSessionAviatrixGateway.kql` | WebSession | `AviatrixWebSession_CL` |
 | `vimNetworkSessionAviatrixSuricata.kql` | NetworkSession (IDS) | `AviatrixIDS_CL` |
 
-Deploy each parser as a saved function in your Log Analytics workspace. See the deployment instructions at the top of each `.kql` file.
+Deploy each parser as a saved function in your Log Analytics workspace. See the deployment instructions at the top of each `.kql` file. You can then query them directly, e.g. `vimNetworkSessionAviatrixGateway(starttime=ago(1h))`.
 
-Once deployed, the parsers integrate with Sentinel's ASIM framework (`_Im_NetworkSession`, `_Im_WebSession`), enabling cross-vendor correlation and ASIM-based analytics rules.
+#### ASIM integration (`_Im_NetworkSession` / `_Im_WebSession`)
+
+Saving a function under a custom name does **not** add it to Sentinel's built-in
+unifying parsers, so `_Im_NetworkSession | where EventVendor == "Aviatrix"` returns
+nothing until the Aviatrix parsers are referenced from the schema's **custom
+unifying parser** in your workspace. Follow Microsoft's
+[Manage ASIM parsers](https://learn.microsoft.com/azure/sentinel/normalization-manage-parsers)
+guide ("Add a custom parser to a built-in unifying parser") and add, for example:
+
+- NetworkSession custom unifying parser: calls to `vimNetworkSessionAviatrixGateway(...)`
+  and `vimNetworkSessionAviatrixSuricata(...)`, passing through the filtering
+  parameters (`starttime`, `endtime`, `srcipaddr_has_any_prefix`, ..., `disabled`)
+- WebSession custom unifying parser: a call to `vimWebSessionAviatrixGateway(...)`
+
+Check the exact custom-parser function names and parameter lists for your
+workspace's ASIM version in that guide; if the custom unifying function already
+exists, add the Aviatrix calls to its `union` instead of replacing it. After that,
+ASIM-based analytics rules and `_Im_*` queries include Aviatrix data.
 
 ## Updating Configuration
 
@@ -220,7 +276,9 @@ cd deployments/azure-aci/deploy-public
 terraform apply
 ```
 
-The container has `CONFIG_RELOAD_AUTOMATIC=true`, so Logstash detects file changes and reloads without restart.
+The share files track content with `content_md5`, so any edit to the assembled config or `patterns/avx.conf` shows up in the plan as a file replacement. The container has `CONFIG_RELOAD_AUTOMATIC=true`, so Logstash detects the new file and reloads without restart.
+
+If you add a field to `output.conf` that should reach Log Analytics, also add the column to `module/ai/4-table-schemas.tf` (shared by the tables and DCR stream declarations); otherwise the DCR drops it silently.
 
 ## Testing Without Live Aviatrix Gateways
 
@@ -335,7 +393,9 @@ AviatrixIDS_CL | take 10
 ### Common Issues
 
 - **Plugin not found**: Ensure you're using the custom container image with the Sentinel plugin, not the stock Elastic image.
-- **Config file not updating**: If `terraform apply` doesn't detect the file change, taint and re-apply: `terraform taint 'module.deployment.azurerm_storage_share_file.logstash_conf'`
+- **Image pull fails**: If the registry does not allow anonymous pull, set `container_registry_server`, `container_registry_username` and `container_registry_password`.
+- **Config file not updating**: Re-run `./scripts/assemble-config.sh azure-log-ingestion` first; Terraform uploads whatever is in `logstash-configs/assembled/`. Content changes are detected via `content_md5`. To force a re-upload anyway: `terraform apply -replace='module.deployment.azurerm_storage_share_file.logstash_conf'`
+- **Fields missing in a table**: The column is not declared in `module/ai/4-table-schemas.tf`, so the DCR drops it. Add it there and `terraform apply` (updates both the table and the DCR).
 - **DCR ingestion errors**: Check that the SPN has "Monitoring Metrics Publisher" role on all DCRs. Verify with: `az role assignment list --assignee <spn-object-id> --scope <dcr-id>`
 - **No data in tables**: Verify the container is running and receiving syslog. Check `az container logs` for errors. Ensure timestamps in test data are within the last 24 hours (run `generate-current-samples.sh --overwrite` to refresh).
 - **FQDN events missing**: This is expected — FQDN events are parsed but not forwarded to Azure. Only 8 of the 9 log types have Azure outputs.

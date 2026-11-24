@@ -12,7 +12,7 @@ You need a **Platform token** (`dt0s16.*`) — not a classic API token (`dt0c01.
 | Scope | Required For |
 |-------|-------------|
 | `storage:metrics:write` | Metrics ingest (gw_sys_stats, gw_net_stats) |
-| `storage:logs:write` | Logs ingest (tunnel status, DCF events, IDS alerts, FQDN, controller audit) |
+| `storage:logs:write` | Logs ingest (tunnel status, DCF events, IDS alerts, FQDN, controller audit, VPN sessions) |
 
 You can use a single token with both scopes, or separate tokens for metrics and logs.
 
@@ -46,6 +46,8 @@ https://{environment-id}.apps.dynatrace.com/platform/classic/environment-api/v2/
 Find your `{environment-id}` in the Dynatrace URL bar (e.g., `abc12345` from `https://abc12345.apps.dynatrace.com/`).
 
 > **Common mistake**: Do NOT use `https://{env-id}.live.dynatrace.com/api/v2/` — that endpoint only accepts classic `dt0c01.*` tokens and will return 401 for platform tokens.
+
+**Terraform (AWS EC2 roots):** set `dt_environment_id` and `dt_api_token` in `logstash_config_variables`; the templates build the URLs above. `dt_region` defaults to `apps` (the old value `live` is treated as `apps`). Set `dt_metrics_url` / `dt_logs_url` to override the full URLs. `dt_logs_token` defaults to `dt_api_token`. The ECS roots take the full URLs instead: `dt_metrics_url` / `dt_logs_url` in `aws-ecs-fargate`, `--dt-metrics-url` / `--dt-logs-url` in `quickstart.sh`.
 
 ## 4. Verify Before Deploying
 
@@ -87,7 +89,7 @@ Three output configurations are available:
 |---------|--------|----------|
 | **`dynatrace`** (combined) | `./scripts/assemble-config.sh dynatrace` | Both metrics and logs from a single Logstash instance |
 | **`dynatrace-metrics`** | `./scripts/assemble-config.sh dynatrace-metrics` | Metrics only (gw_sys_stats, gw_net_stats) |
-| **`dynatrace-logs`** | `./scripts/assemble-config.sh dynatrace-logs` | Logs only (tunnel status, DCF, IDS, FQDN, controller audit) |
+| **`dynatrace-logs`** | `./scripts/assemble-config.sh dynatrace-logs` | Logs only (tunnel status, DCF, IDS, FQDN, controller audit, VPN sessions) |
 
 The **combined** variant is recommended for most deployments. Use the split variants when you need separate Logstash instances for metrics and logs (e.g., different scaling requirements).
 
@@ -159,7 +161,13 @@ The **combined** variant is recommended for most deployments. Use the split vari
   timeseries avg(aviatrix.gateway.cpu.usage), by:{gateway}
   timeseries avg(aviatrix.gateway.memory.usage), by:{gateway}
   timeseries avg(aviatrix.gateway.net.bytes_rx), by:{gateway, interface}
+  timeseries max(aviatrix.gateway.cpu.core.usage), by:{gateway, core}
   ```
+
+  `aviatrix.gateway.cpu.usage` / `cpu.idle` carry only the gateway-level series. Per-core and
+  all-core-aggregate series are under `aviatrix.gateway.cpu.core.usage` / `cpu.core.idle` with a
+  `core` dimension (`0`..`N`, `aggregate`). Dashboards that filtered `cpu.usage` by `core` must
+  switch to the `cpu.core.*` keys.
 
 ### Logs
 

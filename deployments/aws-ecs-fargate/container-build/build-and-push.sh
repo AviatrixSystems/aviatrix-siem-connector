@@ -11,7 +11,7 @@ set -euo pipefail
 # --- Defaults ---
 OUTPUT_TYPE=""
 ECR_REPO=""
-TAG="latest"
+TAG=""   # default: content hash of the build context (see below)
 REGION="us-east-2"
 
 # --- Parse Args ---
@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
       echo "Options:"
       echo "  --output-type   Output type (splunk-hec, zabbix, dynatrace, etc.) [required]"
       echo "  --ecr-repo      ECR repository URI [required]"
-      echo "  --tag           Image tag (default: latest)"
+      echo "  --tag           Image tag (default: cfg-<hash of config, patterns and plugins>)"
       echo "  --region        AWS region (default: us-east-2)"
       exit 0
       ;;
@@ -74,11 +74,10 @@ get_extra_plugins() {
 
 EXTRA_PLUGINS="$(get_extra_plugins "$OUTPUT_TYPE")"
 
-# --- Assemble config if needed ---
-if [[ ! -f "$ASSEMBLED_CONF" ]]; then
-  echo "Assembling config for output type: $OUTPUT_TYPE"
-  "$LOGSTASH_CONFIGS/scripts/assemble-config.sh" "$OUTPUT_TYPE"
-fi
+# --- Assemble config ---
+# Always reassemble so filter/output edits are never baked in stale.
+echo "Assembling config for output type: $OUTPUT_TYPE"
+"$LOGSTASH_CONFIGS/scripts/assemble-config.sh" "$OUTPUT_TYPE"
 
 if [[ ! -f "$ASSEMBLED_CONF" ]]; then
   echo "Error: Assembled config not found at $ASSEMBLED_CONF"
@@ -93,6 +92,17 @@ mkdir -p "$BUILD_DIR/pipeline" "$BUILD_DIR/patterns"
 cp "$ASSEMBLED_CONF" "$BUILD_DIR/pipeline/logstash.conf"
 cp "$LOGSTASH_CONFIGS/patterns/"* "$BUILD_DIR/patterns/"
 cp "$SCRIPT_DIR/Dockerfile" "$BUILD_DIR/"
+echo "$EXTRA_PLUGINS" > "$BUILD_DIR/.plugins"
+
+# --- Default tag: content hash ---
+# A mutable tag like "latest" never changes the task definition, so ECS would
+# keep running the old image. A content-addressed tag changes whenever the
+# config, patterns, Dockerfile or plugin list change.
+if [[ -z "$TAG" ]]; then
+  if command -v sha256sum &>/dev/null; then SHA_CMD=(sha256sum); else SHA_CMD=(shasum -a 256); fi
+  CONTENT_HASH="$(cd "$BUILD_DIR" && find . -type f | LC_ALL=C sort | xargs "${SHA_CMD[@]}" | "${SHA_CMD[@]}" | cut -c1-12)"
+  TAG="cfg-$CONTENT_HASH"
+fi
 
 echo ""
 echo "Build context:"

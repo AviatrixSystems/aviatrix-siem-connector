@@ -1,182 +1,46 @@
 [
     {
-        "action": "PERMIT",
-        "dst_ip": "10.10.2.132",
-        "dst_mac": "52:54:00:7e:f9:d6",
-        "dst_port": 0,
+        "TimeGenerated": "2026-03-04T22:54:38.000Z",
+        "EventVendor": "Aviatrix",
+        "EventProduct": "Distributed Cloud Firewall",
+        "EventSchema": "NetworkSession",
+        "EventSchemaVersion": "0.2.7",
+        "EventType": "NetworkSession",
+        "EventCount": 1,
+        "EventResult": "Success",
+        "EventSeverity": "Informational",
+        "EventStartTime": "2026-03-04T22:54:38.000Z",
+        "EventEndTime": "2026-03-04T22:54:38.000Z",
+        "EventSubType": "End",
+        "DvcAction": "Allow",
+        "DvcOriginalAction": "PERMIT",
+        "DvcHostname": "frontend-eks-spoke",
+        "DvcIpAddr": "18.216.17.241",
+        "SrcIpAddr": "100.64.242.5",
+        "DstIpAddr": "10.5.0.8",
+        "SrcPortNumber": 37368,
+        "DstPortNumber": 80,
+        "SrcMacAddr": "02:64:c0:e4:c9:b1",
+        "DstMacAddr": "02:55:21:72:8c:63",
+        "NetworkProtocol": "TCP",
+        "NetworkRuleName": "51321a3b-e5e2-4ab3-9594-e97a51799e15",
+        "NetworkSessionId": "14657611050032487314",
+        "NetworkBytes": 39936,
+        "NetworkDuration": 0,
+        "NetworkPackets": 3,
         "enforced": true,
-        "gw_hostname": "avx-gw-ferme-0",
-        "ls_timestamp": "2025-08-12T14:49:51.000Z",
-        "proto": "ICMP",
-        "src_ip": "192.168.16.112",
-        "src_mac": "78:8a:20:bb:4a:9f",
-        "src_port": 0,
+        "ip_size": "52",
+        "session_event": "1",
+        "session_end_reason": "1",
+        "session_pkt_cnt": "3",
+        "session_byte_cnt": "39936",
+        "session_dur": "236983",
+        "session_id": "14657611050032487314",
         "tags": [
-            "microseg",
-            "ebpf"
+            "microseg"
         ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "192.168.16.112",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 0,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:49:51.000Z",
-        "proto": "ICMP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 0,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "20.54.144.51",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 80,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:50:34.000Z",
-        "proto": "TCP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 44026,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "34.254.182.186",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 443,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:50:34.000Z",
-        "proto": "TCP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 47126,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "185.125.190.77",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 443,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:50:35.000Z",
-        "proto": "TCP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 38122,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "185.125.190.77",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 443,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:50:35.000Z",
-        "proto": "TCP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 38130,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "185.125.190.24",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 443,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:50:35.000Z",
-        "proto": "TCP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 43184,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "10.10.2.132",
-        "dst_mac": "52:54:00:7e:f9:d6",
-        "dst_port": 0,
-        "enforced": true,
-        "gw_hostname": "avx-gw-ferme-0",
-        "ls_timestamp": "2025-08-12T14:50:51.000Z",
-        "proto": "ICMP",
-        "src_ip": "192.168.16.112",
-        "src_mac": "78:8a:20:bb:4a:9f",
-        "src_port": 0,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "192.168.16.112",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 0,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:50:53.000Z",
-        "proto": "ICMP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 0,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
-    },
-    {
-        "action": "PERMIT",
-        "dst_ip": "20.54.144.51",
-        "dst_mac": "7c:1e:52:61:2a:a0",
-        "dst_port": 80,
-        "enforced": true,
-        "gw_hostname": "azr-we-spoke-MyApp2-avx",
-        "ls_timestamp": "2025-08-12T14:51:04.000Z",
-        "proto": "TCP",
-        "src_ip": "10.10.2.132",
-        "src_mac": "74:83:ef:cf:43:69",
-        "src_port": 37676,
-        "tags": [
-            "microseg",
-            "ebpf"
-        ],
-        "uuid": "2e22f3c8-b5b5-4c65-b57f-ac05a046be69"
+        "unix_time": 1772664878,
+        "EventOriginalResultDetails": "tcp-fin",
+        "session_end_reason_text": "tcp-fin"
     }
 ]

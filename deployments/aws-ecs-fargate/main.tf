@@ -61,21 +61,48 @@ resource "aws_ecs_cluster" "default" {
 # --- ECS Task Definition ---
 
 locals {
+  # Logstash's bundled jvm.options sets a 1 GiB heap, which equals the default
+  # 1024 MiB task memory and leaves no room for non-heap memory (OOM kills).
+  # Size the heap to half the task memory instead.
+  heap_mb = floor(var.memory / 2)
+
+  # Per-output env that the EC2 docker_run.tftpl files also set, so the
+  # schema does not depend on how the connector is deployed.
+  output_env = {
+    "splunk-hec" = [{ name = "FLATTEN_SURICATA", value = "true" }]
+  }
+
   # Base environment variables that always apply
-  base_env = [
+  base_env = concat([
     { name = "LOG_PROFILE", value = var.log_profile },
     { name = "XPACK_MONITORING_ENABLED", value = "false" },
-  ]
+    { name = "SYSLOG_PORT", value = tostring(var.syslog_port) },
+    { name = "LS_JAVA_OPTS", value = "-Xms${local.heap_mb}m -Xmx${local.heap_mb}m" },
+  ], lookup(local.output_env, var.output_type, []))
 
   # User-provided config variables (Splunk HEC token, Dynatrace API key, etc.)
-  config_env = [
-    for k, v in var.logstash_config_variables : {
-      name  = upper(k)
-      value = v
+  # are injected from Secrets Manager rather than plaintext task-definition
+  # environment. Names are uppercased, except for azure-log-ingestion whose
+  # output.conf references lowercase names (${client_app_id}, ...). Pinning
+  # the version id makes a value change produce a new task definition.
+  config_secrets = [
+    for k in keys(var.logstash_config_variables) : {
+      name      = var.output_type == "azure-log-ingestion" ? k : upper(k)
+      valueFrom = "${aws_secretsmanager_secret.config.arn}:${k}::${aws_secretsmanager_secret_version.config.version_id}"
     }
   ]
+}
 
-  container_env = concat(local.base_env, local.config_env)
+resource "aws_secretsmanager_secret" "config" {
+  name                    = "${local.name_prefix}-config"
+  description             = "Logstash output credentials/settings for the Aviatrix SIEM connector"
+  recovery_window_in_days = 0
+  tags                    = var.tags
+}
+
+resource "aws_secretsmanager_secret_version" "config" {
+  secret_id     = aws_secretsmanager_secret.config.id
+  secret_string = jsonencode(var.logstash_config_variables)
 }
 
 resource "aws_ecs_task_definition" "default" {
@@ -106,9 +133,9 @@ resource "aws_ecs_task_definition" "default" {
       ]
 
       secrets = [
-        { name = "TLS_SERVER_CERT", valueFrom = "${module.tls[0].secret_arn}:server_cert::" },
-        { name = "TLS_SERVER_KEY", valueFrom = "${module.tls[0].secret_arn}:server_key::" },
-        { name = "TLS_CA_CERT", valueFrom = "${module.tls[0].secret_arn}:ca_cert::" },
+        { name = "TLS_SERVER_CERT", valueFrom = "${module.tls[0].secret_version_arn}:server_cert::" },
+        { name = "TLS_SERVER_KEY", valueFrom = "${module.tls[0].secret_version_arn}:server_key::" },
+        { name = "TLS_CA_CERT", valueFrom = "${module.tls[0].secret_version_arn}:ca_cert::" },
       ]
 
       logConfiguration = {
@@ -131,7 +158,8 @@ resource "aws_ecs_task_definition" "default" {
         { containerPort = var.syslog_port, protocol = "tcp" },
       ]
 
-      environment = local.container_env
+      environment = local.base_env
+      secrets     = local.config_secrets
 
       logConfiguration = {
         logDriver = "awslogs"
@@ -177,6 +205,10 @@ resource "aws_ecs_service" "default" {
     container_name   = var.tls_enabled ? "stunnel" : "logstash"
     container_port   = local.effective_port
   }
+
+  # CreateService fails if the target group is not yet attached to the NLB,
+  # and tasks cannot read their secrets until the execution role policy exists.
+  depends_on = [aws_lb_listener.default, aws_iam_role_policy_attachment.ecs_secrets]
 
   tags = var.tags
 }

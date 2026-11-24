@@ -1,141 +1,72 @@
 [
     {
+        "TimeGenerated": "2026-03-04T22:57:01.661Z",
+        "EventVendor": "Aviatrix",
+        "EventProduct": "Suricata IDS",
+        "EventSchema": "NetworkSession",
+        "EventSchemaVersion": "0.2.7",
+        "EventType": "IDS",
+        "EventCount": 1,
+        "EventResult": "Success",
+        "EventSeverity": "Medium",
+        "EventStartTime": "2026-03-04T22:57:01.661Z",
+        "EventEndTime": "2026-03-04T22:57:01.661Z",
+        "DvcAction": "Allow",
+        "DvcOriginalAction": "allowed",
+        "SrcIpAddr": "3.170.131.31",
+        "DstIpAddr": "100.64.59.124",
+        "SrcPortNumber": 80,
+        "DstPortNumber": 42324,
+        "NetworkProtocol": "TCP",
+        "NetworkApplicationProtocol": "HTTP",
+        "NetworkRuleName": "GPL ATTACK_RESPONSE id check returned root",
+        "NetworkRuleNumber": 2100498,
+        "NetworkSessionId": "255638648850226",
+        "SrcBytes": 299,
+        "DstBytes": 738,
+        "SrcPackets": 5,
+        "DstPackets": 5,
+        "ThreatName": "GPL ATTACK_RESPONSE id check returned root",
+        "ThreatId": "2100498",
+        "ThreatCategory": "Potentially Bad Traffic",
+        "ThreatRiskLevel": 50,
+        "ThreatOriginalRiskLevel": "2",
         "alert": {
             "action": "allowed",
-            "category": "Potentially Bad Traffic",
             "gid": 1,
-            "metadata": {
-                "created_at": [
-                    "2014_09_26"
-                ],
-                "signature_severity": [
-                    "Major"
-                ],
-                "updated_at": [
-                    "2019_07_26"
-                ]
-            },
-            "rev": 3,
-            "severity": 2,
-            "signature": "ET ATTACK_RESPONSE Output of id command from HTTP server",
-            "signature_id": 2019284
-        },
-        "app_proto": "http",
-        "dest_ip": "10.10.4.132",
-        "dest_port": 42906,
-        "event_type": "alert",
-        "files": [
-            {
-                "filename": "/uid/index.html",
-                "gaps": false,
-                "sid": [],
-                "size": 39,
-                "state": "CLOSED",
-                "stored": false,
-                "tx_id": 0
-            }
-        ],
-        "flow": {
-            "bytes_toclient": 875,
-            "bytes_toserver": 495,
-            "pkts_toclient": 5,
-            "pkts_toserver": 6,
-            "start": "2025-07-24T08:32:47.619756+0000"
-        },
-        "flow_id": 1293588041266412,
-        "http": {
-            "hostname": "testmynids.org",
-            "http_content_type": "text/html",
-            "http_method": "GET",
-            "http_user_agent": "curl/8.5.0",
-            "length": 39,
-            "protocol": "HTTP/1.1",
-            "status": 200,
-            "url": "/uid/index.html"
-        },
-        "in_iface": "ids0",
-        "ls_timestamp": "2025-07-24T08:32:47.000Z",
-        "ls_version": "1",
-        "proto": "TCP",
-        "src_ip": "13.227.219.7",
-        "src_port": 80,
-        "tags": [
-            "_grokparsefailure",
-            "suricata"
-        ],
-        "TimeGenerated": "2025-07-24T08:33:22.301571488Z",
-        "timestamp": "2025-07-24T08:32:47.636566+0000",
-        "unix_time": 1753345967
-    },
-    {
-        "alert": {
-            "action": "allowed",
-            "category": "Potentially Bad Traffic",
-            "gid": 1,
-            "metadata": {
-                "confidence": [
-                    "Medium"
-                ],
-                "created_at": [
-                    "2010_09_23"
-                ],
-                "signature_severity": [
-                    "Informational"
-                ],
-                "updated_at": [
-                    "2019_07_26"
-                ]
-            },
+            "signature_id": 2100498,
             "rev": 7,
-            "severity": 2,
             "signature": "GPL ATTACK_RESPONSE id check returned root",
-            "signature_id": 2100498
+            "category": "Potentially Bad Traffic",
+            "severity": 2
         },
-        "app_proto": "http",
-        "dest_ip": "10.10.4.132",
-        "dest_port": 42906,
-        "event_type": "alert",
-        "files": [
-            {
-                "filename": "/uid/index.html",
-                "gaps": false,
-                "sid": [],
-                "size": 39,
-                "state": "CLOSED",
-                "stored": false,
-                "tx_id": 0
-            }
-        ],
         "flow": {
-            "bytes_toclient": 875,
-            "bytes_toserver": 495,
+            "pkts_toserver": 5,
             "pkts_toclient": 5,
-            "pkts_toserver": 6,
-            "start": "2025-07-24T08:32:47.619756+0000"
+            "bytes_toserver": 299,
+            "bytes_toclient": 738,
+            "start": "2026-03-04T22:57:01.573850+0000"
         },
-        "flow_id": 1293588041266412,
         "http": {
             "hostname": "testmynids.org",
-            "http_content_type": "text/html",
+            "url": "http:///uid/index.html",
+            "http_user_agent": "curl/8.17.0",
             "http_method": "GET",
-            "http_user_agent": "curl/8.5.0",
-            "length": 39,
             "protocol": "HTTP/1.1",
             "status": 200,
-            "url": "/uid/index.html"
+            "length": 40
         },
-        "in_iface": "ids0",
-        "ls_timestamp": "2025-07-24T08:32:47.000Z",
-        "ls_version": "1",
-        "proto": "TCP",
-        "src_ip": "13.227.219.7",
-        "src_port": 80,
+        "event_type": "alert",
+        "app_proto": "http",
+        "flow_id": 255638648850226,
+        "direction": "to_client",
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
         "tags": [
-            "_grokparsefailure",
             "suricata"
         ],
-        "TimeGenerated": "2025-07-24T08:33:22.301630258Z",
-        "timestamp": "2025-07-24T08:32:47.636566+0000",
-        "unix_time": 1753345967
+        "unix_time": 1772665021,
+        "timestamp": "2026-03-04T22:57:01.661154+0000",
+        "DvcHostname": "backend-eks-spoke"
     }
 ]

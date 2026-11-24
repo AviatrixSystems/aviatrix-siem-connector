@@ -12,6 +12,10 @@ subnet_ids = ["subnet-XXXXXXXXXXXXX", "subnet-XXXXXXXXXXXXX"]
 # Syslog Configuration
 syslog_port = 5000
 
+# Security: who may send syslog. The NLB preserves client IPs, so restrict
+# this to your Aviatrix gateway/controller egress IPs. Default ["0.0.0.0/0"].
+# allowed_syslog_cidrs = ["203.0.113.10/32", "198.51.100.0/24"]
+
 # Log Profile - which log types to forward
 # Options: "all" (default), "security", "networking"
 log_profile = "all"
@@ -22,8 +26,14 @@ output_type = "splunk-hec"
 
 # --- Container Image ---
 # Leave empty on first apply (creates ECR, NLB, etc. without ECS service).
-# After running build-and-push.sh, set this to the ECR image URI and apply again.
+# After running build-and-push.sh, set this to the ECR image URI it prints
+# (content-addressed tag) and apply again. Each config change yields a new tag,
+# so the task definition changes and ECS rolls out the new image.
 container_image = ""
+
+# logstash_config_variables are stored in Secrets Manager and injected as ECS
+# secrets (not plaintext task-definition environment). Keys become env var
+# names, uppercased (kept as-is for azure-log-ingestion).
 
 # --- Example: Splunk HEC ---
 logstash_config_variables = {
@@ -45,13 +55,13 @@ logstash_config_variables = {
 # logstash_config_variables = {
 #   "dt_api_token"   = "YOUR_DT_API_TOKEN"
 #   "dt_logs_token"  = "YOUR_DT_LOGS_TOKEN"
-#   "dt_metrics_url" = "https://YOUR_ENV.live.dynatrace.com/api/v2/metrics/ingest"
-#   "dt_logs_url"    = "https://YOUR_ENV.live.dynatrace.com/api/v2/logs/ingest"
+#   "dt_metrics_url" = "https://YOUR_ENV.apps.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest"
+#   "dt_logs_url"    = "https://YOUR_ENV.apps.dynatrace.com/platform/classic/environment-api/v2/logs/ingest"
 # }
 
 # Fargate Task Sizing
 # cpu    = 512   # 0.5 vCPU
-# memory = 1024  # 1 GB
+# memory = 1024  # 1 GB (Logstash heap = memory / 2 via LS_JAVA_OPTS)
 # desired_count = 1
 
 # Set to false if using private subnets with a NAT gateway

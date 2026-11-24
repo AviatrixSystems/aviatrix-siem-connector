@@ -1,5 +1,6 @@
 # Custom Log Analytics Tables (managed via azapi)
 # These tables must exist BEFORE the DCRs that reference them.
+# Column lists live in 4-table-schemas.tf (shared with the DCR stream declarations).
 #
 # Security tables use ASIM-normalized schemas:
 #   AviatrixNetworkSession_CL - L4 microseg (ASIM NetworkSession)
@@ -22,51 +23,8 @@ resource "azapi_resource" "table_netsession" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixNetworkSession_CL"
-        columns = [
-          # ASIM common fields
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "EventVendor", type = "string" },
-          { name = "EventProduct", type = "string" },
-          { name = "EventSchema", type = "string" },
-          { name = "EventSchemaVersion", type = "string" },
-          { name = "EventType", type = "string" },
-          { name = "EventCount", type = "int" },
-          { name = "EventResult", type = "string" },
-          { name = "EventSeverity", type = "string" },
-          { name = "EventStartTime", type = "datetime" },
-          { name = "EventEndTime", type = "datetime" },
-          { name = "EventSubType", type = "string" },
-          # ASIM action fields
-          { name = "DvcAction", type = "string" },
-          { name = "DvcOriginalAction", type = "string" },
-          { name = "DvcHostname", type = "string" },
-          { name = "DvcIpAddr", type = "string" },
-          # ASIM network fields
-          { name = "SrcIpAddr", type = "string" },
-          { name = "DstIpAddr", type = "string" },
-          { name = "SrcPortNumber", type = "int" },
-          { name = "DstPortNumber", type = "int" },
-          { name = "SrcMacAddr", type = "string" },
-          { name = "DstMacAddr", type = "string" },
-          { name = "NetworkProtocol", type = "string" },
-          { name = "NetworkRuleName", type = "string" },
-          { name = "NetworkSessionId", type = "string" },
-          { name = "NetworkBytes", type = "long" },
-          { name = "NetworkDuration", type = "int" },
-          { name = "NetworkPackets", type = "long" },
-          # Aviatrix-specific fields preserved
-          { name = "enforced", type = "boolean" },
-          { name = "ip_size", type = "int" },
-          { name = "session_event", type = "int" },
-          { name = "session_end_reason", type = "int" },
-          { name = "session_pkt_cnt", type = "long" },
-          { name = "session_byte_cnt", type = "long" },
-          { name = "session_dur", type = "long" },
-          { name = "session_id", type = "long" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-        ]
+        name    = "AviatrixNetworkSession_CL"
+        columns = local.table_schemas.netsession
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -82,44 +40,8 @@ resource "azapi_resource" "table_websession" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixWebSession_CL"
-        columns = [
-          # ASIM common fields
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "EventVendor", type = "string" },
-          { name = "EventProduct", type = "string" },
-          { name = "EventSchema", type = "string" },
-          { name = "EventSchemaVersion", type = "string" },
-          { name = "EventType", type = "string" },
-          { name = "EventCount", type = "int" },
-          { name = "EventResult", type = "string" },
-          { name = "EventSeverity", type = "string" },
-          { name = "EventStartTime", type = "datetime" },
-          { name = "EventEndTime", type = "datetime" },
-          # ASIM action fields
-          { name = "DvcAction", type = "string" },
-          { name = "DvcOriginalAction", type = "string" },
-          { name = "DvcHostname", type = "string" },
-          { name = "DvcIpAddr", type = "string" },
-          # ASIM network fields
-          { name = "SrcIpAddr", type = "string" },
-          { name = "DstIpAddr", type = "string" },
-          { name = "SrcPortNumber", type = "int" },
-          { name = "DstPortNumber", type = "int" },
-          { name = "NetworkProtocol", type = "string" },
-          { name = "NetworkRuleName", type = "string" },
-          # ASIM web session fields
-          { name = "DstFqdn", type = "string" },
-          { name = "DstHostname", type = "string" },
-          { name = "Url", type = "string" },
-          # Aviatrix-specific fields preserved
-          { name = "enforced", type = "boolean" },
-          { name = "mitm_sni_hostname", type = "string" },
-          { name = "mitm_url_parts", type = "string" },
-          { name = "mitm_decrypted_by", type = "string" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-        ]
+        name    = "AviatrixWebSession_CL"
+        columns = local.table_schemas.websession
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -135,61 +57,8 @@ resource "azapi_resource" "table_ids" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixIDS_CL"
-        columns = [
-          # ASIM common fields
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "EventVendor", type = "string" },
-          { name = "EventProduct", type = "string" },
-          { name = "EventSchema", type = "string" },
-          { name = "EventSchemaVersion", type = "string" },
-          { name = "EventType", type = "string" },
-          { name = "EventCount", type = "int" },
-          { name = "EventResult", type = "string" },
-          { name = "EventSeverity", type = "string" },
-          { name = "EventStartTime", type = "datetime" },
-          { name = "EventEndTime", type = "datetime" },
-          # ASIM action fields
-          { name = "DvcAction", type = "string" },
-          { name = "DvcOriginalAction", type = "string" },
-          { name = "DvcInboundInterface", type = "string" },
-          # ASIM network fields
-          { name = "SrcIpAddr", type = "string" },
-          { name = "DstIpAddr", type = "string" },
-          { name = "SrcPortNumber", type = "int" },
-          { name = "DstPortNumber", type = "int" },
-          { name = "NetworkProtocol", type = "string" },
-          { name = "NetworkApplicationProtocol", type = "string" },
-          { name = "NetworkRuleName", type = "string" },
-          { name = "NetworkRuleNumber", type = "int" },
-          { name = "NetworkSessionId", type = "string" },
-          { name = "SrcBytes", type = "long" },
-          { name = "DstBytes", type = "long" },
-          { name = "SrcPackets", type = "long" },
-          { name = "DstPackets", type = "long" },
-          # ASIM threat fields
-          { name = "ThreatName", type = "string" },
-          { name = "ThreatId", type = "string" },
-          { name = "ThreatCategory", type = "string" },
-          { name = "ThreatRiskLevel", type = "int" },
-          { name = "ThreatOriginalRiskLevel", type = "string" },
-          # Suricata-native / Aviatrix-specific fields preserved
-          { name = "alert", type = "dynamic" },
-          { name = "flow", type = "dynamic" },
-          { name = "http", type = "dynamic" },
-          { name = "tls", type = "dynamic" },
-          { name = "dns", type = "dynamic" },
-          { name = "tcp", type = "dynamic" },
-          { name = "event_type", type = "string" },
-          { name = "app_proto", type = "string" },
-          { name = "flow_id", type = "long" },
-          { name = "direction", type = "string" },
-          { name = "pkt_src", type = "string" },
-          { name = "tx_id", type = "int" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-          { name = "timestamp", type = "string" },
-        ]
+        name    = "AviatrixIDS_CL"
+        columns = local.table_schemas.ids
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -205,32 +74,8 @@ resource "azapi_resource" "table_gw_net_stats" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixGwNetStats_CL"
-        columns = [
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "alias", type = "string" },
-          { name = "bw_in_limit_exceeded", type = "int" },
-          { name = "bw_out_limit_exceeded", type = "int" },
-          { name = "conntrack_allowance_available", type = "int" },
-          { name = "conntrack_count", type = "int" },
-          { name = "conntrack_limit_exceeded", type = "int" },
-          { name = "conntrack_usage_rate", type = "int" },
-          { name = "gateway", type = "string" },
-          { name = "interface", type = "string" },
-          { name = "linklocal_limit_exceeded", type = "int" },
-          { name = "ls_timestamp", type = "string" },
-          { name = "pps_limit_exceeded", type = "int" },
-          { name = "private_ip", type = "string" },
-          { name = "public_ip", type = "string" },
-          { name = "tags", type = "dynamic" },
-          { name = "total_rx_cum", type = "string" },
-          { name = "total_rx_rate", type = "int" },
-          { name = "total_rx_tx_cum", type = "string" },
-          { name = "total_rx_tx_rate", type = "int" },
-          { name = "total_tx_cum", type = "string" },
-          { name = "total_tx_rate", type = "int" },
-          { name = "unix_time", type = "long" },
-        ]
+        name    = "AviatrixGwNetStats_CL"
+        columns = local.table_schemas.gw_net_stats
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -246,27 +91,8 @@ resource "azapi_resource" "table_gw_sys_stats" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixGwSysStats_CL"
-        columns = [
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "alias", type = "string" },
-          { name = "cpu_aggregate_busy_avg", type = "int" },
-          { name = "cpu_aggregate_busy_max", type = "int" },
-          { name = "cpu_aggregate_busy_min", type = "int" },
-          { name = "cpu_busy", type = "real" },
-          { name = "cpu_core_count", type = "int" },
-          { name = "cpu_cores_parsed", type = "dynamic" },
-          { name = "cpu_idle", type = "real" },
-          { name = "disk_free", type = "int" },
-          { name = "disk_total", type = "int" },
-          { name = "gateway", type = "string" },
-          { name = "ls_timestamp", type = "string" },
-          { name = "memory_available", type = "int" },
-          { name = "memory_free", type = "int" },
-          { name = "memory_total", type = "int" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-        ]
+        name    = "AviatrixGwSysStats_CL"
+        columns = local.table_schemas.gw_sys_stats
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -282,25 +108,8 @@ resource "azapi_resource" "table_vpn_session" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixVPNSession_CL"
-        columns = [
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "vpn_user", type = "string" },
-          { name = "vpn_status", type = "string" },
-          { name = "vpn_gateway", type = "string" },
-          { name = "vpn_gateway_ip", type = "string" },
-          { name = "vpn_virtual_ip", type = "string" },
-          { name = "vpn_public_ip", type = "string" },
-          { name = "vpn_login", type = "string" },
-          { name = "vpn_logout", type = "string" },
-          { name = "vpn_duration", type = "string" },
-          { name = "vpn_rx_bytes", type = "string" },
-          { name = "vpn_tx_bytes", type = "string" },
-          { name = "vpn_client_platform", type = "string" },
-          { name = "vpn_client_version", type = "string" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-        ]
+        name    = "AviatrixVPNSession_CL"
+        columns = local.table_schemas.vpn_session
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -316,20 +125,8 @@ resource "azapi_resource" "table_cmd" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixCmd_CL"
-        columns = [
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "action", type = "string" },
-          { name = "args", type = "string" },
-          { name = "controller_ip", type = "string" },
-          { name = "gw_hostname", type = "string" },
-          { name = "ls_timestamp", type = "string" },
-          { name = "reason", type = "string" },
-          { name = "result", type = "string" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-          { name = "username", type = "string" },
-        ]
+        name    = "AviatrixCmd_CL"
+        columns = local.table_schemas.cmd
       }
       retentionInDays      = 30
       totalRetentionInDays = 30
@@ -345,17 +142,8 @@ resource "azapi_resource" "table_tunnel_status" {
   body = {
     properties = {
       schema = {
-        name = "AviatrixTunnelStatus_CL"
-        columns = [
-          { name = "TimeGenerated", type = "datetime" },
-          { name = "dst_gw", type = "string" },
-          { name = "ls_timestamp", type = "string" },
-          { name = "new_state", type = "string" },
-          { name = "old_state", type = "string" },
-          { name = "src_gw", type = "string" },
-          { name = "tags", type = "dynamic" },
-          { name = "unix_time", type = "long" },
-        ]
+        name    = "AviatrixTunnelStatus_CL"
+        columns = local.table_schemas.tunnel_status
       }
       retentionInDays      = 30
       totalRetentionInDays = 30

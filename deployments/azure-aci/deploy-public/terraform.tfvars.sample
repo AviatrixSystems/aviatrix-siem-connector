@@ -11,11 +11,18 @@ location            = "eastus"
 # ── Container ────────────────────────────────────────────────────────────────
 # IMPORTANT: The stock Elastic image does NOT include the Sentinel plugin.
 # You must build a custom image first. See logstash-container-build/README.md
+# container_image has no default and rejects docker.elastic.co/logstash/*.
 container_name  = "aviatrix-logstash-sentinel"
 container_image = "your-registry.azurecr.io/aviatrix-logstash-sentinel:latest"
 cpu_cores       = 1
 memory_gb       = 1.5
 container_port  = 5000
+
+# Private registry pull (recommended instead of ACR anonymous pull).
+# Leave unset if the image is publicly pullable.
+# container_registry_server   = "your-registry.azurecr.io"
+# container_registry_username = "your-acr-token-or-admin-user"
+# container_registry_password = "your-acr-password"
 
 # ACI exposes only one protocol per port. TCP is recommended for syslog
 # reliability. Set to "UDP" only if your gateways are configured for UDP.
@@ -32,19 +39,25 @@ log_analytics_resource_group_name = "your-log-analytics-rg"
 # log_analytics_subscription_id   = "00000000-0000-0000-0000-000000000000"
 
 # ── Service Principal ────────────────────────────────────────────────────────
-# Option 1 (default): Provide an existing SPN with "Monitoring Metrics Publisher"
-# role on the resource group. Terraform will assign the role to each DCR.
+# Option 1 (default): Provide an existing SPN. Terraform assigns it the
+# "Monitoring Metrics Publisher" role on each DCR. All three values are
+# required (GUIDs for client_app_id and tenant_id); plan fails otherwise.
 use_existing_spn  = true
 client_app_id     = "00000000-0000-0000-0000-000000000000"
 client_app_secret = "your-client-secret"
 tenant_id         = "00000000-0000-0000-0000-000000000000"
 
 # Option 2: Let Terraform create a new SPN (requires "Application Administrator"
-# or "Cloud Application Administrator" Entra ID role).
-# use_existing_spn = false
+# or "Cloud Application Administrator" Entra ID role). Its secret is rotated
+# on the first terraform apply after spn_secret_rotation_days (default 180);
+# the old secret remains valid for 30 more days, so schedule a periodic apply.
+# use_existing_spn         = false
+# spn_secret_rotation_days = 180
 
 # ── Azure Cloud ──────────────────────────────────────────────────────────────
-# "AzureCloud" (default), "AzureChinaCloud", or "AzureUSGovernment"
+# deploy-public: "AzureCloud" (default) or "AzureUSGovernment" (also switches
+# the Terraform providers to the US Gov cloud). For "AzureChinaCloud" use
+# ../deploy-china instead.
 azure_cloud = "AzureCloud"
 
 # ── Tags ─────────────────────────────────────────────────────────────────────

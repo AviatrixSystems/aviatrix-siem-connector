@@ -19,6 +19,7 @@ This output configuration sends parsed Aviatrix logs to Splunk via the HTTP Even
 | `SPLUNK_ADDRESS` | Yes | — | Splunk server hostname/IP (include protocol, e.g., `https://splunk.example.com`) |
 | `SPLUNK_PORT` | No | `8088` | HEC port |
 | `SPLUNK_HEC_AUTH` | Yes | — | HEC authentication token |
+| `SPLUNK_INCLUDE_SYSLOG` | No | `true` | Include the raw syslog line as `event.syslog` (microseg, fqdn, cmd, gw_net_stats, tunnel_status, vpn_session). Set to `false` to reduce ingest volume. |
 | `LOG_PROFILE` | No | `all` | Log type filter: `all`, `security`, or `networking` |
 
 ## Quick Start
@@ -62,6 +63,12 @@ The configuration sends logs with the following source values:
 | Network Stats | `avx-gw-net-stats` | Gateway throughput |
 | System Stats | `avx-gw-sys-stats` | Gateway CPU/memory |
 | Tunnel Status | `avx-tunnel-status` | Tunnel state changes |
+| VPN Session | `avx-vpn-session` | VPN connect/disconnect |
+
+Payloads for microseg, fqdn, cmd, gw_net_stats, tunnel_status and vpn_session
+are built in Ruby (see `output.conf`): fields that are absent from an event
+(for example `session_*` on legacy microseg logs, or `username` on CMD logs
+without a user) are left out instead of being sent as a literal `%{field}`.
 
 ## Terraform Deployment
 

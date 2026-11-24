@@ -32,7 +32,20 @@ autoscale_step_size = 2     # Number of instances to add/remove when scaling
 
 # Syslog Configuration
 syslog_port     = 5000
-syslog_protocol = "tcp"
+syslog_protocol = "tcp" # "tcp" or "udp"
+
+# Security: who may reach the syslog port. Default ["0.0.0.0/0"] keeps the
+# endpoint open to the internet (plaintext, unauthenticated). Restrict it to
+# your Aviatrix gateway/controller egress IPs.
+# allowed_syslog_cidrs = ["203.0.113.10/32", "198.51.100.0/24"]
+
+# SSH is closed by default. Add an admin CIDR only if you need SSH
+# (or use SSM Session Manager).
+# ssh_allowed_cidrs = ["192.0.2.10/32"]
+
+# Pin the AMI to avoid instance replacement/refresh whenever a new Amazon
+# Linux 2023 AMI is published (default: latest AL2023).
+# ami_id = "ami-XXXXXXXXXXXXXXXXX"
 
 # Log Profile - which log types to forward
 # Options: "all" (default), "security", "networking"
@@ -53,12 +66,54 @@ logstash_config_variables = {
   "splunk_address"  = "https://YOUR_SPLUNK_PRIVATE_IP"
 }
 
-# --- Example: Dynatrace Metrics ---
-# output_type = "dynatrace-metrics"
+# logstash_config_variables is stored in Secrets Manager and fetched at boot;
+# it is not embedded in EC2 user_data. Keys are the variables of
+# logstash-configs/outputs/<output_type>/docker_run.tftpl. Optional keys
+# (logstash_image, splunk_port, dt_*_source, zabbix_port, ...) have defaults.
+
+# --- Example: Dynatrace (dynatrace, dynatrace-metrics or dynatrace-logs) ---
+# Uses a platform token (dt0s16.*) against https://<env>.apps.dynatrace.com.
+# output_type = "dynatrace"
 # logstash_config_variables = {
-#   "dt_environment_id" = "YOUR_DT_ENVIRONMENT_ID"
-#   "dt_api_token"      = "YOUR_DT_API_TOKEN"
-#   "dt_region"         = "live"
+#   "dt_environment_id" = "YOUR_DT_ENVIRONMENT_ID" # e.g. abc12345
+#   "dt_api_token"      = "YOUR_DT_PLATFORM_TOKEN"
+#   # Optional:
+#   # "dt_logs_token"    = "..."        # defaults to dt_api_token
+#   # "dt_region"        = "apps"       # domain label; "sprint.apps" for sprint envs
+#   # "dt_metrics_url"   = "https://..." # full URL override
+#   # "dt_logs_url"      = "https://..." # full URL override
+#   # "dt_metric_source" = "aviatrix"
+#   # "dt_log_source"    = "aviatrix"
+# }
+
+# --- Example: Zabbix ---
+# The stock Logstash image has no zabbix output plugin; logstash_image is
+# required (plan fails without it). Build one from
+# logstash-configs/outputs/zabbix/Containerfile and push it to a registry
+# the instances can pull from.
+# output_type = "zabbix"
+# logstash_config_variables = {
+#   "zabbix_server"      = "YOUR_ZABBIX_SERVER"
+#   "zabbix_port"        = "10051"
+#   "zabbix_host_prefix" = ""
+#   "logstash_image"     = "YOUR_REGISTRY/logstash-avx-zabbix:TAG"
+# }
+
+# --- Example: Azure Log Analytics (azure-log-ingestion) ---
+# Needs the Sentinel output plugin, so logstash_image is required. See
+# deployments/azure-aci/logstash-container-build/ and
+# logstash-configs/outputs/azure-log-ingestion/docker_run.tftpl for the full
+# list of client_app_id, tenant_id, data_collection_endpoint, azure_dcr_* and
+# azure_stream_* keys.
+# output_type = "azure-log-ingestion"
+# logstash_config_variables = {
+#   "logstash_image"           = "YOUR_ACR.azurecr.io/aviatrix-logstash-sentinel:TAG"
+#   "client_app_id"            = "..."
+#   "client_app_secret"        = "..."
+#   "tenant_id"                = "..."
+#   "data_collection_endpoint" = "https://..."
+#   "azure_cloud"              = "AzureCloud"
+#   # ... azure_dcr_*_id and azure_stream_* keys
 # }
 
 # Resource Tags

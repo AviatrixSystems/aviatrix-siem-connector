@@ -69,6 +69,7 @@ See [dynatrace-metrics README](../dynatrace-metrics/README.md) for the full metr
 | `suricata` | IDSAlert | sev1=ERROR, sev2=WARN, sev3+=INFO | security |
 | `fqdn` | FQDNFilter | blocked=WARN, else=INFO | security |
 | `cmd` | ControllerAudit | !Success=WARN, else=INFO | security |
+| `vpn_session` | VPNSession | INFO | security |
 
 See [dynatrace-logs README](../dynatrace-logs/README.md) for the full attribute reference and DQL queries.
 
@@ -76,9 +77,9 @@ See [dynatrace-logs README](../dynatrace-logs/README.md) for the full attribute 
 
 | Profile | Metrics | Logs |
 |---------|---------|------|
-| `all` | gw_sys_stats, gw_net_stats | All 6 event types |
+| `all` | gw_sys_stats, gw_net_stats | All 7 event types |
 | `networking` | gw_sys_stats, gw_net_stats | tunnel_status only |
-| `security` | (none) | suricata, mitm, microseg, fqdn, cmd |
+| `security` | (none) | suricata, mitm, microseg, fqdn, cmd, vpn_session |
 
 ## Correlation Between Metrics and Logs
 

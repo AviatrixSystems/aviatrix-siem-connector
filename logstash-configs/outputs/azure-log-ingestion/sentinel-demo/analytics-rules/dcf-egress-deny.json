@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'aviatrix-dcf-egress-deny')]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "Aviatrix DCF: repeated egress denied to a destination FQDN",
+        "description": "Raises a Sentinel incident when Aviatrix DCF denies repeated egress from a single source to the same destination FQDN.",
+        "severity": "Medium",
+        "enabled": true,
+        "query": "AviatrixWebSession_CL | where DvcAction in ('Deny','Drop') | extend Domain = coalesce(DstFqdn, mitm_sni_hostname) | where isnotempty(Domain) | summarize Denies = count() by SrcIpAddr, Domain, bin(TimeGenerated, 5m) | where Denies >= 5 | project TimeGenerated, SrcIpAddr, Domain, Denies",
+        "queryFrequency": "PT5M",
+        "queryPeriod": "PT5M",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": ["Exfiltration", "CommandAndControl"],
+        "incidentConfiguration": { "createIncident": true },
+        "entityMappings": [
+          { "entityType": "IP", "fieldMappings": [ { "identifier": "Address", "columnName": "SrcIpAddr" } ] },
+          { "entityType": "DNS", "fieldMappings": [ { "identifier": "DomainName", "columnName": "Domain" } ] }
+        ]
+      }
+    }
+  ]
+}

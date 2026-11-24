@@ -3,7 +3,14 @@
 //
 // Usage:
 //   vimNetworkSessionAviatrixGateway()
-//   _Im_NetworkSession | where EventVendor == "Aviatrix" and EventProduct == "Distributed Cloud Firewall"
+//   vimNetworkSessionAviatrixGateway(starttime=ago(1h), dvcaction=dynamic(["Deny"]))
+//
+// NOTE: Saving this function does NOT by itself make Aviatrix rows appear in
+// the built-in unifying parser (_Im_NetworkSession). ASIM only includes
+// custom source parsers that are referenced from the schema's workspace
+// custom unifying parser. See "ASIM integration" in
+// deployments/azure-aci/README.md and Microsoft's "Manage ASIM parsers" guide:
+// https://learn.microsoft.com/azure/sentinel/normalization-manage-parsers
 //
 // Deployment (Azure CLI):
 //   az monitor log-analytics workspace saved-search create \
@@ -51,7 +58,9 @@ let parser = (
         Rule = NetworkRuleName,
         SessionId = NetworkSessionId,
         Duration = NetworkDuration,
-        ResultDetails = EventOriginalResultDetails
+        // column_ifexists keeps the parser compiling on tables created before
+        // EventOriginalResultDetails was added to the schema (2026-11).
+        ResultDetails = column_ifexists("EventOriginalResultDetails", "")
 };
 parser(
     starttime=starttime,

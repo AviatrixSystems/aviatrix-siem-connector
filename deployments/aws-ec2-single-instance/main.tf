@@ -26,6 +26,10 @@ module "logstash" {
   ssh_key_name                = var.ssh_key_name
   use_existing_security_group = var.use_existing_security_group
   existing_security_group_id  = var.existing_security_group_id
+  allowed_syslog_cidrs        = var.allowed_syslog_cidrs
+  ssh_allowed_cidrs           = var.ssh_allowed_cidrs
+  ami_id                      = var.ami_id
+  output_type                 = var.output_type
   logstash_config_path        = local.config_path
   logstash_config_name        = local.config_name
   patterns_path               = local.patterns_path
@@ -53,7 +57,7 @@ resource "terraform_data" "patterns_etag" {
 resource "aws_instance" "default" {
   ami                         = module.logstash.ami_id
   instance_type               = var.instance_size
-  key_name                    = var.ssh_key_name
+  key_name                    = var.ssh_key_name != "" ? var.ssh_key_name : null
   iam_instance_profile        = module.logstash.iam_instance_profile_name
   user_data_replace_on_change = true
 
@@ -75,6 +79,10 @@ resource "aws_instance" "default" {
 
   lifecycle {
     replace_triggered_by = [terraform_data.config_etag, terraform_data.patterns_etag]
+    # A new AL2023 AMI must not destroy/recreate this instance (syslog outage)
+    # on an unrelated apply. Pin var.ami_id, or `terraform apply -replace`
+    # to move to a newer image.
+    ignore_changes = [ami]
   }
 }
 

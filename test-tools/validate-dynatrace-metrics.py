@@ -133,6 +133,46 @@ def parse_dimensions(dim_str):
     return dims, errors
 
 
+def split_outside_quotes(line):
+    """Split a MINT line on spaces that are not inside a double-quoted value.
+
+    Quoted dimension values (alias="my gw") may contain spaces and \\-escapes,
+    so a plain str.split(' ') would break them apart.
+    Returns (parts, error) where error is None or a message.
+    """
+    parts = []
+    current = []
+    in_quotes = False
+    i = 0
+    while i < len(line):
+        ch = line[i]
+        if in_quotes:
+            current.append(ch)
+            if ch == '\\' and i + 1 < len(line):
+                current.append(line[i + 1])
+                i += 2
+                continue
+            if ch == '"':
+                in_quotes = False
+        elif ch == '"':
+            in_quotes = True
+            current.append(ch)
+        elif ch == ' ':
+            if current:
+                parts.append(''.join(current))
+                current = []
+            else:
+                return parts, "Consecutive spaces between parts"
+        else:
+            current.append(ch)
+        i += 1
+    if in_quotes:
+        return parts, "Unterminated quoted dimension value"
+    if current:
+        parts.append(''.join(current))
+    return parts, None
+
+
 def validate_line(line, line_num, now_ms):
     """Validate a single MINT line. Returns (is_valid, metric_key, dims, errors)."""
     errors = []
@@ -143,7 +183,9 @@ def validate_line(line, line_num, now_ms):
         return True, None, {}, []
 
     # Split into parts: metric_key_and_dims SPACE payload [SPACE timestamp]
-    parts = stripped.split(' ')
+    parts, split_error = split_outside_quotes(stripped)
+    if split_error:
+        return False, None, {}, [f"Line {line_num}: {split_error}"]
     if len(parts) < 2 or len(parts) > 3:
         return False, None, {}, [f"Line {line_num}: Expected 2-3 space-separated parts, got {len(parts)}"]
 
@@ -208,30 +250,33 @@ def validate_line(line, line_num, now_ms):
 
 
 def check_completeness(all_metrics):
-    """Check that expected metric sets appear for each gateway."""
-    # Group by gateway
-    gateways = {}
+    """Check that expected metric sets appear for each gateway.
+
+    sys_stats metrics are grouped by gateway; net_stats metrics by
+    (gateway, interface), so a metric missing on one interface is not hidden
+    by another interface of the same gateway.
+    """
+    sys_groups = {}
+    net_groups = {}
     for metric_key, dims in all_metrics:
         gw = dims.get('gateway', 'unknown')
-        if gw not in gateways:
-            gateways[gw] = set()
-        gateways[gw].add(metric_key)
+        if metric_key.startswith('aviatrix.gateway.net'):
+            net_groups.setdefault((gw, dims.get('interface', 'unknown')), set()).add(metric_key)
+        else:
+            sys_groups.setdefault(gw, set()).add(metric_key)
 
     issues = []
-    for gw, keys in sorted(gateways.items()):
-        # Check if this looks like sys_stats or net_stats
-        has_cpu = any(k.startswith('aviatrix.gateway.cpu') for k in keys)
-        has_net = any(k.startswith('aviatrix.gateway.net') for k in keys)
-
-        if has_cpu:
+    for gw, keys in sorted(sys_groups.items()):
+        if any(k.startswith('aviatrix.gateway.cpu') for k in keys):
             missing = EXPECTED_SYS_STATS - keys
             if missing:
                 issues.append(f"  Gateway '{gw}' missing sys_stats metrics: {sorted(missing)}")
 
-        if has_net:
-            missing = EXPECTED_NET_STATS_GAUGE - keys
-            if missing:
-                issues.append(f"  Gateway '{gw}' missing net_stats gauge metrics: {sorted(missing)}")
+    for (gw, iface), keys in sorted(net_groups.items()):
+        missing = EXPECTED_NET_STATS_GAUGE - keys
+        if missing:
+            issues.append(
+                f"  Gateway '{gw}' interface '{iface}' missing net_stats gauge metrics: {sorted(missing)}")
 
     return issues
 
@@ -332,6 +377,7 @@ def main():
             print(f"  {e}")
         print()
 
+    issues = []
     if args.check_completeness:
         issues = check_completeness(all_metrics)
         if issues:
@@ -343,7 +389,8 @@ def main():
             print("Completeness: All expected metrics present for all gateways.")
             print()
 
-    sys.exit(1 if invalid_count > 0 else 0)
+    # Completeness issues fail the run too, so automated use can detect them.
+    sys.exit(1 if invalid_count > 0 or issues else 0)
 
 
 if __name__ == '__main__':

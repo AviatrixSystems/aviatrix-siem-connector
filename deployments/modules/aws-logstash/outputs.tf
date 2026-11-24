@@ -14,12 +14,12 @@ output "security_group_id" {
 }
 
 output "ami_id" {
-  description = "Amazon Linux 2023 AMI ID"
-  value       = data.aws_ami.amazon_linux.id
+  description = "Amazon Linux 2023 AMI ID (var.ami_id when pinned, otherwise the latest AL2023 lookup)"
+  value       = var.ami_id != "" ? var.ami_id : data.aws_ami.amazon_linux[0].id
 }
 
 output "user_data" {
-  description = "Base64-encoded user data for EC2 instances"
+  description = "Base64-encoded user data for EC2 instances (contains no SIEM credentials; those are fetched from Secrets Manager at boot)"
   value       = base64encode(local.user_data)
 }
 
@@ -41,4 +41,9 @@ output "patterns_etag" {
 output "effective_port" {
   description = "The externally-facing syslog port (TLS port when enabled, syslog port otherwise)"
   value       = var.tls_enabled ? var.tls_port : var.syslog_port
+}
+
+output "runtime_secret_arn" {
+  description = "ARN of the Secrets Manager secret holding the rendered Logstash container command"
+  value       = aws_secretsmanager_secret.runtime.arn
 }

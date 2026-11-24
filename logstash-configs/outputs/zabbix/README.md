@@ -136,7 +136,19 @@ podman run -d --name logstash-zabbix-test \
 
 #### Option B: AWS EC2 deployment
 
-Use the Terraform deployment in `deployments/aws-ec2-single-instance/` or `deployments/aws-ec2-autoscale/` with `output_type = "zabbix"`.
+Use the Terraform deployment in `deployments/aws-ec2-single-instance/` or `deployments/aws-ec2-autoscale/` with `output_type = "zabbix"`. The stock Logstash image has no zabbix plugin, so `logstash_image` is required (plan fails without it): build the image above, push it to a registry the instances can pull from, and set:
+
+```hcl
+output_type = "zabbix"
+logstash_config_variables = {
+  "zabbix_server"      = "10.0.0.50"
+  "zabbix_port"        = "10051"
+  "zabbix_host_prefix" = ""
+  "logstash_image"     = "<registry>/logstash-avx-zabbix:<tag>"
+}
+```
+
+The instance mounts the S3 config over `/usr/share/logstash/pipeline`, replacing the baked one. Do not use the GHCR connector image here; its entrypoint copies a second pipeline into that directory.
 
 #### Option C: AWS ECS Fargate deployment
 

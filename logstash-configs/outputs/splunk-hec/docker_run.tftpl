@@ -1,13 +1,21 @@
 # DOCKER RUN FOR SPLUNK HEC OUTPUT
+# Rendered by deployments/modules/aws-logstash for BOTH plaintext and TLS mode
+# (TLS adds a stunnel sidecar that forwards to the published syslog port), and
+# stored in Secrets Manager; the instance fetches and runs it at boot.
+# Module-provided vars: log_profile, syslog_port, plus defaults for
+# logstash_image, splunk_port, dt_region, dt_metrics_url, dt_logs_url,
+# dt_metric_source, dt_log_source, dt_logs_token, zabbix_port, zabbix_host_prefix.
+# Required: splunk_hec_auth, splunk_address. Optional: splunk_port, logstash_image.
 docker run -d --restart=always \
   -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
   -v /logstash/patterns:/usr/share/logstash/patterns \
-  -p 5000:5000/tcp \
-  -p 5000:5000/udp \
+  -p ${syslog_port}:${syslog_port}/tcp \
+  -p ${syslog_port}:${syslog_port}/udp \
+  -e SYSLOG_PORT=${syslog_port} \
   -e LOG_PROFILE=${log_profile} \
-  -e SPLUNK_HEC_AUTH=${splunk_hec_auth} \
-  -e SPLUNK_ADDRESS=${splunk_address} \
-  -e SPLUNK_PORT=${splunk_port} \
+  -e SPLUNK_HEC_AUTH="${splunk_hec_auth}" \
+  -e SPLUNK_ADDRESS="${splunk_address}" \
+  -e SPLUNK_PORT="${splunk_port}" \
   -e FLATTEN_SURICATA=true \
   -e XPACK_MONITORING_ENABLED=false \
-  docker.elastic.co/logstash/logstash:8.16.2
+  ${logstash_image}

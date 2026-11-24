@@ -81,13 +81,21 @@ az acr create --resource-group $RESOURCE_GROUP \
     --sku Standard
 ```
 
-## 3. Enable anonymous container pulling.
+## 3. Create pull credentials for ACI (recommended)
 
-We could also create a managed identity assigned to the Azure Container Instance so that it has an IAM role that allows container to be pulled for the Azure Container Registry. As we have no sensitive data, we go for anonymus pulling.
+Create a pull-only token and pass it to Terraform, instead of making the registry public:
 
 ```sh
-az acr update --name $ACR_NAME --anonymous-pull-enabled true
+az acr token create --name aci-pull --registry $ACR_NAME --scope-map _repositories_pull
+# note the generated password, then in terraform.tfvars:
+#   container_registry_server   = "${ACR_NAME}.azurecr.io"   # .azurecr.cn in Azure China
+#   container_registry_username = "aci-pull"
+#   container_registry_password = "<password>"
 ```
+
+*Not recommended:* `az acr update --name $ACR_NAME --anonymous-pull-enabled true`
+makes **every** repository in the registry publicly pullable. Only use it for a
+dedicated, throwaway registry.
 
 ## 4. Log in to the Container Registry
 
@@ -99,13 +107,17 @@ az acr login --name $ACR_NAME
 
 ```sh
 az acr build --registry $ACR_NAME \
-    --image ${IMAGE_NAME}:${IMAGE_TAG} .
+    --image ${IMAGE_NAME}:${IMAGE_TAG} \
+    --build-arg SENTINEL_PLUGIN_VERSION=<x.y.z> .
 ```
+
+`SENTINEL_PLUGIN_VERSION` pins the `microsoft-sentinel-log-analytics-logstash-output-plugin`
+version so rebuilds are reproducible. Leave it out to install the latest release.
 
 *Alternatively, using Docker CLI:*
 
 ```sh
-docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+docker build --build-arg SENTINEL_PLUGIN_VERSION=<x.y.z> -t ${IMAGE_NAME}:${IMAGE_TAG} .
 docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}
 docker push ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}
 ```

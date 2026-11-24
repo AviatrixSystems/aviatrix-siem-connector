@@ -12,55 +12,27 @@ The stock Elastic image does NOT include the Sentinel plugin. You must build a c
 
 ### 2. Create Custom Log Analytics Tables
 
-Tables are auto-created by Terraform. For manual creation:
+Tables are auto-created by Terraform (`deployments/azure-aci/`), which is the recommended path.
+
+For a manual setup, every table and DCR stream must declare **every** column the
+output sends: the DCR silently drops any undeclared field. The authoritative
+column lists live in one file,
+[`deployments/azure-aci/module/ai/4-table-schemas.tf`](../../../deployments/azure-aci/module/ai/4-table-schemas.tf)
+(keys: `netsession`, `websession`, `ids`, `gw_net_stats`, `gw_sys_stats`, `cmd`,
+`tunnel_status`, `vpn_session`). Build the CLI column list from it rather than
+typing a partial one:
 
 ```bash
-# L4 Network Session table (ASIM NetworkSession)
-az monitor log-analytics workspace table create \
-    --resource-group <rg> \
-    --workspace-name <workspace> \
-    --name "AviatrixNetworkSession_CL" \
-    --columns \
-        TimeGenerated=datetime \
-        EventVendor=string \
-        EventProduct=string \
-        EventSchema=string \
-        SrcIpAddr=string \
-        DstIpAddr=string \
-        SrcPortNumber=int \
-        DstPortNumber=int \
-        NetworkProtocol=string \
-        DvcAction=string \
-        EventResult=string
+SCHEMA=deployments/azure-aci/module/ai/4-table-schemas.tf   # run from the repo root
+cols() { sed -n "/^    $1 = \[/,/^    \]/p" "$SCHEMA" | sed -nE 's/.*name = "([^"]+)", type = "([^"]+)".*/\1=\2/p' | tr '\n' ' '; }
 
-# L7 Web Session table (ASIM WebSession)
 az monitor log-analytics workspace table create \
-    --resource-group <rg> \
-    --workspace-name <workspace> \
-    --name "AviatrixWebSession_CL" \
-    --columns \
-        TimeGenerated=datetime \
-        EventVendor=string \
-        DstFqdn=string \
-        Url=string \
-        SrcIpAddr=string \
-        DstIpAddr=string \
-        DvcAction=string
-
-# IDS table (ASIM NetworkSession, EventType=IDS)
-az monitor log-analytics workspace table create \
-    --resource-group <rg> \
-    --workspace-name <workspace> \
-    --name "AviatrixIDS_CL" \
-    --columns \
-        TimeGenerated=datetime \
-        EventVendor=string \
-        ThreatName=string \
-        ThreatId=string \
-        ThreatCategory=string \
-        SrcIpAddr=string \
-        DstIpAddr=string \
-        alert=dynamic
+    --resource-group <rg> --workspace-name <workspace> \
+    --name "AviatrixNetworkSession_CL" --columns $(cols netsession)
+# Repeat for AviatrixWebSession_CL (websession), AviatrixIDS_CL (ids),
+# AviatrixGwNetStats_CL (gw_net_stats), AviatrixGwSysStats_CL (gw_sys_stats),
+# AviatrixCmd_CL (cmd), AviatrixTunnelStatus_CL (tunnel_status),
+# AviatrixVPNSession_CL (vpn_session)
 ```
 
 ### 3. Create Data Collection Endpoint (DCE)
@@ -74,7 +46,15 @@ az monitor data-collection endpoint create \
 
 ### 4. Create Data Collection Rules (DCR)
 
-Create DCRs for each log type. See `output_loganalytics_sentinel_dcr/avx_dcf_dcr.json` for a template.
+Create one DCR per log type (8 in total) on the DCE above, each with:
+
+- a stream declaration `Custom-<Table>` whose columns are exactly the table's columns
+  (same list as step 2; as JSON: `sed -n "/^    netsession = \[/,/^    \]/p" "$SCHEMA" | sed -nE 's/.*name = "([^"]+)", type = "([^"]+)".*/{"name":"\1","type":"\2"}/p' | paste -sd, - | sed 's/^/[/; s/$/]/'`)
+- a data flow from that stream to the Log Analytics workspace with `transformKql: "source"`
+  and `outputStream: Custom-<Table>`
+
+The Terraform definitions in `deployments/azure-aci/module/ai/2-data-collection.tf`
+are the reference implementation.
 
 ### 5. Create Service Principal
 
@@ -109,8 +89,12 @@ Grant the service principal access to the DCRs.
 | `azure_stream_cmd` | Yes* | — | Stream name (e.g., `Custom-AviatrixCmd_CL`) |
 | `azure_dcr_tunnel_status_id` | Yes* | — | DCR immutable ID for Tunnel Status |
 | `azure_stream_tunnel_status` | Yes* | — | Stream name (e.g., `Custom-AviatrixTunnelStatus_CL`) |
+| `azure_dcr_vpn_session_id` | Yes* | — | DCR immutable ID for VPN Session |
+| `azure_stream_vpn_session` | Yes* | — | Stream name (e.g., `Custom-AviatrixVPNSession_CL`) |
 
-\* DCR variables are required for each log type enabled by `LOG_PROFILE`.
+\* All 8 DCR/stream pairs are required **regardless of `LOG_PROFILE`**: Logstash
+resolves every `${VAR}` when it compiles the pipeline, so an unset variable stops
+the pipeline from loading even if that log type is never forwarded.
 
 ## Quick Start
 
@@ -140,6 +124,16 @@ docker run -d --restart=always \
   -e azure_stream_websession=Custom-AviatrixWebSession_CL \
   -e azure_dcr_ids_id=dcr-zzzzz \
   -e azure_stream_ids=Custom-AviatrixIDS_CL \
+  -e azure_dcr_gw_net_stats_id=dcr-aaaaa \
+  -e azure_stream_gw_net_stats=Custom-AviatrixGwNetStats_CL \
+  -e azure_dcr_gw_sys_stats_id=dcr-bbbbb \
+  -e azure_stream_gw_sys_stats=Custom-AviatrixGwSysStats_CL \
+  -e azure_dcr_cmd_id=dcr-ccccc \
+  -e azure_stream_cmd=Custom-AviatrixCmd_CL \
+  -e azure_dcr_tunnel_status_id=dcr-ddddd \
+  -e azure_stream_tunnel_status=Custom-AviatrixTunnelStatus_CL \
+  -e azure_dcr_vpn_session_id=dcr-eeeee \
+  -e azure_stream_vpn_session=Custom-AviatrixVPNSession_CL \
   -e azure_cloud=AzureCloud \
   -e LOG_PROFILE=all \
   -e XPACK_MONITORING_ENABLED=false \
@@ -159,6 +153,9 @@ docker run -d --restart=always \
 | Gateway System Stats | `AviatrixGwSysStats_CL` | (none) |
 | Controller CMD/API | `AviatrixCmd_CL` | (none) |
 | Tunnel Status | `AviatrixTunnelStatus_CL` | (none) |
+| VPN Session | `AviatrixVPNSession_CL` | (none) |
+
+FQDN firewall events are parsed but have no Azure output.
 
 ## ASIM Parsers
 
@@ -167,13 +164,18 @@ KQL parser files for Sentinel ASIM integration are in `asim-parsers/`:
 - `vimWebSessionAviatrixGateway.kql` - L7 MITM
 - `vimNetworkSessionAviatrixSuricata.kql` - Suricata IDS
 
-See deployment instructions in each `.kql` file.
+See deployment instructions in each `.kql` file. Saving the functions does not
+by itself add Aviatrix rows to `_Im_NetworkSession` / `_Im_WebSession`; see
+"ASIM integration" in [deployments/azure-aci/README.md](../../../deployments/azure-aci/README.md#asim-parser-deployment-optional).
 
 ## Sample Output Files
 
-The `_sample*.json` files in this directory show example output formats:
-- `_sampleMicrosegOutput.json` - Microseg event structure
-- `_sampleSuricataOutput.json` - Suricata event structure
+The `_sample*.json` files show one row per security table as it lands in Log
+Analytics (fields limited to declared columns), generated from the current
+`output.conf` ASIM mapping using events from `test-tools/sample-logs/test-samples.log`:
+- `_sampleMicrosegOutput.json` - `AviatrixNetworkSession_CL` (L4 microseg session end)
+- `_sampleWebSessionOutput.json` - `AviatrixWebSession_CL` (L7 MITM TLS-check event)
+- `_sampleSuricataOutput.json` - `AviatrixIDS_CL` (Suricata alert)
 
 ## Terraform Deployment
 

@@ -1,0 +1,42 @@
+[
+    {
+        "TimeGenerated": "2026-03-04T22:57:15.000Z",
+        "EventVendor": "Aviatrix",
+        "EventProduct": "Distributed Cloud Firewall",
+        "EventSchema": "WebSession",
+        "EventSchemaVersion": "0.2.7",
+        "EventType": "HTTPsession",
+        "EventCount": 1,
+        "EventResult": "Success",
+        "EventSeverity": "Informational",
+        "EventStartTime": "2026-03-04T22:57:15.000Z",
+        "EventEndTime": "2026-03-04T22:57:15.000Z",
+        "DvcAction": "Allow",
+        "DvcOriginalAction": "Permit",
+        "DvcHostname": "frontend-eks-spoke",
+        "SrcIpAddr": "100.64.242.5",
+        "DstIpAddr": "140.82.112.3",
+        "SrcPortNumber": 52792,
+        "DstPortNumber": 443,
+        "NetworkProtocol": "TCP",
+        "NetworkRuleName": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+        "DstFqdn": "github.com",
+        "DstHostname": "github.com",
+        "enforced": true,
+        "mitm_sni_hostname": "github.com",
+        "tags": [
+            "mitm"
+        ],
+        "unix_time": 1772665035,
+        "EventSubType": "TLS_PROFILE",
+        "NetworkSessionId": "52e4c272-6a9c-406f-88e2-414b7f4e5ef9",
+        "mitm_reason": "TLS_PROFILE",
+        "mitm_session_id": "52e4c272-6a9c-406f-88e2-414b7f4e5ef9",
+        "mitm_session_stage": "tls_check",
+        "mitm_stage": "ORIGIN_CERT_VALIDATE",
+        "mitm_ids": "true",
+        "mitm_priority": "LOG_WARNING",
+        "mitm_message": "unable to get local issuer certificate",
+        "mitm_session_time": "104080"
+    }
+]
