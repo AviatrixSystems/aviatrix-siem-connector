@@ -3,9 +3,9 @@
 # You must build a custom image. See deployments/azure-aci/logstash-container-build/README.md
 # REQUIRED template variable: logstash_image (your custom image, e.g.
 # myacr.azurecr.io/aviatrix-logstash-sentinel:1.0). Set it in
-# logstash_config_variables; if it is missing, terraform plan fails with
-# "vars map does not contain key logstash_image" instead of booting an
-# instance whose docker run cannot pull a placeholder image.
+# logstash_config_variables; if it is missing, the precondition in
+# deployments/modules/aws-logstash/main.tf fails the plan instead of booting
+# an instance that runs a stock image without the Sentinel plugin.
 # Module-provided vars: log_profile, syslog_port (see the splunk-hec template).
 docker run -d --restart=always \
   -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \

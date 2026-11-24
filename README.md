@@ -252,7 +252,7 @@ Metrics are named `aviatrix.gateway.*`; per-core CPU is under `aviatrix.gateway.
 Changes in this release that can affect existing deployments, dashboards or searches:
 
 **Parsed data (all outputs)**
-- `gw_net_stats` `total_rx_rate`, `total_tx_rate`, `total_rx_tx_rate` are now floats in bytes/s (1024-based) instead of truncated integers in mixed units (`186.97Kb` was `186`, is now `191457.28`). Rescale dashboards and searches.
+- `gw_net_stats` `total_rx_rate`, `total_tx_rate`, `total_rx_tx_rate` are now floats in bytes/s (1024-based) instead of truncated integers in mixed units (`186.97Kb` was `186`, is now `191457.28`; Azure rounds to whole bytes/s because its columns are `int`). Values are roughly 1024x larger; rescale dashboards, searches and alerts.
 - `cpu_cores_parsed` now includes core `"0"`; `cpu_busy`, `cpu_aggregate_busy_*` and per-core values change for gateways whose list starts with core 0, and `cpu_core_count` goes up by 1.
 - Syslog timestamps without a zone are parsed in `SYSLOG_TIMEZONE` (default `UTC`) instead of the JVM zone.
 - Suricata/MITM events with invalid or truncated JSON are no longer forwarded; they get `_avx_json_parse_failure` + `unparsed`. Grok misses get `_avx_grok_failure_<type>`; untyped events get `unparsed`. Absent MITM fields are omitted instead of holding literal `%{...}` text.

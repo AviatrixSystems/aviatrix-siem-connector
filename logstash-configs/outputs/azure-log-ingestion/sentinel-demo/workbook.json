@@ -1,0 +1,486 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "## 🛡️ Aviatrix Security — Distributed Cloud Firewall in Microsoft Sentinel\nLive telemetry from the Aviatrix fabric: policy enforcement, threat detection, traffic, and gateway health."
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "a1b2c3d4-0001-0001-0001-000000000001",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "isRequired": true,
+            "value": { "durationMs": 86400000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 14400000 },
+                { "durationMs": 43200000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 }
+              ]
+            }
+          },
+          {
+            "id": "a1b2c3d4-0001-0001-0001-000000000002",
+            "version": "KqlParameterItem/1.0",
+            "name": "Gateway",
+            "label": "Gateway",
+            "type": 2,
+            "isRequired": true,
+            "query": "union (AviatrixGwSysStats_CL | distinct gateway), (AviatrixNetworkSession_CL | distinct DvcHostname | project gateway=DvcHostname), (AviatrixWebSession_CL | distinct DvcHostname | project gateway=DvcHostname) | where isnotempty(gateway) | distinct gateway | union (print gateway='All') | order by gateway asc",
+            "value": "All",
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          },
+          {
+            "id": "a1b2c3d4-0001-0001-0001-000000000003",
+            "version": "KqlParameterItem/1.0",
+            "name": "Action",
+            "label": "Action",
+            "type": 2,
+            "isRequired": true,
+            "value": "All",
+            "jsonData": "[{\"value\":\"All\",\"label\":\"All\"},{\"value\":\"Block\",\"label\":\"Block\"},{\"value\":\"Allow\",\"label\":\"Allow\"}]"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          { "id": "tab-overview", "cellValue": "selectedTab", "linkTarget": "parameter", "linkLabel": "📊 Overview", "subTarget": "overview", "style": "link" },
+          { "id": "tab-dcf", "cellValue": "selectedTab", "linkTarget": "parameter", "linkLabel": "🛡️ DCF Policy", "subTarget": "dcf", "style": "link" },
+          { "id": "tab-threats", "cellValue": "selectedTab", "linkTarget": "parameter", "linkLabel": "⚠️ Threats (IDS)", "subTarget": "threats", "style": "link" },
+          { "id": "tab-traffic", "cellValue": "selectedTab", "linkTarget": "parameter", "linkLabel": "🌐 Traffic & Egress", "subTarget": "traffic", "style": "link" },
+          { "id": "tab-gwhealth", "cellValue": "selectedTab", "linkTarget": "parameter", "linkLabel": "💻 Gateway Health", "subTarget": "gwhealth", "style": "link" }
+        ]
+      },
+      "name": "tabs"
+    },
+
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where DvcAction in ('Deny','Drop') | summarize Value=count() | extend Metric='Blocked Sessions'), (AviatrixIDS_CL | summarize Value=count() | extend Metric='IDS Alerts'), (AviatrixWebSession_CL | where isnotempty(DstFqdn) | summarize Value=dcount(DstFqdn) | extend Metric='Unique Domains'), (AviatrixGwSysStats_CL | summarize Value=dcount(gateway) | extend Metric='Active Gateways') | project Metric, Value",
+        "size": 3,
+        "title": "Security posture",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "tiles",
+        "tileSettings": {
+          "titleContent": { "columnMatch": "Metric", "formatter": 1 },
+          "leftContent": { "columnMatch": "Value", "formatter": 12, "formatOptions": { "palette": "blue" } },
+          "showBorder": true
+        }
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "overview" },
+      "name": "ov-kpi"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixIDS_CL | extend Kind='IDS', Detail=ThreatName, Sev=toint(ThreatRiskLevel) | project TimeGenerated, Kind, Sev, SrcIpAddr, DstIpAddr, Detail), (AviatrixNetworkSession_CL | where DvcAction in ('Deny','Drop') | extend Kind='DCF Deny', Detail=strcat(NetworkProtocol,' ',tostring(DstPortNumber)), Sev=2 | project TimeGenerated, Kind, Sev, SrcIpAddr, DstIpAddr, Detail), (AviatrixWebSession_CL | where DvcAction in ('Deny','Drop') | extend Kind='DCF Deny (L7)', Detail=coalesce(DstFqdn, mitm_sni_hostname), Sev=2 | project TimeGenerated, Kind, Sev, SrcIpAddr, DstIpAddr, Detail) | sort by TimeGenerated desc | take 50",
+        "size": 0,
+        "title": "Live threat feed",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "overview" },
+      "name": "ov-threatfeed"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project SrcIpAddr, DstIpAddr), (AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project SrcIpAddr, DstIpAddr) | summarize Sessions=count(), Dests=dcount(DstIpAddr) by SrcIpAddr | top 10 by Sessions desc",
+        "size": 1,
+        "title": "Top talkers",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "overview" },
+      "name": "ov-toptalkers"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | extend Domain=coalesce(DstFqdn, mitm_sni_hostname) | where isnotempty(Domain) | summarize Hits=count() by Domain | top 10 by Hits desc",
+        "size": 1,
+        "title": "Top accessed domains",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "overview" },
+      "name": "ov-topdomains"
+    },
+
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project DvcAction), (AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project DvcAction) | extend Verdict=iff(DvcAction in ('Deny','Drop'),'Block','Allow') | summarize Count=count() by Verdict",
+        "size": 1,
+        "title": "Allow vs Block",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "piechart"
+      },
+      "customWidth": "33",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-allowblock"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | project SrcIpAddr, DstIpAddr), (AviatrixWebSession_CL | project SrcIpAddr, DstIpAddr) | extend SrcPriv=(SrcIpAddr matches regex @'^(10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|192\\.168\\.|100\\.6[4-9]\\.)'), DstPriv=(DstIpAddr matches regex @'^(10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|192\\.168\\.|100\\.6[4-9]\\.)') | extend Direction=case(SrcPriv and DstPriv,'East-West',SrcPriv and not(DstPriv),'Egress','Ingress') | summarize Count=count() by Direction",
+        "size": 1,
+        "title": "Traffic direction",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "piechart"
+      },
+      "customWidth": "33",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-direction"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | project enforced), (AviatrixWebSession_CL | project enforced) | extend Mode=iff(tobool(enforced),'Enforced','Monitor') | summarize Count=count() by Mode",
+        "size": 1,
+        "title": "Enforced vs Monitor",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "piechart"
+      },
+      "customWidth": "33",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-mode"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project TimeGenerated, DvcAction), (AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project TimeGenerated, DvcAction) | extend Verdict=iff(DvcAction in ('Deny','Drop'),'Block','Allow') | summarize Count=count() by bin(TimeGenerated,5m), Verdict",
+        "size": 0,
+        "title": "Policy activity over time",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "areachart"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-activity"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixWebSession_CL | where DvcAction in ('Deny','Drop') | extend Domain=coalesce(DstFqdn, mitm_sni_hostname) | where isnotempty(Domain) | summarize Blocks=count(), Sources=dcount(SrcIpAddr) by Domain | top 15 by Blocks desc",
+        "size": 1,
+        "title": "Top blocked domains",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-blockeddomains"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | project NetworkRuleName, DvcAction, SrcIpAddr), (AviatrixWebSession_CL | project NetworkRuleName, DvcAction, SrcIpAddr) | where isnotempty(NetworkRuleName) | summarize Hits=count(), Blocks=countif(DvcAction in ('Deny','Drop')), Sources=dcount(SrcIpAddr) by NetworkRuleName | extend BlockRatePct=round(100.0*Blocks/Hits,1) | top 15 by Hits desc",
+        "size": 1,
+        "title": "Top policies",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-toppolicies"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where DvcAction in ('Deny','Drop') | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project TimeGenerated, SrcIpAddr, DstIpAddr, DstPortNumber, NetworkProtocol, NetworkRuleName), (AviatrixWebSession_CL | where DvcAction in ('Deny','Drop') | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | extend NetworkRuleName=coalesce(NetworkRuleName, mitm_sni_hostname) | project TimeGenerated, SrcIpAddr, DstIpAddr, DstPortNumber, NetworkProtocol, NetworkRuleName) | sort by TimeGenerated desc | take 50",
+        "size": 0,
+        "title": "Denied flows",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "dcf" },
+      "name": "dcf-deniedflows"
+    },
+
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixIDS_CL | extend Sev=case(toint(ThreatRiskLevel)==1,'1-Critical',toint(ThreatRiskLevel)==2,'2-High',toint(ThreatRiskLevel)==3,'3-Medium','4-Low') | summarize Count=count() by bin(TimeGenerated,5m), Sev",
+        "size": 0,
+        "title": "Alert timeline by severity",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "areachart"
+      },
+      "customWidth": "60",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "threats" },
+      "name": "ids-timeline"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixIDS_CL | where isnotempty(ThreatCategory) | summarize Count=count() by ThreatCategory | top 10 by Count desc",
+        "size": 1,
+        "title": "Alert categories",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "piechart"
+      },
+      "customWidth": "40",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "threats" },
+      "name": "ids-categories"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixIDS_CL | summarize Alerts=count(), Sources=dcount(SrcIpAddr), Targets=dcount(DstIpAddr) by ThreatName, ThreatId, ThreatRiskLevel | top 20 by Alerts desc",
+        "size": 1,
+        "title": "Top signatures",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "threats" },
+      "name": "ids-signatures"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixIDS_CL | summarize Alerts=count(), Signatures=dcount(ThreatName), Targets=dcount(DstIpAddr) by SrcIpAddr | top 20 by Alerts desc",
+        "size": 1,
+        "title": "Source investigation",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "threats" },
+      "name": "ids-sources"
+    },
+
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project TimeGenerated, DvcAction), (AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project TimeGenerated, DvcAction) | extend Verdict=iff(DvcAction in ('Deny','Drop'),'Block','Allow') | summarize Sessions=count() by bin(TimeGenerated,5m), Verdict",
+        "size": 0,
+        "title": "Traffic over time (sessions)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "areachart"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "traffic" },
+      "name": "tr-volume"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project SrcIpAddr, DstIpAddr, DstPortNumber, NetworkProtocol, DvcAction), (AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | project SrcIpAddr, DstIpAddr, DstPortNumber, NetworkProtocol, DvcAction) | summarize Sessions=count() by SrcIpAddr, DstIpAddr, DstPortNumber, NetworkProtocol, DvcAction | top 50 by Sessions desc",
+        "size": 0,
+        "title": "Source → destination flows",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "traffic" },
+      "name": "tr-flows"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | project SrcIpAddr, DstIpAddr), (AviatrixWebSession_CL | project SrcIpAddr, DstIpAddr) | summarize Sessions=count(), Dests=dcount(DstIpAddr) by SrcIpAddr | top 15 by Sessions desc",
+        "size": 1,
+        "title": "Top sources",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "traffic" },
+      "name": "tr-topsources"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "union (AviatrixNetworkSession_CL | project DstPortNumber), (AviatrixWebSession_CL | project DstPortNumber) | summarize Count=count() by DstPortNumber | top 15 by Count desc",
+        "size": 1,
+        "title": "Port distribution",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "piechart"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "traffic" },
+      "name": "tr-ports"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | extend Domain=coalesce(DstFqdn, mitm_sni_hostname), Verdict=iff(DvcAction in ('Deny','Drop'),'Block','Allow') | where isnotempty(Domain) | summarize Hits=count() by Domain | top 20 by Hits desc",
+        "size": 0,
+        "title": "Top domains by hits (L7 / SNI)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "barchart"
+      },
+      "customWidth": "60",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "traffic" },
+      "name": "tr-topdomains-chart"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixWebSession_CL | where ('{Gateway}'=='All' or DvcHostname=='{Gateway}') | extend Domain=coalesce(DstFqdn, mitm_sni_hostname), Verdict=iff(DvcAction in ('Deny','Drop'),'Block','Allow') | where isnotempty(Domain) | summarize Hits=count(), Sources=dcount(SrcIpAddr), Gateways=dcount(DvcHostname), LastSeen=max(TimeGenerated) by Domain, Verdict | top 30 by Hits desc",
+        "size": 0,
+        "title": "Domain detail (hits, sources, gateways, last seen)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "customWidth": "40",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "traffic" },
+      "name": "tr-topdomains-table"
+    },
+
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixGwSysStats_CL | where ('{Gateway}'=='All' or gateway=='{Gateway}') | summarize arg_max(TimeGenerated,*) by gateway | extend CpuPct=round(100.0-todouble(cpu_idle),1), MemPct=round(100.0*(todouble(memory_total)-todouble(memory_available))/todouble(memory_total),1), DiskPct=round(100.0*(todouble(disk_total)-todouble(disk_free))/todouble(disk_total),1) | extend Status=case(CpuPct>90 or MemPct>90 or DiskPct>90,'Critical',CpuPct>75 or MemPct>75 or DiskPct>75,'Warning','Healthy') | project gateway, Status, CpuPct, MemPct, DiskPct",
+        "size": 0,
+        "title": "Gateway status",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "gwhealth" },
+      "name": "gw-status"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixGwSysStats_CL | where ('{Gateway}'=='All' or gateway=='{Gateway}') | summarize CpuPct=avg(100.0-todouble(cpu_idle)) by bin(TimeGenerated,5m), gateway",
+        "size": 0,
+        "title": "CPU utilization",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "linechart"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "gwhealth" },
+      "name": "gw-cpu"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixGwSysStats_CL | where ('{Gateway}'=='All' or gateway=='{Gateway}') | summarize MemPct=avg(100.0*(todouble(memory_total)-todouble(memory_available))/todouble(memory_total)) by bin(TimeGenerated,5m), gateway",
+        "size": 0,
+        "title": "Memory utilization",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "linechart"
+      },
+      "customWidth": "50",
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "gwhealth" },
+      "name": "gw-mem"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AviatrixGwNetStats_CL | where ('{Gateway}'=='All' or gateway=='{Gateway}') | summarize RxRate=avg(todouble(total_rx_rate)), TxRate=avg(todouble(total_tx_rate)) by bin(TimeGenerated,5m), gateway",
+        "size": 0,
+        "title": "Network throughput (Rx/Tx rate)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "areachart"
+      },
+      "conditionalVisibility": { "parameterName": "selectedTab", "comparison": "isEqualTo", "value": "gwhealth" },
+      "name": "gw-throughput"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/a9b9847f-ac2a-4fe8-95c7-727057b7e2e4/resourceGroups/aviatrix-siem-connector/providers/Microsoft.OperationalInsights/workspaces/aviatrix-siem-workspace"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

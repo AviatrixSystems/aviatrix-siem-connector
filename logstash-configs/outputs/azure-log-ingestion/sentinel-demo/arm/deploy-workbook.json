@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceResourceId": { "type": "string" },
+    "workbookDisplayName": { "type": "string", "defaultValue": "Aviatrix Security (Sentinel Demo)" },
+    "workbookId": { "type": "string", "defaultValue": "[guid(resourceGroup().id, 'aviatrix-sentinel-demo-workbook')]" },
+    "serializedData": { "type": "string", "metadata": { "description": "Contents of workbook.json as a string" } }
+  },
+  "resources": [
+    {
+      "type": "microsoft.insights/workbooks",
+      "apiVersion": "2022-04-01",
+      "name": "[parameters('workbookId')]",
+      "location": "[resourceGroup().location]",
+      "kind": "shared",
+      "properties": {
+        "displayName": "[parameters('workbookDisplayName')]",
+        "serializedData": "[parameters('serializedData')]",
+        "version": "1.0",
+        "category": "sentinel",
+        "sourceId": "[parameters('workspaceResourceId')]"
+      }
+    }
+  ],
+  "outputs": {
+    "workbookId": { "type": "string", "value": "[parameters('workbookId')]" }
+  }
+}

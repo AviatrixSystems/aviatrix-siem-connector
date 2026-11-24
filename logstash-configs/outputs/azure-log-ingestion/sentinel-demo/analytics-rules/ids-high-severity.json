@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'aviatrix-ids-high-severity')]",
+      "kind": "Scheduled",
+      "properties": {
+        "displayName": "Aviatrix IDS: high-severity intrusion detected",
+        "description": "Raises a Sentinel incident when Aviatrix Suricata IDS reports a Critical/High (severity 1-2) alert.",
+        "severity": "High",
+        "enabled": true,
+        "query": "AviatrixIDS_CL | where toint(ThreatRiskLevel) in (1, 2) | extend Sev = iff(toint(ThreatRiskLevel)==1, 'Critical', 'High') | project TimeGenerated, SrcIpAddr, DstIpAddr, DstPortNumber, NetworkProtocol, ThreatName, ThreatId, ThreatCategory, Sev, DvcInboundInterface",
+        "queryFrequency": "PT5M",
+        "queryPeriod": "PT5M",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT5H",
+        "suppressionEnabled": false,
+        "tactics": ["InitialAccess", "CommandAndControl"],
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": true,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "Selected",
+            "groupByEntities": ["IP"]
+          }
+        },
+        "entityMappings": [
+          { "entityType": "IP", "fieldMappings": [ { "identifier": "Address", "columnName": "SrcIpAddr" } ] },
+          { "entityType": "IP", "fieldMappings": [ { "identifier": "Address", "columnName": "DstIpAddr" } ] }
+        ]
+      }
+    }
+  ]
+}
