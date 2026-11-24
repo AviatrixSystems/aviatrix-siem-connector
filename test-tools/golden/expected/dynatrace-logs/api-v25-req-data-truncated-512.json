@@ -7,16 +7,23 @@
       "content_type": "application/json",
       "events": [
         {
-          "aviatrix.controller.action": "/v2.5/app-domains? host=controller.example.com ip=198.51.100.79",
+          "aviatrix.controller.action": "/v2.5/app-domains",
+          "aviatrix.controller.api_host": "controller.example.com",
           "aviatrix.controller.args": "{\"name\": \"web-tier\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"tags\": {\"app\": \"web\", \"env\": \"prod\", \"owner\": \"team-a\", \"cost_center\": \"cc-1001\", \"region\": \"us-east-2\", \"tier\": \"frontend\", \"zone\": \"a\"}}}, {\"all\": {\"type\": \"vm\", \"tags\": {\"app\": \"web\", \"env\": \"prod\", \"owner\": \"team-a\", \"cost_center\": \"cc-1001\", \"region\": \"us-east-2\", \"tier\": \"frontend\", \"zone\": \"b\"}}}, {\"all\": {\"type\": \"vm\", \"tags\": {\"app\": \"web\", \"env\": \"prod\", \"owner\": \"team-a\", \"cost_center\": \"cc-1001\", \"region\": \"us-east-2\", \"tier\": \"frontend\", \"zone\": \"c\"}}}]}, \"uui...",
           "aviatrix.controller.host": "Controller-10.0.0.120",
-          "aviatrix.controller.reason": "{\"uuid\": \"4c5d6e7f-8091-4a2b-bc3d-4e5f60718293\"} ",
+          "aviatrix.controller.reason": {
+            "__json_string__": {
+              "uuid": "4c5d6e7f-8091-4a2b-bc3d-4e5f60718293"
+            }
+          },
           "aviatrix.controller.result": "201 CREATED",
           "aviatrix.controller.username": "netops",
           "aviatrix.event.type": "ControllerAudit",
-          "content": "Controller API: /v2.5/app-domains? host=controller.example.com ip=198.51.100.79 by netops - 201 CREATED",
+          "client.ip": "198.51.100.79",
+          "content": "Controller API: /v2.5/app-domains by netops - 201 CREATED",
+          "http.request.method": "POST",
           "log.source": "aviatrix",
-          "severity": "WARN",
+          "severity": "INFORMATIONAL",
           "timestamp": "YYYY-03-04T23:08:14.000Z"
         }
       ],

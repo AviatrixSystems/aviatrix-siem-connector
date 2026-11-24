@@ -9,7 +9,8 @@
         {
           "@timestamp": "YYYY-08-23T15:54:41.859Z",
           "TimeGenerated": "YYYY-08-23T15:54:41.859Z",
-          "action": "/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159",
+          "action": "/v2.5/app-domains",
+          "api_host": "198.51.100.2",
           "args": {
             "__json_string__": {
               "name": "test-sg",
@@ -26,8 +27,10 @@
               "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
             }
           },
+          "client_ip": "203.0.113.159",
           "controller_ip": "10.0.1.118",
           "gw_hostname": "Controller-10.0.1.118",
+          "http_method": "POST",
           "ls_timestamp": "YYYY-08-23T15:54:41.859Z",
           "reason": {
             "__json_string__": {

@@ -8,19 +8,27 @@
       "events": [
         {
           "@timestamp": "YYYY-03-04T23:08:10.000Z",
-          "action": "/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77",
+          "action": "/v2.5/api/gateways/spoke/spoke-test-1/size",
+          "api_host": "controller.example.com",
           "args": {
             "__json_string__": {
               "gw_size": "t3.medium"
             }
           },
+          "client_ip": "198.51.100.77",
           "controller_ip": "10.0.0.120",
           "event": {
             "original": "<14>Mar  4 23:08:10 203.0.113.5 Mar  4 23:08:10 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=PUT url=/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77 user=admin req_data={\"gw_size\": \"t3.medium\"} resp_status=200 OK resp_data={\"return\": true, \"results\": \"Gateway spoke-test-1 resized to t3.medium\"} "
           },
           "gw_hostname": "Controller-10.0.0.120",
+          "http_method": "PUT",
           "message": "<14>Mar  4 23:08:10 203.0.113.5 Mar  4 23:08:10 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=PUT url=/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77 user=admin req_data={\"gw_size\": \"t3.medium\"} resp_status=200 OK resp_data={\"return\": true, \"results\": \"Gateway spoke-test-1 resized to t3.medium\"} ",
-          "reason": "{\"return\": true, \"results\": \"Gateway spoke-test-1 resized to t3.medium\"} ",
+          "reason": {
+            "__json_string__": {
+              "results": "Gateway spoke-test-1 resized to t3.medium",
+              "return": true
+            }
+          },
           "result": "200 OK",
           "tags": [
             "cmd",

@@ -8,7 +8,8 @@
       "events": [
         {
           "event": {
-            "action": "/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd? host=198.51.100.2 ip=203.0.113.218",
+            "action": "/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd",
+            "api_host": "198.51.100.2",
             "args": {
               "__json_string__": {
                 "name": "test-sg-1",
@@ -25,6 +26,8 @@
                 "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
               }
             },
+            "client_ip": "203.0.113.218",
+            "http_method": "PUT",
             "reason": {
               "__json_string__": {
                 "name": "test-sg-1",

@@ -9,16 +9,24 @@
         {
           "@timestamp": "YYYY-03-04T23:08:10.000Z",
           "TimeGenerated": "YYYY-03-04T23:08:10.000Z",
-          "action": "/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77",
+          "action": "/v2.5/api/gateways/spoke/spoke-test-1/size",
+          "api_host": "controller.example.com",
           "args": {
             "__json_string__": {
               "gw_size": "t3.medium"
             }
           },
+          "client_ip": "198.51.100.77",
           "controller_ip": "10.0.0.120",
           "gw_hostname": "Controller-10.0.0.120",
+          "http_method": "PUT",
           "ls_timestamp": "YYYY-03-04T23:08:10.000Z",
-          "reason": "{\"return\": true, \"results\": \"Gateway spoke-test-1 resized to t3.medium\"} ",
+          "reason": {
+            "__json_string__": {
+              "results": "Gateway spoke-test-1 resized to t3.medium",
+              "return": true
+            }
+          },
           "result": "200 OK",
           "tags": [
             "cmd",

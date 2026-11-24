@@ -8,7 +8,8 @@
       "events": [
         {
           "event": {
-            "action": "/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159",
+            "action": "/v2.5/app-domains",
+            "api_host": "198.51.100.2",
             "args": {
               "__json_string__": {
                 "name": "test-sg",
@@ -25,6 +26,8 @@
                 "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
               }
             },
+            "client_ip": "203.0.113.159",
+            "http_method": "POST",
             "reason": {
               "__json_string__": {
                 "reason": "myreason"

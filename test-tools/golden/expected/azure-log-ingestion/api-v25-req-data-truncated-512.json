@@ -9,12 +9,19 @@
         {
           "@timestamp": "YYYY-03-04T23:08:14.000Z",
           "TimeGenerated": "YYYY-03-04T23:08:14.000Z",
-          "action": "/v2.5/app-domains? host=controller.example.com ip=198.51.100.79",
+          "action": "/v2.5/app-domains",
+          "api_host": "controller.example.com",
           "args": "{\"name\": \"web-tier\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"tags\": {\"app\": \"web\", \"env\": \"prod\", \"owner\": \"team-a\", \"cost_center\": \"cc-1001\", \"region\": \"us-east-2\", \"tier\": \"frontend\", \"zone\": \"a\"}}}, {\"all\": {\"type\": \"vm\", \"tags\": {\"app\": \"web\", \"env\": \"prod\", \"owner\": \"team-a\", \"cost_center\": \"cc-1001\", \"region\": \"us-east-2\", \"tier\": \"frontend\", \"zone\": \"b\"}}}, {\"all\": {\"type\": \"vm\", \"tags\": {\"app\": \"web\", \"env\": \"prod\", \"owner\": \"team-a\", \"cost_center\": \"cc-1001\", \"region\": \"us-east-2\", \"tier\": \"frontend\", \"zone\": \"c\"}}}]}, \"uui...",
+          "client_ip": "198.51.100.79",
           "controller_ip": "10.0.0.120",
           "gw_hostname": "Controller-10.0.0.120",
+          "http_method": "POST",
           "ls_timestamp": "YYYY-03-04T23:08:14.000Z",
-          "reason": "{\"uuid\": \"4c5d6e7f-8091-4a2b-bc3d-4e5f60718293\"} ",
+          "reason": {
+            "__json_string__": {
+              "uuid": "4c5d6e7f-8091-4a2b-bc3d-4e5f60718293"
+            }
+          },
           "result": "201 CREATED",
           "tags": [
             "cmd",

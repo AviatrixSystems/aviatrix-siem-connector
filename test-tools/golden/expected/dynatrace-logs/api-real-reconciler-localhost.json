@@ -7,7 +7,8 @@
       "content_type": "application/json",
       "events": [
         {
-          "aviatrix.controller.action": "/v2.5/app-domains? host=localhost ip=",
+          "aviatrix.controller.action": "/v2.5/app-domains",
+          "aviatrix.controller.api_host": "localhost",
           "aviatrix.controller.args": {
             "__json_string__": {
               "desc": "Created by assetd firewall policy reconciler",
@@ -32,7 +33,8 @@
           "aviatrix.controller.result": "400 BAD REQUEST",
           "aviatrix.controller.username": "admin",
           "aviatrix.event.type": "ControllerAudit",
-          "content": "Controller API: /v2.5/app-domains? host=localhost ip= by admin - 400 BAD REQUEST",
+          "content": "Controller API: /v2.5/app-domains by admin - 400 BAD REQUEST",
+          "http.request.method": "POST",
           "log.source": "aviatrix",
           "severity": "WARN",
           "timestamp": "YYYY-06-10T21:20:42.000Z"

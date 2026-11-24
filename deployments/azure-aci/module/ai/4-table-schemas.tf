@@ -230,6 +230,10 @@ locals {
       { name = "tags", type = "dynamic" },
       { name = "unix_time", type = "long" },
       { name = "username", type = "string" },
+      # Added 2026-11: V2.5 API method, client IP and Host header
+      { name = "http_method", type = "string" },
+      { name = "client_ip", type = "string" },
+      { name = "api_host", type = "string" },
     ]
     tunnel_status = [
       { name = "TimeGenerated", type = "datetime" },

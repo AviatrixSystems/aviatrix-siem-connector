@@ -7,20 +7,28 @@
       "content_type": "application/json",
       "events": [
         {
-          "aviatrix.controller.action": "/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77",
+          "aviatrix.controller.action": "/v2.5/api/gateways/spoke/spoke-test-1/size",
+          "aviatrix.controller.api_host": "controller.example.com",
           "aviatrix.controller.args": {
             "__json_string__": {
               "gw_size": "t3.medium"
             }
           },
           "aviatrix.controller.host": "Controller-10.0.0.120",
-          "aviatrix.controller.reason": "{\"return\": true, \"results\": \"Gateway spoke-test-1 resized to t3.medium\"} ",
+          "aviatrix.controller.reason": {
+            "__json_string__": {
+              "results": "Gateway spoke-test-1 resized to t3.medium",
+              "return": true
+            }
+          },
           "aviatrix.controller.result": "200 OK",
           "aviatrix.controller.username": "admin",
           "aviatrix.event.type": "ControllerAudit",
-          "content": "Controller API: /v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77 by admin - 200 OK",
+          "client.ip": "198.51.100.77",
+          "content": "Controller API: /v2.5/api/gateways/spoke/spoke-test-1/size by admin - 200 OK",
+          "http.request.method": "PUT",
           "log.source": "aviatrix",
-          "severity": "WARN",
+          "severity": "INFORMATIONAL",
           "timestamp": "YYYY-03-04T23:08:10.000Z"
         }
       ],

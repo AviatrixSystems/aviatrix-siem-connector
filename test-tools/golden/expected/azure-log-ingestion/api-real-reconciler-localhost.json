@@ -9,7 +9,8 @@
         {
           "@timestamp": "YYYY-06-10T21:20:42.000Z",
           "TimeGenerated": "YYYY-06-10T21:20:42.000Z",
-          "action": "/v2.5/app-domains? host=localhost ip=",
+          "action": "/v2.5/app-domains",
+          "api_host": "localhost",
           "args": {
             "__json_string__": {
               "desc": "Created by assetd firewall policy reconciler",
@@ -27,6 +28,7 @@
           },
           "controller_ip": "10.0.0.141",
           "gw_hostname": "Controller-10.0.0.141",
+          "http_method": "POST",
           "ls_timestamp": "YYYY-06-10T21:20:42.000Z",
           "reason": {
             "__json_string__": {

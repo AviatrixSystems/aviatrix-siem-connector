@@ -9,14 +9,17 @@
         {
           "@timestamp": "YYYY-03-04T23:08:12.000Z",
           "TimeGenerated": "YYYY-03-04T23:08:12.000Z",
-          "action": "/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78",
+          "action": "/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718",
+          "api_host": "10.0.0.120",
           "args": {
             "__json_string__": {}
           },
+          "client_ip": "198.51.100.78",
           "controller_ip": "10.0.0.120",
           "gw_hostname": "Controller-10.0.0.120",
+          "http_method": "DELETE",
           "ls_timestamp": "YYYY-03-04T23:08:12.000Z",
-          "reason": "None ",
+          "reason": "None",
           "result": "401 UNAUTHORIZED",
           "tags": [
             "cmd",

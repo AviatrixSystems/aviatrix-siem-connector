@@ -8,7 +8,8 @@
       "events": [
         {
           "@timestamp": "YYYY-08-23T15:54:41.859Z",
-          "action": "/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159",
+          "action": "/v2.5/app-domains",
+          "api_host": "198.51.100.2",
           "args": {
             "__json_string__": {
               "name": "test-sg",
@@ -25,11 +26,13 @@
               "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
             }
           },
+          "client_ip": "203.0.113.159",
           "controller_ip": "10.0.1.118",
           "event": {
             "original": "2023-08-23T15:54:41.859849+00:00 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=POST url=/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159 user=admin req_data={\"name\": \"test-sg\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"name\": \"web-vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"} resp_status=201 CREATED resp_data={\"name\": \"test-sg\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"name\": \"web-vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"}"
           },
           "gw_hostname": "Controller-10.0.1.118",
+          "http_method": "POST",
           "message": "2023-08-23T15:54:41.859849+00:00 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=POST url=/v2.5/app-domains? host=198.51.100.2 ip=203.0.113.159 user=admin req_data={\"name\": \"test-sg\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"name\": \"web-vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"} resp_status=201 CREATED resp_data={\"name\": \"test-sg\", \"selector\": {\"any\": [{\"all\": {\"type\": \"vm\", \"name\": \"web-vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"}",
           "reason": {
             "__json_string__": {

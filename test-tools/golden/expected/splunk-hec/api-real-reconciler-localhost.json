@@ -8,7 +8,8 @@
       "events": [
         {
           "event": {
-            "action": "/v2.5/app-domains? host=localhost ip=",
+            "action": "/v2.5/app-domains",
+            "api_host": "localhost",
             "args": {
               "__json_string__": {
                 "desc": "Created by assetd firewall policy reconciler",
@@ -24,6 +25,7 @@
                 }
               }
             },
+            "http_method": "POST",
             "reason": {
               "__json_string__": {
                 "message": "[AVXERR-SMARTGROUP-0004] Smart Group with name firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977 exists. Smart Group UUID is ed36e4db-b013-429a-8725-19e853773126"

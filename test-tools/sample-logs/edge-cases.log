@@ -101,8 +101,8 @@
 
 # --- Real layout: method=, host=, ip= before user=; resp_status with reason phrase ---
 # [copilot] apps/ui/src/components/Security/Audit/constants.tsx:47
-# KNOWN BUG: action = "<url>? host=<ip> ip=<ip>"; method and client ip are not
-# extracted. Should be action=/v2.5/app-domains/<uuid>, method=PUT, client ip.
+# action=/v2.5/app-domains/<uuid> (trailing "?" stripped), http_method=PUT,
+# api_host and client_ip extracted. (Before the fix action held "<url>? host=.. ip=..".)
 # @case api-v25-put-host-ip-201
 <14>Aug 30 00:15:56 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=PUT url=/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd? host=198.51.100.2 ip=203.0.113.218 user=admin req_data={"name": "test-sg-1", "selector": {"any": [{"all": {"name": "web-vm", "type": "vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"} resp_status=201 CREATED resp_data={"name": "test-sg-1", "selector": {"any": [{"all": {"name": "web-vm", "type": "vm"}}]}, "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"}
 
@@ -265,7 +265,7 @@ this is not a syslog line
 # resp_status resp_data, each followed by a space (trailing space at end of line).
 
 # --- Real field order, 200 OK, trailing space ---
-# KNOWN BUG: action captures "<url>? host=... ip=..."; method/ip not extracted.
+# Parsed by the full-format pattern; the trailing space is trimmed from reason.
 # @case api-v25-put-200-ok-trailing-space
 <14>Mar  4 23:08:10 203.0.113.5 Mar  4 23:08:10 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=PUT url=/v2.5/api/gateways/spoke/spoke-test-1/size? host=controller.example.com ip=198.51.100.77 user=admin req_data={"gw_size": "t3.medium"} resp_status=200 OK resp_data={"return": true, "results": "Gateway spoke-test-1 resized to t3.medium"} 
 

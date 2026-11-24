@@ -9,12 +9,15 @@
         {
           "@timestamp": "YYYY-11-03T20:03:16.000Z",
           "TimeGenerated": "YYYY-11-03T20:03:16.000Z",
-          "action": "/v2.5/k8s/clusters/6aea18a306f557b62f476c15? host=203.0.113.3 ip=198.51.100.32",
+          "action": "/v2.5/k8s/clusters/6aea18a306f557b62f476c15",
+          "api_host": "203.0.113.3",
           "args": {
             "__json_string__": {}
           },
+          "client_ip": "198.51.100.32",
           "controller_ip": "10.0.0.131",
           "gw_hostname": "Controller-10.0.0.131",
+          "http_method": "DELETE",
           "ls_timestamp": "YYYY-11-03T20:03:16.000Z",
           "reason": "None",
           "result": "204 NO CONTENT",

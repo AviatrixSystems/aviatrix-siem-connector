@@ -8,7 +8,8 @@
       "events": [
         {
           "@timestamp": "YYYY-06-10T21:20:42.000Z",
-          "action": "/v2.5/app-domains? host=localhost ip=",
+          "action": "/v2.5/app-domains",
+          "api_host": "localhost",
           "args": {
             "__json_string__": {
               "desc": "Created by assetd firewall policy reconciler",
@@ -29,6 +30,7 @@
             "original": "<14>Jun 10 21:20:42 Controller-10.0.0.141 run_cloudxd.py[2417]: AviatrixAPI: method=POST url=/v2.5/app-domains? host=localhost ip= user=admin req_data={\"desc\": \"Created by assetd firewall policy reconciler\", \"name\": \"firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977\", \"selector\": {\"any\": [{\"all\": {\"cidr\": \"0.0.0.0/0\"}}]}} resp_status=400 BAD REQUEST resp_data={\"message\": \"[AVXERR-SMARTGROUP-0004] Smart Group with name firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977 exists. Smart Group UUID is ed36e4db-b013-429a-8725-19e853773126\"}"
           },
           "gw_hostname": "Controller-10.0.0.141",
+          "http_method": "POST",
           "message": "<14>Jun 10 21:20:42 Controller-10.0.0.141 run_cloudxd.py[2417]: AviatrixAPI: method=POST url=/v2.5/app-domains? host=localhost ip= user=admin req_data={\"desc\": \"Created by assetd firewall policy reconciler\", \"name\": \"firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977\", \"selector\": {\"any\": [{\"all\": {\"cidr\": \"0.0.0.0/0\"}}]}} resp_status=400 BAD REQUEST resp_data={\"message\": \"[AVXERR-SMARTGROUP-0004] Smart Group with name firewallpolicy-smartgroup-gatus--gatus-egress--anywhere--1a516977 exists. Smart Group UUID is ed36e4db-b013-429a-8725-19e853773126\"}",
           "reason": {
             "__json_string__": {
