@@ -251,6 +251,13 @@ Metrics are named `aviatrix.gateway.*`; per-core CPU is under `aviatrix.gateway.
 
 Changes that can affect existing deployments, dashboards or searches, newest first.
 
+### v2.2.0
+
+**Azure deployments** (`terraform apply` required)
+- Numeric and boolean fields were stored as **null** whenever Logstash sent them as JSON strings: a typed DCR stream column does not convert `"1267"` into an int column. This hit microseg `ip_size` and `session_*`, every `gw_net_stats` counter, and similar fields. DCR stream declarations now declare int/long/real/boolean columns as `dynamic` and the DCR transform casts them (`toint`/`tolong`/`toreal`/`tobool`), generated from `module/ai/4-table-schemas.tf`. Table column types are unchanged.
+- `gw_net_stats` rate columns are `int` and stored null above ~2.1 Gbit/s. New real columns `total_rx_bps`, `total_tx_bps`, `total_rx_tx_bps` carry the full value; `conntrack_usage_pct` (real) carries the exact `conntrack_usage_rate`, which its `int` column truncates. Use the new columns in queries; the old ones stay for compatibility.
+- `session_id` is a uint64 and can exceed the `long` column (stored null); use `NetworkSessionId`, which always carries it as a string.
+
 ### v2.1.0
 
 **Parsing fixes** (events that were dropped or lost fields are now forwarded)

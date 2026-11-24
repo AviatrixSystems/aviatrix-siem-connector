@@ -208,7 +208,7 @@ The 3 security log types are ASIM-normalized for Azure Sentinel integration. ASI
 | TunnelStatus | `AviatrixTunnelStatus_CL` | (none) | - |
 | VpnSession | `AviatrixVPNSession_CL` | (none) | - |
 
-Columns for all 8 tables and DCRs come from `deployments/azure-aci/module/ai/4-table-schemas.tf`; a field missing there is dropped at ingestion, so add new fields there.
+Columns for all 8 tables and DCRs come from `deployments/azure-aci/module/ai/4-table-schemas.tf`; a field missing there is dropped at ingestion, so add new fields there. DCR stream declarations are derived from it: int/long/real/boolean columns are declared `dynamic` and cast in the generated DCR transform, because a typed stream column stores null for a JSON string value. Never change the type of an existing column (unsafe once a table has data); add a new column and fill it in `dcr_transform_prefix`. `golden.py azure-columns` checks the contract.
 
 ### ASIM Field Patterns
 

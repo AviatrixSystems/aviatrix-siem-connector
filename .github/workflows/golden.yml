@@ -72,9 +72,9 @@ jobs:
           python3 test-tools/golden/golden.py check ${{ steps.sel.outputs.args }} \
             --actual-dir "$RUNNER_TEMP/golden-actual"
 
-      - name: Azure column contract (report only)
+      - name: Azure column contract
         if: always()
-        run: python3 test-tools/golden/golden.py azure-columns || true
+        run: python3 test-tools/golden/golden.py azure-columns
 
       - name: Upload actual output on failure
         if: failure()

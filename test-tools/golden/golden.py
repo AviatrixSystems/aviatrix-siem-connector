@@ -545,6 +545,15 @@ AZURE_PATH_TABLE = {
 }
 # Fields the DCR is expected to drop (not columns on purpose).
 AZURE_EXPECTED_DROPS = {"tags", "@timestamp"}
+# Columns the DCR transform fills from other columns (dcr_transform_prefix in
+# 4-table-schemas.tf), so no Logstash event carries them.
+AZURE_DCR_DERIVED = {"conntrack_usage_pct", "total_rx_bps", "total_tx_bps", "total_rx_tx_bps"}
+# Known, accepted losses: session_id is a uint64 that can exceed the long column
+# (NetworkSessionId carries it as a string); legacy microseg enforced="unknown".
+AZURE_ACCEPTED = {("netsession", "session_id", "null"), ("netsession", "enforced", "null"),
+                  ("gw_net_stats", "conntrack_usage_rate", "truncated"),
+                  ("gw_net_stats", "total_rx_rate", "null"), ("gw_net_stats", "total_tx_rate", "null"),
+                  ("gw_net_stats", "total_rx_tx_rate", "null")}
 
 
 def azure_schemas() -> dict[str, dict[str, str]]:
@@ -561,20 +570,40 @@ def azure_schemas() -> dict[str, dict[str, str]]:
     return tables
 
 
-def _type_ok(col_type: str, v) -> bool:
-    if v is None:
-        return True
-    if col_type in ("int", "long"):
-        return isinstance(v, int) and not isinstance(v, bool)
-    if col_type == "real":
-        return isinstance(v, (int, float)) and not isinstance(v, bool)
+INT_RANGE = {"int": (-2**31, 2**31 - 1), "long": (-2**63, 2**63 - 1)}
+
+
+def _azure_outcome(col_type: str, v) -> str:
+    """What Log Analytics stores for value v in a column of col_type, given the
+    DCR transform casts generated in 4-table-schemas.tf (dynamic stream column,
+    then toint(toreal(x)) / tolong(x) / toreal(x) / tobool(x)). Measured against
+    a live workspace 2026-11: JSON numbers and numeric strings both cast; a
+    non-numeric string or an out-of-range value becomes null; int truncates.
+    Returns "ok", "truncated" or "null"."""
+    if v is None or col_type in ("string", "dynamic", "datetime"):
+        return "ok" if col_type != "string" or isinstance(v, str) or v is None else "ok"
     if col_type == "boolean":
-        return isinstance(v, bool)
-    if col_type == "datetime":
-        return isinstance(v, str)
-    if col_type == "string":
-        return isinstance(v, str)
-    return True  # dynamic
+        if isinstance(v, bool) or (isinstance(v, str) and v.lower() in ("true", "false")):
+            return "ok"
+        return "null"
+    if isinstance(v, bool):
+        return "null"
+    num = v
+    if isinstance(v, str):
+        try:
+            num = int(v) if re.fullmatch(r"[+-]?\d+", v.strip()) else float(v)
+        except ValueError:
+            return "null"
+    if not isinstance(num, (int, float)):
+        return "null"
+    if col_type == "real":
+        return "ok"
+    lo, hi = INT_RANGE[col_type]
+    if not lo <= num <= hi:
+        return "null"
+    if isinstance(num, float) and not num.is_integer():
+        return "truncated"
+    return "ok"
 
 
 def azure_columns_report(strict: bool) -> int:
@@ -594,17 +623,21 @@ def azure_columns_report(strict: bool) -> int:
             for ev in req["events"]:
                 for k, v in ev.items():
                     sent.setdefault(table, {}).setdefault(k, set()).add(rec["case"])
-                    if k in cols and k not in TIME_KEYS and not _type_ok(cols[k], v):
-                        mismatches.setdefault((table, k, cols[k], type(v).__name__), []).append(
+                    outcome = _azure_outcome(cols[k], v) if k in cols and k not in TIME_KEYS else "ok"
+                    if outcome != "ok":
+                        mismatches.setdefault((table, k, cols[k], outcome), []).append(
                             (rec["case"], json.dumps(v)[:40]))
-    for (table, k, col, got), hits in sorted(mismatches.items()):
-        print(f"  TYPE     {table}.{k}: column is {col}, sent as {got} in {len(hits)} case(s), "
+    for (table, k, col, outcome), hits in sorted(mismatches.items()):
+        accepted = (table, k, outcome) in AZURE_ACCEPTED
+        label = "accepted" if accepted else outcome.upper()
+        print(f"  {label:9} {table}.{k}: {col} column stores {outcome} in {len(hits)} case(s), "
               f"e.g. {hits[0][0]} = {hits[0][1]}")
-        problems += 1
+        problems += 0 if accepted else 1
     for table, fields in sorted(sent.items()):
         cols = schemas.get(table, {})
         dropped = sorted(k for k in fields if k not in cols and k not in AZURE_EXPECTED_DROPS)
-        unused = sorted(c for c in cols if c not in fields and c != "TimeGenerated")
+        unused = sorted(c for c in cols if c not in fields and c != "TimeGenerated"
+                        and c not in AZURE_DCR_DERIVED)
         for k in dropped:
             print(f"  DROPPED  {table}.{k}: sent (e.g. by {sorted(fields[k])[0]}) but not a column")
         if unused:
