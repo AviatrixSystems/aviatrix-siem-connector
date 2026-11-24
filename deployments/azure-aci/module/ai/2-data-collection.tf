@@ -21,7 +21,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_netsession" {
     streams       = ["Custom-AviatrixNetworkSession_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixNetworkSession_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.netsession
   }
 
   destinations {
@@ -35,7 +35,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_netsession" {
     stream_name = "Custom-AviatrixNetworkSession_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.netsession
+      for_each = local.stream_schemas.netsession
       content {
         name = column.value.name
         type = column.value.type
@@ -57,7 +57,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_websession" {
     streams       = ["Custom-AviatrixWebSession_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixWebSession_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.websession
   }
 
   destinations {
@@ -71,7 +71,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_websession" {
     stream_name = "Custom-AviatrixWebSession_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.websession
+      for_each = local.stream_schemas.websession
       content {
         name = column.value.name
         type = column.value.type
@@ -93,7 +93,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_ids" {
     streams       = ["Custom-AviatrixIDS_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixIDS_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.ids
   }
 
   destinations {
@@ -107,7 +107,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_ids" {
     stream_name = "Custom-AviatrixIDS_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.ids
+      for_each = local.stream_schemas.ids
       content {
         name = column.value.name
         type = column.value.type
@@ -129,7 +129,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_gw_net_stats" {
     streams       = ["Custom-AviatrixGwNetStats_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixGwNetStats_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.gw_net_stats
   }
 
   destinations {
@@ -143,7 +143,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_gw_net_stats" {
     stream_name = "Custom-AviatrixGwNetStats_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.gw_net_stats
+      for_each = local.stream_schemas.gw_net_stats
       content {
         name = column.value.name
         type = column.value.type
@@ -165,7 +165,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_gw_sys_stats" {
     streams       = ["Custom-AviatrixGwSysStats_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixGwSysStats_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.gw_sys_stats
   }
 
   destinations {
@@ -179,7 +179,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_gw_sys_stats" {
     stream_name = "Custom-AviatrixGwSysStats_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.gw_sys_stats
+      for_each = local.stream_schemas.gw_sys_stats
       content {
         name = column.value.name
         type = column.value.type
@@ -201,7 +201,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_cmd" {
     streams       = ["Custom-AviatrixCmd_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixCmd_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.cmd
   }
 
   destinations {
@@ -215,7 +215,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_cmd" {
     stream_name = "Custom-AviatrixCmd_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.cmd
+      for_each = local.stream_schemas.cmd
       content {
         name = column.value.name
         type = column.value.type
@@ -237,7 +237,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_tunnel_status" {
     streams       = ["Custom-AviatrixTunnelStatus_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixTunnelStatus_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.tunnel_status
   }
 
   destinations {
@@ -251,7 +251,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_tunnel_status" {
     stream_name = "Custom-AviatrixTunnelStatus_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.tunnel_status
+      for_each = local.stream_schemas.tunnel_status
       content {
         name = column.value.name
         type = column.value.type
@@ -273,7 +273,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_vpn_session" {
     streams       = ["Custom-AviatrixVPNSession_CL"]
     destinations  = ["loganalytics-destination"]
     output_stream = "Custom-AviatrixVPNSession_CL"
-    transform_kql = "source"
+    transform_kql = local.dcr_transform_kql.vpn_session
   }
 
   destinations {
@@ -287,7 +287,7 @@ resource "azurerm_monitor_data_collection_rule" "aviatrix_vpn_session" {
     stream_name = "Custom-AviatrixVPNSession_CL"
     # Columns are defined once in 4-table-schemas.tf
     dynamic "column" {
-      for_each = local.table_schemas.vpn_session
+      for_each = local.stream_schemas.vpn_session
       content {
         name = column.value.name
         type = column.value.type

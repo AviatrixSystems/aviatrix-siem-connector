@@ -4,6 +4,14 @@
 #   - 3-log-analytics-tables.tf  -> azapi table body (schema.columns)
 #   - 2-data-collection.tf       -> DCR stream_declaration (dynamic "column")
 #
+# DCR stream declarations are derived from these lists (stream_schemas below):
+# int/long/real/boolean columns are declared "dynamic" and cast in the DCR
+# transform. A typed stream column stores null when the JSON value is a string
+# ("1267" into an int column), and Logstash sends many numbers as strings.
+# Tested against Log Analytics 2026-11: dynamic + toint()/tolong()/toreal()/
+# tobool() stores both JSON numbers and numeric strings; a decimal string into
+# an int and a value above the long maximum still store null.
+#
 # The DCR silently drops any property that is not declared here, so every field
 # that logstash-configs/outputs/azure-log-ingestion/output.conf sends (and that
 # should land in Log Analytics) must be listed. Add new columns at the END of a
@@ -197,6 +205,14 @@ locals {
       { name = "total_tx_cum", type = "string" },
       { name = "total_tx_rate", type = "int" },
       { name = "unix_time", type = "long" },
+      # Added 2026-11, set by the DCR transform (dcr_transform_prefix) from the
+      # columns above: the exact usage rate (conntrack_usage_rate is an int and
+      # truncates it) and the rates in bits/s (the int rate columns store null
+      # above 2^31-1, i.e. ~2.1 Gbit/s).
+      { name = "conntrack_usage_pct", type = "real" },
+      { name = "total_rx_bps", type = "real" },
+      { name = "total_tx_bps", type = "real" },
+      { name = "total_rx_tx_bps", type = "real" },
     ]
     gw_sys_stats = [
       { name = "TimeGenerated", type = "datetime" },
@@ -266,5 +282,40 @@ locals {
       { name = "tags", type = "dynamic" },
       { name = "unix_time", type = "long" },
     ]
+  }
+
+  # --- Derived: DCR stream declarations and transforms (2-data-collection.tf) ---
+  dcr_cast = {
+    int     = "toint(toreal(%s))" # toreal first so "12.0" and 12.0 also cast
+    long    = "tolong(%s)"        # no toreal: it would lose precision above 2^53
+    real    = "toreal(%s)"
+    boolean = "tobool(%s)"
+  }
+
+  stream_schemas = {
+    for table, cols in local.table_schemas : table => [
+      for c in cols : { name = c.name, type = contains(keys(local.dcr_cast), c.type) ? "dynamic" : c.type }
+    ]
+  }
+
+  # Extra KQL that runs before the casts, per table. Columns it sets must also be
+  # in the table list above (they are cast like any other column).
+  dcr_transform_prefix = {
+    gw_net_stats = "extend conntrack_usage_pct = conntrack_usage_rate, total_rx_bps = total_rx_rate, total_tx_bps = total_tx_rate, total_rx_tx_bps = total_rx_tx_rate"
+  }
+
+  dcr_casts = {
+    for table, cols in local.table_schemas : table => [
+      for c in cols : format("%s = %s", c.name, format(local.dcr_cast[c.type], c.name))
+      if contains(keys(local.dcr_cast), c.type)
+    ]
+  }
+
+  dcr_transform_kql = {
+    for table, casts in local.dcr_casts : table => join(" | ", compact([
+      "source",
+      lookup(local.dcr_transform_prefix, table, ""),
+      length(casts) > 0 ? "extend ${join(", ", casts)}" : "",
+    ]))
   }
 }
