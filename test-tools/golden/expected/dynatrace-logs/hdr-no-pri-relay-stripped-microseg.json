@@ -5,5 +5,38 @@
   },
   "case": "hdr-no-pri-relay-stripped-microseg",
   "input": "Mar 10 14:08:05 GW-insertion-gw-dev-agent-198.51.100.1-sink /usr/local/bin/avx-gw-state-sync 2026/03/10 14:08:05 AviatrixGwMicrosegPacket: POLICY=665b3391-0abe-4c0d-af0a-b4f892323c9a SRC_MAC=06:d9:42:0b:45:c3 DST_MAC=06:09:6c:50:13:21 IP_SZ=60 SRC_IP=10.0.66.44 DST_IP=10.0.4.178 PROTO=TCP SRC_PORT=8000 DST_PORT=59670 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=32026532893825936 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0",
-  "requests": []
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "PERMIT",
+          "aviatrix.dcf.dst_ip": "10.0.4.178",
+          "aviatrix.dcf.dst_port": 59670,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "insertion-gw-dev-agent",
+          "aviatrix.dcf.layer": "L4",
+          "aviatrix.dcf.policy_uuid": "665b3391-0abe-4c0d-af0a-b4f892323c9a",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.session_byte_cnt": "0",
+          "aviatrix.dcf.session_dur": "0",
+          "aviatrix.dcf.session_end_reason": "0",
+          "aviatrix.dcf.session_end_reason_text": "active",
+          "aviatrix.dcf.session_event": "0",
+          "aviatrix.dcf.session_event_type": "Start",
+          "aviatrix.dcf.session_id": "32026532893825936",
+          "aviatrix.dcf.session_pkt_cnt": "0",
+          "aviatrix.dcf.src_ip": "10.0.66.44",
+          "aviatrix.dcf.src_port": 8000,
+          "aviatrix.event.type": "DCFPolicyEvent",
+          "content": "L4 DCF Allow: 10.0.66.44:8000 -> 10.0.4.178:59670 TCP",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-10T14:08:05.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
 }

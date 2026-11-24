@@ -25,8 +25,7 @@
 
 # --- Space between <PRI> and the timestamp (layout emitted by CoPilot avx-log-gen) ---
 # [copilot] integration_tests/avx-log-gen/src/generators/syslog.py:112-144
-# KNOWN BUG: every pattern expects the timestamp immediately after <PRI>, so this
-# fails grok (_avx_grok_failure_microseg). Should parse like the 8.2 samples.
+# Parses: the header pattern (AVX_PRI) allows a space after <PRI>.
 # @case hdr-space-after-pri-microseg
 <133> Nov 23 10:00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[4242]: 2026/11/23 10:00:00 AviatrixGwMicrosegPacket: POLICY=0b6c3f9e-2f43-4b8e-9d1e-5f0a6f3c2a11 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.12.34.56 DST_IP=10.65.43.21 PROTO=TCP SRC_PORT=50123 DST_PORT=443 DATA=0x ACT=ALLOW ENFORCED=TRUE
 
@@ -65,13 +64,14 @@
 
 # --- RFC 5424 header, program "traffic-server" (hyphen), action PERMIT uppercase ---
 # [copilot] integration_tests/avx-log-gen/src/generators/syslog.py:146-154
-# KNOWN BUG (if gateways ever emit RFC 5424 to us): unparsed.
+# Parses: AVX_PRI accepts the RFC 5424 version, the L7 filter accepts
+# "traffic-server" and takes the JSON from the first "{" (procid/"- -" skipped).
 # @case mitm-rfc5424-traffic-server-hyphen
 <153>1 2026-11-23T10:00:02.123456Z hostname traffic-server 2 - - {"priority":"LOG_ALERT","action":"PERMIT","reason":"POLICY","src":"10.21.0.36","src_port":42148,"dest":"203.0.113.21","dest_port":443,"enforced":false,"ids":false,"stage":"SNI","sni_hostname":"www.example.com","decided_by":"21018422-0b45-4226-9694-d2cfab39a382","proto":"TCP","timestamp":1795428002,"session_id":"00000000-0000-0000-0000-000000000000","session_start":1795428002,"session_stage":"start"}
 
 # --- traffic_server without [pid] ---
 # [copilot] synthetic from avxlogs.conf alternatives
-# KNOWN BUG: the gate looks for "traffic_server[", so this is unparsed.
+# Parses: the L7 filter accepts traffic_server with or without [pid].
 # @case mitm-no-pid
 <153>Nov 23 10:00:03 GW-frontend-spoke-198.51.100.41-sink traffic_server: {"priority":"LOG_ALERT","action":"Permit","reason":"POLICY","src":"10.1.5.205","src_port":40708,"dest":"203.0.113.138","dest_port":443,"enforced":true,"ids":true,"stage":"SNI","sni_hostname":"www.example.com","decided_by":"3822a647-d2b2-4e04-9be3-6808da41110e","proto":"TCP","timestamp":1795428003}
 
@@ -190,7 +190,7 @@ this is not a syslog line
 
 # --- Customer custom template: RFC 5424 header on a microseg line ---
 # [cloudn] fwd_syslog.py:93-101 (--omfwd_template accepts any rsyslog template)
-# KNOWN BUG: our ^<PRI>timestamp anchors fail on "<158>1 <ISO> ..." -> grok failure.
+# Parses: AVX_PRI accepts the RFC 5424 version field after <PRI>.
 # @case hdr-rfc5424-custom-template-microseg avx=8.2 until=10.0
 <158>1 2026-03-04T23:02:10.120000+00:00 GW-db-spoke-198.51.100.31-sink avx-gw-state-sync - - - 2026/03/04 23:02:10 AviatrixGwMicrosegPacket: POLICY=0b6e4d3c-91a2-4f7e-8c55-3d2e1f0a9b88 SRC_MAC=02:aa:bb:cc:dd:01 DST_MAC=02:aa:bb:cc:dd:02 IP_SZ=60 SRC_IP=10.40.0.9 DST_IP=10.50.0.7 PROTO=TCP SRC_PORT=40100 DST_PORT=5432 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=771249900399 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
 
@@ -411,7 +411,8 @@ this is not a syslog line
 # @case microseg-real-101-icmp avx=10.1
 <158>Nov  3 19:51:15 GW-n3-fs-b-192.0.2.3-sink /usr/local/bin/avx-gw-state-sync 2026/11/03 19:51:15 AviatrixGwMicrosegPacket: POLICY=7f1aea27-fdb5-4635-b651-893b37d9c855 SRC_MAC=12:ff:f7:57:9f:09 DST_MAC=12:ff:cc:7c:ee:a7 IP_SZ=28 SRC_IP=10.11.0.58 DST_IP=10.12.0.41 PROTO=ICMP SRC_PORT=0 DST_PORT=0 DATA=0x ACT=DENY ENFORCED=false SESSION_START=2026-11-03T17:10:21.461098724Z SESSION_ID=0 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0 EGRESS_PATH=EGRESS_PATH_DEFAULT
 
-# --- Same 8.2 shape as received by Splunk's UDP input: PRI stripped and Splunk prepended its own 'MMM D HH:MM:SS <sender-ip>' (prefix removed here). Microseg/L7/stats groks all require a leading <PRI> (count: 99,553 (syslog sourcetype)) ---
+# --- Same 8.2 shape as received by Splunk's UDP input: PRI stripped and Splunk prepended its own 'MMM D HH:MM:SS <sender-ip>' (prefix removed here). (count: 99,553 (syslog sourcetype)) ---
+# Parses: <PRI> is optional in the header pattern (AVX_PRI).
 # [splunk] L4 #9
 # @case hdr-no-pri-relay-stripped-microseg avx=8.2 until=10.0
 Mar 10 14:08:05 GW-insertion-gw-dev-agent-198.51.100.1-sink /usr/local/bin/avx-gw-state-sync 2026/03/10 14:08:05 AviatrixGwMicrosegPacket: POLICY=665b3391-0abe-4c0d-af0a-b4f892323c9a SRC_MAC=06:d9:42:0b:45:c3 DST_MAC=06:09:6c:50:13:21 IP_SZ=60 SRC_IP=10.0.66.44 DST_IP=10.0.4.178 PROTO=TCP SRC_PORT=8000 DST_PORT=59670 DATA=0x ACT=PERMIT ENFORCED=true SESSION_ID=32026532893825936 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0
