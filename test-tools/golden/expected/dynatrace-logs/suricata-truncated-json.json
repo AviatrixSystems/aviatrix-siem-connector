@@ -1,0 +1,5 @@
+{
+  "case": "suricata-truncated-json",
+  "input": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":4",
+  "requests": []
+}

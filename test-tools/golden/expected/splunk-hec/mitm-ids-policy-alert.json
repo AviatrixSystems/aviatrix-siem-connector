@@ -1,0 +1,48 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-ids-policy-alert",
+  "input": "<153>Mar  4 22:58:02 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"IDS_POLICY_ALERT\",\"src\":\"10.1.5.205\",\"src_port\":39378,\"dest\":\"23.215.0.136\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"example.com\",\"decrypted_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"session_start\":1772665082538942969,\"session_time\":116428959,\"session_stage\":\"end\",\"session_id\":\"988975f9-002e-4ae7-bf50-333b226d522a\",\"request_bytes\":98,\"response_bytes\":804,\"sid\":\"2200311\",\"url\":\"example.com/\",\"timestamp\":1772665082}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Permit",
+              "decided_by": "3822a647-d2b2-4e04-9be3-6808da41110e",
+              "decrypted_by": "3822a647-d2b2-4e04-9be3-6808da41110e",
+              "dest": "23.215.0.136",
+              "dest_port": 443,
+              "enforced": true,
+              "ids": true,
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "IDS_POLICY_ALERT",
+              "request_bytes": 98,
+              "response_bytes": 804,
+              "session_id": "988975f9-002e-4ae7-bf50-333b226d522a",
+              "session_stage": "end",
+              "session_start": 1772665082538942969,
+              "session_time": 116428959,
+              "sid": "2200311",
+              "sni_hostname": "example.com",
+              "src": "10.1.5.205",
+              "src_port": 39378,
+              "stage": "txn",
+              "timestamp": "YYYY-03-04T22:58:02.000Z (epoch)",
+              "url": "example.com/"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-04T22:58:02.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

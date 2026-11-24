@@ -1,0 +1,27 @@
+{
+  "case": "fqdn-dropped-no-rule",
+  "input": "<14>Mar  4 22:59:15 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=104.244.42.1 hostname=api.twitter.com state=NO_MATCH drop_reason=NOT_WHITELISTED",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "FQDNFilter",
+          "aviatrix.firewall.drop_reason": "NOT_WHITELISTED",
+          "aviatrix.firewall.dst_ip": "104.244.42.1",
+          "aviatrix.firewall.gateway": "egress-fqdn-gw",
+          "aviatrix.firewall.hostname": "api.twitter.com",
+          "aviatrix.firewall.rule": "",
+          "aviatrix.firewall.src_ip": "10.10.1.163",
+          "aviatrix.firewall.state": "NO_MATCH",
+          "content": "FQDN Allow: 10.10.1.163 -> api.twitter.com (104.244.42.1) on egress-fqdn-gw",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T22:59:15.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

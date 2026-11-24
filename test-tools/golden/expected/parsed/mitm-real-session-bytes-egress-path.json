@@ -1,0 +1,44 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-session-bytes-egress-path",
+  "input": "<153>Sep 21 15:55:37 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"POLICY\",\"session_stage\":\"end\",\"enforced\":true,\"session_bytes\":85,\"src\":\"10.10.2.216\",\"session_id\":\"ea42bbf7-7f04-4035-aac1-9cc136850346\",\"dest\":\"198.51.100.39\",\"priority\":\"LOG_ALERT\",\"session_start\":1790006137922125333,\"url\":\"198.51.100.39/\",\"session_time\":98217,\"decided_by\":\"b32d68fc-7608-454c-a603-5cc5ce163c5c\",\"src_port\":51782,\"stage\":\"txn\",\"proto\":\"tcp\",\"action\":\"Deny\",\"ids\":false,\"sni_hostname\":\"198.51.100.39\",\"request_bytes\":85,\"dest_port\":80,\"timestamp\":1790006137,\"egress_path\":\"EGRESS_PATH_DEFAULT\"}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-09-21T15:55:37.000Z",
+          "action": "Deny",
+          "dst_ip": "198.51.100.39",
+          "dst_port": 80,
+          "enforced": true,
+          "gw_hostname": "app-spoke",
+          "message": "<153>Sep 21 15:55:37 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"POLICY\",\"session_stage\":\"end\",\"enforced\":true,\"session_bytes\":85,\"src\":\"10.10.2.216\",\"session_id\":\"ea42bbf7-7f04-4035-aac1-9cc136850346\",\"dest\":\"198.51.100.39\",\"priority\":\"LOG_ALERT\",\"session_start\":1790006137922125333,\"url\":\"198.51.100.39/\",\"session_time\":98217,\"decided_by\":\"b32d68fc-7608-454c-a603-5cc5ce163c5c\",\"src_port\":51782,\"stage\":\"txn\",\"proto\":\"tcp\",\"action\":\"Deny\",\"ids\":false,\"sni_hostname\":\"198.51.100.39\",\"request_bytes\":85,\"dest_port\":80,\"timestamp\":1790006137,\"egress_path\":\"EGRESS_PATH_DEFAULT\"}",
+          "mitm_ids": "false",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_request_bytes": "85",
+          "mitm_session_id": "ea42bbf7-7f04-4035-aac1-9cc136850346",
+          "mitm_session_stage": "end",
+          "mitm_session_time": "98217",
+          "mitm_sni_hostname": "198.51.100.39",
+          "mitm_stage": "txn",
+          "mitm_url_parts": "198.51.100.39/",
+          "proto": "TCP",
+          "src_ip": "10.10.2.216",
+          "src_port": 51782,
+          "syslog_pri": "153",
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-09-21T15:55:37.000Z (epoch)",
+          "uuid": "b32d68fc-7608-454c-a603-5cc5ce163c5c"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

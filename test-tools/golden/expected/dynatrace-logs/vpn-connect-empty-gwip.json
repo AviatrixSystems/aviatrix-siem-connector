@@ -1,0 +1,25 @@
+{
+  "case": "vpn-connect-empty-gwip",
+  "input": "<14>Mar 10 12:37:41 3.131.22.171 Mar 10 12:37:41 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=cmchenr, Status=active, Gateway=egress-vpn-gw, GatewayIP=, VPNVirtualIP=192.168.43.6, PublicIP=45.26.1.144, Login=2026-03-10 12:37:39, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=mac, VPNClientVersion=AVPNC-2.17.7",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "VPNSession",
+          "aviatrix.vpn.gateway": "egress-vpn-gw",
+          "aviatrix.vpn.gateway_ip": "",
+          "aviatrix.vpn.public_ip": "45.26.1.144",
+          "aviatrix.vpn.status": "active",
+          "aviatrix.vpn.user": "cmchenr",
+          "content": "VPN active: cmchenr on egress-vpn-gw",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-10T12:37:41.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

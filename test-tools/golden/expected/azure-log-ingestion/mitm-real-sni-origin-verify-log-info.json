@@ -1,0 +1,65 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-sni-origin-verify-log-info",
+  "input": "<158>Dec  9 18:36:14 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"TLS_PROFILE\",\"session_stage\":\"tls_check\",\"enforced\":true,\"src\":\"100.64.10.182\",\"session_id\":\"100d7ee7-7d4a-4b86-9832-02eea8ff1a74\",\"message\":\"SNI verification failed\",\"dest\":\"192.0.2.40\",\"priority\":\"LOG_INFO\",\"session_start\":1765305374621473818,\"session_time\":192433,\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"src_port\":57548,\"stage\":\"SNI_ORIGIN_VERIFY\",\"proto\":\"TCP\",\"action\":\"Deny\",\"ids\":true,\"sni_hostname\":\"h1.example4.com\",\"dest_port\":443,\"timestamp\":1765305374}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-12-09T18:36:14.000Z",
+          "DstFqdn": "h1.example4.com",
+          "DstHostname": "h1.example4.com",
+          "DstIpAddr": "192.0.2.40",
+          "DstPortNumber": 443,
+          "DvcAction": "Deny",
+          "DvcHostname": "app-spoke",
+          "DvcOriginalAction": "Deny",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-12-09T18:36:14.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Failure",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Low",
+          "EventStartTime": "YYYY-12-09T18:36:14.000Z",
+          "EventSubType": "TLS_PROFILE",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+          "NetworkSessionId": "100d7ee7-7d4a-4b86-9832-02eea8ff1a74",
+          "SrcIpAddr": "100.64.10.182",
+          "SrcPortNumber": 57548,
+          "TimeGenerated": "YYYY-12-09T18:36:14.000Z",
+          "action": "Deny",
+          "dst_ip": "192.0.2.40",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "app-spoke",
+          "mitm_ids": "true",
+          "mitm_message": "SNI verification failed",
+          "mitm_priority": "LOG_INFO",
+          "mitm_reason": "TLS_PROFILE",
+          "mitm_session_id": "100d7ee7-7d4a-4b86-9832-02eea8ff1a74",
+          "mitm_session_stage": "tls_check",
+          "mitm_session_time": "192433",
+          "mitm_sni_hostname": "h1.example4.com",
+          "mitm_stage": "SNI_ORIGIN_VERIFY",
+          "proto": "TCP",
+          "src_ip": "100.64.10.182",
+          "src_port": 57548,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-12-09T18:36:14.000Z (epoch)",
+          "uuid": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

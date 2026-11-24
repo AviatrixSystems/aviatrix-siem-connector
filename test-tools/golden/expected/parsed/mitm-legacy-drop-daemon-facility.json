@@ -1,0 +1,36 @@
+{
+  "case": "mitm-legacy-drop-daemon-facility",
+  "input": "<25>May 11 05:05:15 GW-webfilter-aws-spoke-east-198.51.100.125 traffic_server[9196]: {\"priority\":\"LOG_ALERT\",\"action\":\"DROP\",\"reason\":\"POLICY\",\"src\":\"10.11.0.39\",\"src_port\":57016,\"dest\":\"10.12.0.36\",\"dest_port\":443,\"enforced\":true,\"ids\":false,\"stage\":\"SNI\",\"sni_hostname\":\"blocked.example.com\",\"decided_by\":\"9e0c30af-2c6c-45cb-a451-ed1df1e62003\",\"proto\":\"TCP\",\"timestamp\":1683781515}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-05-11T05:05:15.000Z",
+          "action": "DROP",
+          "dst_ip": "10.12.0.36",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "webfilter-aws-spoke-east",
+          "message": "<25>May 11 05:05:15 GW-webfilter-aws-spoke-east-198.51.100.125 traffic_server[9196]: {\"priority\":\"LOG_ALERT\",\"action\":\"DROP\",\"reason\":\"POLICY\",\"src\":\"10.11.0.39\",\"src_port\":57016,\"dest\":\"10.12.0.36\",\"dest_port\":443,\"enforced\":true,\"ids\":false,\"stage\":\"SNI\",\"sni_hostname\":\"blocked.example.com\",\"decided_by\":\"9e0c30af-2c6c-45cb-a451-ed1df1e62003\",\"proto\":\"TCP\",\"timestamp\":1683781515}",
+          "mitm_ids": "false",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_sni_hostname": "blocked.example.com",
+          "mitm_stage": "SNI",
+          "proto": "TCP",
+          "src_ip": "10.11.0.39",
+          "src_port": 57016,
+          "syslog_pri": "25",
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-05-11T05:05:15.000Z (epoch)",
+          "uuid": "9e0c30af-2c6c-45cb-a451-ed1df1e62003"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

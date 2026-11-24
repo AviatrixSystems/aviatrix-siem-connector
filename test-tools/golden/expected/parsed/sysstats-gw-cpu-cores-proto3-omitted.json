@@ -1,0 +1,51 @@
+{
+  "case": "sysstats-gw-cpu-cores-proto3-omitted",
+  "input": "<14>Mar  4 23:09:05 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:05 AviatrixGwSysStats: timestamp=2026-03-04T23:09:05.77 name=transit-1 alias= cpu_idle=97 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[busy:{start:{seconds:1772665705 nanos:1200} end:{seconds:1772665745 nanos:99}} name:1 busy:{start:{seconds:1772665705} end:{seconds:1772665745} max:7 avg:1} name:-1 busy:{start:{seconds:1772665705 nanos:5} end:{seconds:1772665745 nanos:6} max:4}]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:09:05.000Z",
+          "cpu_aggregate_busy_max": 4,
+          "cpu_busy": 4,
+          "cpu_core_count": 2,
+          "cpu_cores": "[busy:{start:{seconds:1772665705 nanos:1200} end:{seconds:1772665745 nanos:99}} name:1 busy:{start:{seconds:1772665705} end:{seconds:1772665745} max:7 avg:1} name:-1 busy:{start:{seconds:1772665705 nanos:5} end:{seconds:1772665745 nanos:6} max:4}]",
+          "cpu_cores_parsed": [
+            {
+              "name": "0"
+            },
+            {
+              "busy_avg": 1,
+              "busy_max": 7,
+              "name": "1"
+            },
+            {
+              "busy_max": 4,
+              "name": "-1"
+            }
+          ],
+          "cpu_idle": 97,
+          "disk_free": 58001234,
+          "disk_total": 65842432,
+          "event": {
+            "original": "<14>Mar  4 23:09:05 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:05 AviatrixGwSysStats: timestamp=2026-03-04T23:09:05.77 name=transit-1 alias= cpu_idle=97 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[busy:{start:{seconds:1772665705 nanos:1200} end:{seconds:1772665745 nanos:99}} name:1 busy:{start:{seconds:1772665705} end:{seconds:1772665745} max:7 avg:1} name:-1 busy:{start:{seconds:1772665705 nanos:5} end:{seconds:1772665745 nanos:6} max:4}]"
+          },
+          "gateway": "transit-1",
+          "memory_available": 2899120,
+          "memory_free": 1203344,
+          "memory_total": 3828976,
+          "message": "<14>Mar  4 23:09:05 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:05 AviatrixGwSysStats: timestamp=2026-03-04T23:09:05.77 name=transit-1 alias= cpu_idle=97 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[busy:{start:{seconds:1772665705 nanos:1200} end:{seconds:1772665745 nanos:99}} name:1 busy:{start:{seconds:1772665705} end:{seconds:1772665745} max:7 avg:1} name:-1 busy:{start:{seconds:1772665705 nanos:5} end:{seconds:1772665745 nanos:6} max:4}]",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T23:09:05.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

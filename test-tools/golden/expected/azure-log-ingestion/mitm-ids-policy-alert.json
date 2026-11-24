@@ -1,0 +1,73 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-ids-policy-alert",
+  "input": "<153>Mar  4 22:58:02 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"IDS_POLICY_ALERT\",\"src\":\"10.1.5.205\",\"src_port\":39378,\"dest\":\"23.215.0.136\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"example.com\",\"decrypted_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"decided_by\":\"3822a647-d2b2-4e04-9be3-6808da41110e\",\"proto\":\"TCP\",\"session_start\":1772665082538942969,\"session_time\":116428959,\"session_stage\":\"end\",\"session_id\":\"988975f9-002e-4ae7-bf50-333b226d522a\",\"request_bytes\":98,\"response_bytes\":804,\"sid\":\"2200311\",\"url\":\"example.com/\",\"timestamp\":1772665082}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:58:02.000Z",
+          "DstBytes": 804,
+          "DstFqdn": "example.com",
+          "DstHostname": "example.com",
+          "DstIpAddr": "23.215.0.136",
+          "DstPortNumber": 443,
+          "DvcAction": "Allow",
+          "DvcHostname": "frontend-eks-spoke",
+          "DvcOriginalAction": "Permit",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-03-04T22:58:02.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-03-04T22:58:02.000Z",
+          "EventSubType": "IDS_POLICY_ALERT",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "NetworkSessionId": "988975f9-002e-4ae7-bf50-333b226d522a",
+          "SrcBytes": 98,
+          "SrcIpAddr": "10.1.5.205",
+          "SrcPortNumber": 39378,
+          "ThreatId": "2200311",
+          "TimeGenerated": "YYYY-03-04T22:58:02.000Z",
+          "Url": "example.com/",
+          "action": "Permit",
+          "dst_ip": "23.215.0.136",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "frontend-eks-spoke",
+          "mitm_decrypted_by": "3822a647-d2b2-4e04-9be3-6808da41110e",
+          "mitm_ids": "true",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "IDS_POLICY_ALERT",
+          "mitm_request_bytes": "98",
+          "mitm_response_bytes": "804",
+          "mitm_session_id": "988975f9-002e-4ae7-bf50-333b226d522a",
+          "mitm_session_stage": "end",
+          "mitm_session_time": "116428959",
+          "mitm_sid": "2200311",
+          "mitm_sni_hostname": "example.com",
+          "mitm_stage": "txn",
+          "mitm_url_parts": "example.com/",
+          "proto": "TCP",
+          "src_ip": "10.1.5.205",
+          "src_port": 39378,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-03-04T22:58:02.000Z (epoch)",
+          "uuid": "3822a647-d2b2-4e04-9be3-6808da41110e"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

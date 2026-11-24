@@ -1,0 +1,25 @@
+{
+  "case": "unparsed-event-gateway-status-changed",
+  "input": "<14>Mar  4 23:11:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixGatewayStatusChanged: gwname=spoke-b status=down time=2026-03-04 23:11:00.512003",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "<receive time>",
+          "event": {
+            "original": "<14>Mar  4 23:11:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixGatewayStatusChanged: gwname=spoke-b status=down time=2026-03-04 23:11:00.512003"
+          },
+          "message": "<14>Mar  4 23:11:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixGatewayStatusChanged: gwname=spoke-b status=down time=2026-03-04 23:11:00.512003",
+          "tags": [
+            "unparsed"
+          ],
+          "type": "syslog",
+          "unix_time": "<receive time>"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

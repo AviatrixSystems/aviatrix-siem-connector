@@ -1,0 +1,27 @@
+{
+  "case": "fqdn-matched-no-rule-no-drop-reason",
+  "input": "<14>Mar  4 23:07:01 GW-egress-fqdn-gw-198.51.100.60 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.70.1.5 D_IP=203.0.113.70 hostname=docs.example.com state=MATCHED",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "dip": "203.0.113.70",
+            "gateway": "egress-fqdn-gw",
+            "hostname": "docs.example.com",
+            "sip": "10.70.1.5",
+            "state": "MATCHED",
+            "syslog": "<14>Mar  4 23:07:01 GW-egress-fqdn-gw-198.51.100.60 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.70.1.5 D_IP=203.0.113.70 hostname=docs.example.com state=MATCHED",
+            "timestamp": "YYYY-03-04T23:07:01.000Z (epoch)"
+          },
+          "source": "avx-fqdn",
+          "sourcetype": "aviatrix:firewall:fqdn",
+          "time": "YYYY-03-04T23:07:01.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

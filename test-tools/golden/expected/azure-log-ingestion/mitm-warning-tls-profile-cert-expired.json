@@ -1,0 +1,62 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-warning-tls-profile-cert-expired",
+  "input": "<156>Mar  4 23:05:01 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {\"priority\":\"LOG_WARNING\",\"action\":\"Deny\",\"reason\":\"TLS_PROFILE\",\"src\":\"10.60.1.12\",\"src_port\":40312,\"dest\":\"203.0.113.10\",\"dest_port\":443,\"enforced\":true,\"ids\":false,\"message\":\"certificate has expired\",\"stage\":\"ORIGIN_CERT_VALIDATE\",\"decided_by\":\"7a1c9e44-2b3d-4f61-9e80-1c2d3e4f5a6b\",\"proto\":\"TCP\",\"session_start\":1772665501000000000,\"session_time\":2210,\"session_stage\":\"tls_check\",\"session_id\":\"c2d4e6f8-1a3b-4c5d-8e9f-0a1b2c3d4e5f\",\"timestamp\":1772665501}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:05:01.000Z",
+          "DstIpAddr": "203.0.113.10",
+          "DstPortNumber": 443,
+          "DvcAction": "Deny",
+          "DvcHostname": "egress-spoke",
+          "DvcOriginalAction": "Deny",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-03-04T23:05:01.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Failure",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Low",
+          "EventStartTime": "YYYY-03-04T23:05:01.000Z",
+          "EventSubType": "TLS_PROFILE",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "7a1c9e44-2b3d-4f61-9e80-1c2d3e4f5a6b",
+          "NetworkSessionId": "c2d4e6f8-1a3b-4c5d-8e9f-0a1b2c3d4e5f",
+          "SrcIpAddr": "10.60.1.12",
+          "SrcPortNumber": 40312,
+          "TimeGenerated": "YYYY-03-04T23:05:01.000Z",
+          "action": "Deny",
+          "dst_ip": "203.0.113.10",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "egress-spoke",
+          "mitm_ids": "false",
+          "mitm_message": "certificate has expired",
+          "mitm_priority": "LOG_WARNING",
+          "mitm_reason": "TLS_PROFILE",
+          "mitm_session_id": "c2d4e6f8-1a3b-4c5d-8e9f-0a1b2c3d4e5f",
+          "mitm_session_stage": "tls_check",
+          "mitm_session_time": "2210",
+          "mitm_stage": "ORIGIN_CERT_VALIDATE",
+          "proto": "TCP",
+          "src_ip": "10.60.1.12",
+          "src_port": 40312,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-03-04T23:05:01.000Z (epoch)",
+          "uuid": "7a1c9e44-2b3d-4f61-9e80-1c2d3e4f5a6b"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

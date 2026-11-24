@@ -1,0 +1,192 @@
+{
+  "avx": {
+    "min": "10.0"
+  },
+  "case": "suricata-real-dns-alert-no-action",
+  "input": "<174>Sep 10 14:32:38 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"pcap_cnt\":302,\"event_type\":\"alert\",\"direction\":\"to_server\",\"app_proto\":\"dns\",\"flow_id\":1909643457098901,\"flow\":{\"bytes_toserver\":75,\"pkts_toclient\":0,\"dest_port\":53,\"src_ip\":\"10.10.1.177\",\"dest_ip\":\"203.0.113.39\",\"src_port\":35049,\"pkts_toserver\":1,\"bytes_toclient\":0,\"start\":\"2026-09-10T14:32:38.837839+0000\"},\"dest_ip\":\"203.0.113.39\",\"proto\":\"UDP\",\"tx_id\":0,\"timestamp\":\"2026-09-10T14:32:38.837839+0000\",\"pkt_src\":\"wire/pcap\",\"dns\":{\"version\":3,\"id\":877,\"type\":\"request\",\"opcode\":0,\"rcode\":\"NOERROR\",\"flags\":\"120\",\"queries\":[{\"rrname\":\"example5.com\",\"rrtype\":\"A\"}],\"tx_id\":0,\"rd\":true,\"additionals\":[{\"opt\":[{\"code\":10,\"data\":\"f2aa44e0c48ded5f\"}],\"rrname\":\"\",\"rrtype\":\"OPT\",\"ttl\":0}]},\"dest_port\":53,\"ip_v\":4,\"src_ip\":\"10.10.1.177\",\"src_port\":35049,\"alert\":{\"metadata\":{\"updated_at\":[\"2020_09_14\"],\"confidence\":[\"Medium\"],\"created_at\":[\"2012_01_31\"],\"signature_severity\":[\"Major\"]},\"severity\":2,\"policy_id\":\"81d10deb-0898-4774-aab1-b7dc5750afa4\",\"signature\":\"ET DNS Query for .su TLD (Soviet Union) Often Malware Related\",\"rev\":4,\"signature_id\":2014169,\"category\":\"Potentially Bad Traffic\",\"gid\":1,\"session_id\":\"\"}}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-09-10T14:32:38.000Z",
+          "event": {
+            "original": "<174>Sep 10 14:32:38 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"pcap_cnt\":302,\"event_type\":\"alert\",\"direction\":\"to_server\",\"app_proto\":\"dns\",\"flow_id\":1909643457098901,\"flow\":{\"bytes_toserver\":75,\"pkts_toclient\":0,\"dest_port\":53,\"src_ip\":\"10.10.1.177\",\"dest_ip\":\"203.0.113.39\",\"src_port\":35049,\"pkts_toserver\":1,\"bytes_toclient\":0,\"start\":\"2026-09-10T14:32:38.837839+0000\"},\"dest_ip\":\"203.0.113.39\",\"proto\":\"UDP\",\"tx_id\":0,\"timestamp\":\"2026-09-10T14:32:38.837839+0000\",\"pkt_src\":\"wire/pcap\",\"dns\":{\"version\":3,\"id\":877,\"type\":\"request\",\"opcode\":0,\"rcode\":\"NOERROR\",\"flags\":\"120\",\"queries\":[{\"rrname\":\"example5.com\",\"rrtype\":\"A\"}],\"tx_id\":0,\"rd\":true,\"additionals\":[{\"opt\":[{\"code\":10,\"data\":\"f2aa44e0c48ded5f\"}],\"rrname\":\"\",\"rrtype\":\"OPT\",\"ttl\":0}]},\"dest_port\":53,\"ip_v\":4,\"src_ip\":\"10.10.1.177\",\"src_port\":35049,\"alert\":{\"metadata\":{\"updated_at\":[\"2020_09_14\"],\"confidence\":[\"Medium\"],\"created_at\":[\"2012_01_31\"],\"signature_severity\":[\"Major\"]},\"severity\":2,\"policy_id\":\"81d10deb-0898-4774-aab1-b7dc5750afa4\",\"signature\":\"ET DNS Query for .su TLD (Soviet Union) Often Malware Related\",\"rev\":4,\"signature_id\":2014169,\"category\":\"Potentially Bad Traffic\",\"gid\":1,\"session_id\":\"\"}}"
+          },
+          "gw_hostname": "egress-spoke",
+          "message": "<174>Sep 10 14:32:38 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"pcap_cnt\":302,\"event_type\":\"alert\",\"direction\":\"to_server\",\"app_proto\":\"dns\",\"flow_id\":1909643457098901,\"flow\":{\"bytes_toserver\":75,\"pkts_toclient\":0,\"dest_port\":53,\"src_ip\":\"10.10.1.177\",\"dest_ip\":\"203.0.113.39\",\"src_port\":35049,\"pkts_toserver\":1,\"bytes_toclient\":0,\"start\":\"2026-09-10T14:32:38.837839+0000\"},\"dest_ip\":\"203.0.113.39\",\"proto\":\"UDP\",\"tx_id\":0,\"timestamp\":\"2026-09-10T14:32:38.837839+0000\",\"pkt_src\":\"wire/pcap\",\"dns\":{\"version\":3,\"id\":877,\"type\":\"request\",\"opcode\":0,\"rcode\":\"NOERROR\",\"flags\":\"120\",\"queries\":[{\"rrname\":\"example5.com\",\"rrtype\":\"A\"}],\"tx_id\":0,\"rd\":true,\"additionals\":[{\"opt\":[{\"code\":10,\"data\":\"f2aa44e0c48ded5f\"}],\"rrname\":\"\",\"rrtype\":\"OPT\",\"ttl\":0}]},\"dest_port\":53,\"ip_v\":4,\"src_ip\":\"10.10.1.177\",\"src_port\":35049,\"alert\":{\"metadata\":{\"updated_at\":[\"2020_09_14\"],\"confidence\":[\"Medium\"],\"created_at\":[\"2012_01_31\"],\"signature_severity\":[\"Major\"]},\"severity\":2,\"policy_id\":\"81d10deb-0898-4774-aab1-b7dc5750afa4\",\"signature\":\"ET DNS Query for .su TLD (Soviet Union) Often Malware Related\",\"rev\":4,\"signature_id\":2014169,\"category\":\"Potentially Bad Traffic\",\"gid\":1,\"session_id\":\"\"}}",
+          "suricataData": {
+            "__json_string__": {
+              "alert": {
+                "category": "Potentially Bad Traffic",
+                "gid": 1,
+                "metadata": {
+                  "confidence": [
+                    "Medium"
+                  ],
+                  "created_at": [
+                    "2012_01_31"
+                  ],
+                  "signature_severity": [
+                    "Major"
+                  ],
+                  "updated_at": [
+                    "2020_09_14"
+                  ]
+                },
+                "policy_id": "81d10deb-0898-4774-aab1-b7dc5750afa4",
+                "rev": 4,
+                "session_id": "",
+                "severity": 2,
+                "signature": "ET DNS Query for .su TLD (Soviet Union) Often Malware Related",
+                "signature_id": 2014169
+              },
+              "app_proto": "dns",
+              "dest_ip": "203.0.113.39",
+              "dest_port": 53,
+              "direction": "to_server",
+              "dns": {
+                "additionals": [
+                  {
+                    "opt": [
+                      {
+                        "code": 10,
+                        "data": "f2aa44e0c48ded5f"
+                      }
+                    ],
+                    "rrname": "",
+                    "rrtype": "OPT",
+                    "ttl": 0
+                  }
+                ],
+                "flags": "120",
+                "id": 877,
+                "opcode": 0,
+                "queries": [
+                  {
+                    "rrname": "example5.com",
+                    "rrtype": "A"
+                  }
+                ],
+                "rcode": "NOERROR",
+                "rd": true,
+                "tx_id": 0,
+                "type": "request",
+                "version": 3
+              },
+              "event_type": "alert",
+              "flow": {
+                "bytes_toclient": 0,
+                "bytes_toserver": 75,
+                "dest_ip": "203.0.113.39",
+                "dest_port": 53,
+                "pkts_toclient": 0,
+                "pkts_toserver": 1,
+                "src_ip": "10.10.1.177",
+                "src_port": 35049,
+                "start": "YYYY-09-10T14:32:38.837839+0000"
+              },
+              "flow_id": 1909643457098901,
+              "ip_v": 4,
+              "pcap_cnt": 302,
+              "pkt_src": "wire/pcap",
+              "proto": "UDP",
+              "src_ip": "10.10.1.177",
+              "src_port": 35049,
+              "timestamp": "YYYY-09-10T14:32:38.837839+0000",
+              "tx_id": 0
+            }
+          },
+          "suricataDataJson": {
+            "alert": {
+              "category": "Potentially Bad Traffic",
+              "gid": 1,
+              "metadata": {
+                "confidence": [
+                  "Medium"
+                ],
+                "created_at": [
+                  "2012_01_31"
+                ],
+                "signature_severity": [
+                  "Major"
+                ],
+                "updated_at": [
+                  "2020_09_14"
+                ]
+              },
+              "policy_id": "81d10deb-0898-4774-aab1-b7dc5750afa4",
+              "rev": 4,
+              "session_id": "",
+              "severity": 2,
+              "signature": "ET DNS Query for .su TLD (Soviet Union) Often Malware Related",
+              "signature_id": 2014169
+            },
+            "app_proto": "dns",
+            "dest_ip": "203.0.113.39",
+            "dest_port": 53,
+            "direction": "to_server",
+            "dns": {
+              "additionals": [
+                {
+                  "opt": [
+                    {
+                      "code": 10,
+                      "data": "f2aa44e0c48ded5f"
+                    }
+                  ],
+                  "rrname": "",
+                  "rrtype": "OPT",
+                  "ttl": 0
+                }
+              ],
+              "flags": "120",
+              "id": 877,
+              "opcode": 0,
+              "queries": [
+                {
+                  "rrname": "example5.com",
+                  "rrtype": "A"
+                }
+              ],
+              "rcode": "NOERROR",
+              "rd": true,
+              "tx_id": 0,
+              "type": "request",
+              "version": 3
+            },
+            "event_type": "alert",
+            "flow": {
+              "bytes_toclient": 0,
+              "bytes_toserver": 75,
+              "dest_ip": "203.0.113.39",
+              "dest_port": 53,
+              "pkts_toclient": 0,
+              "pkts_toserver": 1,
+              "src_ip": "10.10.1.177",
+              "src_port": 35049,
+              "start": "YYYY-09-10T14:32:38.837839+0000"
+            },
+            "flow_id": 1909643457098901,
+            "ip_v": 4,
+            "pcap_cnt": 302,
+            "pkt_src": "wire/pcap",
+            "proto": "UDP",
+            "src_ip": "10.10.1.177",
+            "src_port": 35049,
+            "timestamp": "YYYY-09-10T14:32:38.837839+0000",
+            "tx_id": 0
+          },
+          "syslog_pri": "174",
+          "tags": [
+            "suricata"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-09-10T14:32:38.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "case": "unparsed-real-gateway-deleted",
+  "input": "<14>Mar  3 00:57:04 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayDeleted: gwname=dev-agent-vpn-gw vpc_id=vpc-0abc0123456789def lb_name=None",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "<receive time>",
+          "event": {
+            "original": "<14>Mar  3 00:57:04 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayDeleted: gwname=dev-agent-vpn-gw vpc_id=vpc-0abc0123456789def lb_name=None"
+          },
+          "message": "<14>Mar  3 00:57:04 Controller-10.0.0.141 run_cloudxd.py[200409]: AviatrixGatewayDeleted: gwname=dev-agent-vpn-gw vpc_id=vpc-0abc0123456789def lb_name=None",
+          "tags": [
+            "unparsed"
+          ],
+          "type": "syslog",
+          "unix_time": "<receive time>"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

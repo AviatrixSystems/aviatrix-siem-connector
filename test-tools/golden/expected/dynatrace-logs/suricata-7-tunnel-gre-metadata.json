@@ -1,0 +1,40 @@
+{
+  "avx": {
+    "min": "9.0"
+  },
+  "case": "suricata-7-tunnel-gre-metadata",
+  "input": "<174>Mar  4 23:06:12 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"timestamp\":\"2026-03-04T23:06:12.881004+0000\",\"flow_id\":118823401992377,\"in_iface\":\"ids0\",\"event_type\":\"alert\",\"src_ip\":\"10.60.1.12\",\"src_port\":40420,\"dest_ip\":\"203.0.113.60\",\"dest_port\":443,\"proto\":\"TCP\",\"ip_v\":4,\"pkt_src\":\"wire/pcap\",\"tunnel\":{\"src_ip\":\"127.0.0.2\",\"dest_ip\":\"127.0.0.3\",\"proto\":\"GRE\",\"depth\":0,\"pkt_src\":\"wire/pcap\"},\"tx_id\":0,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2200311,\"rev\":2,\"signature\":\"ET POLICY Example Suspicious UA\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":{\"created_at\":[\"2024_01_01\"],\"signature_severity\":[\"Minor\"]}},\"app_proto\":\"http\",\"direction\":\"to_server\",\"flow\":{\"pkts_toserver\":3,\"pkts_toclient\":2,\"bytes_toserver\":512,\"bytes_toclient\":300,\"start\":\"2026-03-04T23:06:12.880001+0000\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.60\",\"src_port\":40420,\"dest_port\":443}}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "IDSAlert",
+          "aviatrix.ids.category": "Potential Corporate Privacy Violation",
+          "aviatrix.ids.dst_ip": "203.0.113.60",
+          "aviatrix.ids.dst_port": "443",
+          "aviatrix.ids.event_type": "alert",
+          "aviatrix.ids.flow.bytes_toclient": 300,
+          "aviatrix.ids.flow.bytes_toserver": 512,
+          "aviatrix.ids.flow.pkts_toclient": 2,
+          "aviatrix.ids.flow.pkts_toserver": 3,
+          "aviatrix.ids.gateway": "egress-spoke",
+          "aviatrix.ids.gid": 1,
+          "aviatrix.ids.protocol": "TCP",
+          "aviatrix.ids.rev": 2,
+          "aviatrix.ids.severity": 1,
+          "aviatrix.ids.signature": "ET POLICY Example Suspicious UA",
+          "aviatrix.ids.signature_id": 2200311,
+          "aviatrix.ids.src_ip": "10.60.1.12",
+          "aviatrix.ids.src_port": "40420",
+          "content": "IDS Alert: ET POLICY Example Suspicious UA (Potential Corporate Privacy Violation) 10.60.1.12:40420 -> 203.0.113.60:443",
+          "log.source": "aviatrix",
+          "severity": "ERROR",
+          "timestamp": "YYYY-03-04T23:06:12.881004+0000"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "case": "suricata-alert-smb-in-iface",
+  "input": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"in_iface\":\"eth0\",\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":445,\"dest_ip\":\"10.0.0.5\",\"dest_port\":49152,\"proto\":\"TCP\",\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2},\"smb\":{\"id\":1,\"dialect\":\"3.11\",\"command\":\"SMB2_COMMAND_NEGOTIATE_PROTOCOL\"}}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-23T10:00:04.000Z",
+          "event": {
+            "original": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"in_iface\":\"eth0\",\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":445,\"dest_ip\":\"10.0.0.5\",\"dest_port\":49152,\"proto\":\"TCP\",\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2},\"smb\":{\"id\":1,\"dialect\":\"3.11\",\"command\":\"SMB2_COMMAND_NEGOTIATE_PROTOCOL\"}}"
+          },
+          "gw_hostname": "spoke",
+          "message": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"in_iface\":\"eth0\",\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":445,\"dest_ip\":\"10.0.0.5\",\"dest_port\":49152,\"proto\":\"TCP\",\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2100498,\"rev\":7,\"signature\":\"GPL ATTACK_RESPONSE id check returned root\",\"category\":\"Potentially Bad Traffic\",\"severity\":2},\"smb\":{\"id\":1,\"dialect\":\"3.11\",\"command\":\"SMB2_COMMAND_NEGOTIATE_PROTOCOL\"}}",
+          "suricataData": {
+            "__json_string__": {
+              "alert": {
+                "action": "allowed",
+                "category": "Potentially Bad Traffic",
+                "gid": 1,
+                "rev": 7,
+                "severity": 2,
+                "signature": "GPL ATTACK_RESPONSE id check returned root",
+                "signature_id": 2100498
+              },
+              "dest_ip": "10.0.0.5",
+              "dest_port": 49152,
+              "event_type": "alert",
+              "flow_id": 1,
+              "in_iface": "eth0",
+              "proto": "TCP",
+              "smb": {
+                "command": "SMB2_COMMAND_NEGOTIATE_PROTOCOL",
+                "dialect": "3.11",
+                "id": 1
+              },
+              "src_ip": "203.0.113.5",
+              "src_port": 445,
+              "timestamp": "YYYY-11-23T10:00:04.000000+0000"
+            }
+          },
+          "suricataDataJson": {
+            "alert": {
+              "action": "allowed",
+              "category": "Potentially Bad Traffic",
+              "gid": 1,
+              "rev": 7,
+              "severity": 2,
+              "signature": "GPL ATTACK_RESPONSE id check returned root",
+              "signature_id": 2100498
+            },
+            "dest_ip": "10.0.0.5",
+            "dest_port": 49152,
+            "event_type": "alert",
+            "flow_id": 1,
+            "in_iface": "eth0",
+            "proto": "TCP",
+            "smb": {
+              "command": "SMB2_COMMAND_NEGOTIATE_PROTOCOL",
+              "dialect": "3.11",
+              "id": 1
+            },
+            "src_ip": "203.0.113.5",
+            "src_port": 445,
+            "timestamp": "YYYY-11-23T10:00:04.000000+0000"
+          },
+          "syslog_pri": "174",
+          "tags": [
+            "suricata"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-11-23T10:00:04.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "case": "vpn-connect",
+  "input": "<14>Mar 10 12:37:41 3.131.22.171 Mar 10 12:37:41 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=jdoe, Status=active, Gateway=vpn-gw-1, GatewayIP=52.52.76.149, VPNVirtualIP=192.168.0.6, PublicIP=203.0.113.45, Login=2026-03-10 12:37:39, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=Windows, VPNClientVersion=2.14.14",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-10T12:37:41.000Z",
+          "TimeGenerated": "YYYY-03-10T12:37:41.000Z",
+          "tags": [
+            "vpn_session"
+          ],
+          "unix_time": "YYYY-03-10T12:37:41.000Z (epoch)",
+          "vpn_client_platform": "Windows",
+          "vpn_client_version": "2.14.14",
+          "vpn_duration": "N/A",
+          "vpn_gateway": "vpn-gw-1",
+          "vpn_gateway_ip": "52.52.76.149",
+          "vpn_login": "YYYY-03-10 12:37:39",
+          "vpn_logout": "N/A",
+          "vpn_public_ip": "203.0.113.45",
+          "vpn_rx_bytes": "N/A",
+          "vpn_status": "active",
+          "vpn_tx_bytes": "N/A",
+          "vpn_user": "jdoe",
+          "vpn_virtual_ip": "192.168.0.6"
+        }
+      ],
+      "path": "/azure/azure-vpn-session"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-license-vpn-users",
+  "input": "<14>Mar 10 13:12:07 203.0.113.5 Mar 10 13:12:07 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixLicenseVPNUsers: users=3 ",
+  "requests": []
+}

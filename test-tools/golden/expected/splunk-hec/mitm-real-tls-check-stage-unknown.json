@@ -1,0 +1,43 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-tls-check-stage-unknown",
+  "input": "<153>Mar  4 00:18:45 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"TLS_PROFILE\",\"enforced\":true,\"session_stage\":\"tls_check\",\"src\":\"10.0.2.246\",\"session_id\":\"7061dc2e-057e-40c9-98a5-108f44926d47\",\"dest\":\"203.0.113.32\",\"priority\":\"LOG_ALERT\",\"message\":\"Failed to get origin cert\",\"session_start\":1772583448132494898,\"session_time\":76946121741,\"decided_by\":\"e569594b-d4da-46fe-85cf-a66f32c73dee\",\"src_port\":48386,\"stage\":\"Unknown\",\"proto\":\"TCP\",\"ids\":false,\"action\":\"Deny\",\"dest_port\":443,\"timestamp\":1772583525}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "__json_string__": {
+              "action": "Deny",
+              "decided_by": "e569594b-d4da-46fe-85cf-a66f32c73dee",
+              "dest": "203.0.113.32",
+              "dest_port": 443,
+              "enforced": true,
+              "ids": false,
+              "message": "Failed to get origin cert",
+              "priority": "LOG_ALERT",
+              "proto": "TCP",
+              "reason": "TLS_PROFILE",
+              "session_id": "7061dc2e-057e-40c9-98a5-108f44926d47",
+              "session_stage": "tls_check",
+              "session_start": 1772583448132494898,
+              "session_time": 76946121741,
+              "src": "10.0.2.246",
+              "src_port": 48386,
+              "stage": "Unknown",
+              "timestamp": "YYYY-03-04T00:18:45.000Z (epoch)"
+            }
+          },
+          "source": "avx-l7-fw",
+          "sourcetype": "aviatrix:firewall:l7",
+          "time": "YYYY-03-04T00:18:45.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

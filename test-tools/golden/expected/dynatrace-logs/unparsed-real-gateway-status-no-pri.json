@@ -1,0 +1,5 @@
+{
+  "case": "unparsed-real-gateway-status-no-pri",
+  "input": "Mar  9 20:28:25 Controller-10.0.0.141 run_cloudxd.py[94463]: AviatrixGatewayStatusChanged: gwname=egress-vpn-gw status=up time=2026-03-09 20:28:25.424108",
+  "requests": []
+}

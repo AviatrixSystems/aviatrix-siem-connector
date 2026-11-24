@@ -1,0 +1,42 @@
+{
+  "case": "netstats-real-eth-vng0-old-shape",
+  "input": "<14>Oct 30 17:59:24 GW-n4-azure-transit-192.0.2.5-sink /usr/local/bin/avx-gw-state-sync 2026/10/30 17:59:24 AviatrixGwNetStats: timestamp=2026-10-30T17:59:21.277804159 name=n4-azure-transit alias=n4-azure-transit  private_ip=10.20.0.132 interface=eth-vng0 total_rx_rate=16.00 total_tx_rate=0.00 total_rx_tx_rate=16.00 total_rx_cum=35.23KB total_tx_cum=7.24KB total_rx_tx_cum=42.46KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=75",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-10-30T17:59:24.000Z",
+          "alias": "n4-azure-transit",
+          "bw_in_limit_exceeded": "0",
+          "bw_out_limit_exceeded": "0",
+          "conntrack_count": "75",
+          "conntrack_limit_exceeded": "0",
+          "event": {
+            "original": "<14>Oct 30 17:59:24 GW-n4-azure-transit-192.0.2.5-sink /usr/local/bin/avx-gw-state-sync 2026/10/30 17:59:24 AviatrixGwNetStats: timestamp=2026-10-30T17:59:21.277804159 name=n4-azure-transit alias=n4-azure-transit  private_ip=10.20.0.132 interface=eth-vng0 total_rx_rate=16.00 total_tx_rate=0.00 total_rx_tx_rate=16.00 total_rx_cum=35.23KB total_tx_cum=7.24KB total_rx_tx_cum=42.46KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=75"
+          },
+          "gateway": "n4-azure-transit",
+          "interface": "eth-vng0",
+          "linklocal_limit_exceeded": "0",
+          "message": "<14>Oct 30 17:59:24 GW-n4-azure-transit-192.0.2.5-sink /usr/local/bin/avx-gw-state-sync 2026/10/30 17:59:24 AviatrixGwNetStats: timestamp=2026-10-30T17:59:21.277804159 name=n4-azure-transit alias=n4-azure-transit  private_ip=10.20.0.132 interface=eth-vng0 total_rx_rate=16.00 total_tx_rate=0.00 total_rx_tx_rate=16.00 total_rx_cum=35.23KB total_tx_cum=7.24KB total_rx_tx_cum=42.46KB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=75",
+          "pps_limit_exceeded": "0",
+          "private_ip": "10.20.0.132",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_net_stats"
+          ],
+          "total_rx_cum": "35.23KB",
+          "total_rx_rate": 16,
+          "total_rx_tx_cum": "42.46KB",
+          "total_rx_tx_rate": 16,
+          "total_tx_cum": "7.24KB",
+          "total_tx_rate": 0,
+          "type": "syslog",
+          "unix_time": "YYYY-10-30T17:59:24.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

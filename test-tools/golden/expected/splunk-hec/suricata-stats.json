@@ -1,0 +1,8 @@
+{
+  "avx": {
+    "until": "7.1"
+  },
+  "case": "suricata-stats",
+  "input": "<174>Mar  4 22:57:03 GW-backend-eks-spoke-18.119.198.171-sink suricata[4]: {\"timestamp\":\"2026-03-04T22:57:03.000412+0000\",\"event_type\":\"stats\",\"stats\":{\"uptime\":86412,\"capture\":{\"kernel_packets\":1203941,\"kernel_drops\":0},\"decoder\":{\"pkts\":1203941,\"bytes\":982341120,\"ipv4\":1203876,\"tcp\":1150233,\"udp\":53643},\"flow\":{\"memuse\":7474304}}}",
+  "requests": []
+}

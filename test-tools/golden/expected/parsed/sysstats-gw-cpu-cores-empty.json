@@ -1,0 +1,37 @@
+{
+  "case": "sysstats-gw-cpu-cores-empty",
+  "input": "<14>Mar  4 23:09:06 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:06 AviatrixGwSysStats: timestamp=2026-03-04T23:09:06.1 name=transit-1 alias=transit-1 cpu_idle=100 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:09:06.000Z",
+          "alias": "transit-1",
+          "cpu_cores": {
+            "__json_string__": []
+          },
+          "cpu_idle": 100,
+          "disk_free": 58001234,
+          "disk_total": 65842432,
+          "event": {
+            "original": "<14>Mar  4 23:09:06 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:06 AviatrixGwSysStats: timestamp=2026-03-04T23:09:06.1 name=transit-1 alias=transit-1 cpu_idle=100 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[]"
+          },
+          "gateway": "transit-1",
+          "memory_available": 2899120,
+          "memory_free": 1203344,
+          "memory_total": 3828976,
+          "message": "<14>Mar  4 23:09:06 GW-transit-1-198.51.100.90-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 23:09:06 AviatrixGwSysStats: timestamp=2026-03-04T23:09:06.1 name=transit-1 alias=transit-1 cpu_idle=100 memory_free=1203344 memory_available=2899120 memory_total=3828976 disk_total=65842432 disk_free=58001234 cpu_cores=[]",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T23:09:06.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

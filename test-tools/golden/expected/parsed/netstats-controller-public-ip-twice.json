@@ -1,0 +1,26 @@
+{
+  "case": "netstats-controller-public-ip-twice",
+  "input": "<14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "<receive time>",
+          "event": {
+            "original": "<14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211"
+          },
+          "message": "<14>Mar  4 23:09:04 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T23:09:04 name=controller public_ip=203.0.113.20 public_ip=203.0.113.20 interface=eth0 total_rx_rate=25.0Kb total_tx_rate=0.0 total_rx_tx_rate=25.0Kb total_rx_cum=1.0GB total_tx_cum=512.0MB total_rx_tx_cum=1.5GB conntrack_count=211",
+          "tags": [
+            "_avx_grok_failure_gw_net_stats",
+            "unparsed"
+          ],
+          "type": "syslog",
+          "unix_time": "<receive time>"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

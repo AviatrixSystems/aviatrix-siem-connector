@@ -1,0 +1,25 @@
+{
+  "case": "cmd-v1-argv-redacted-email-user",
+  "input": "<14>Mar  4 23:08:05 203.0.113.5 Mar  4 23:08:05 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=SETUP_ACCOUNT_PROFILE, argv=['********'], result=Success, reason=, username=ops.user@example.com",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.controller.action": "SETUP_ACCOUNT_PROFILE",
+          "aviatrix.controller.args": "['********']",
+          "aviatrix.controller.host": "Controller-10.0.0.120",
+          "aviatrix.controller.result": "Success",
+          "aviatrix.controller.username": "ops.user@example.com",
+          "aviatrix.event.type": "ControllerAudit",
+          "content": "Controller API: SETUP_ACCOUNT_PROFILE by ops.user@example.com - Success",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:08:05.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

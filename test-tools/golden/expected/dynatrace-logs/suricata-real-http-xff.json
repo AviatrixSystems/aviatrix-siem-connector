@@ -1,0 +1,40 @@
+{
+  "case": "suricata-real-http-xff",
+  "input": "<174>Mar 25 16:16:03 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"flow_id\":1103538019779224,\"event_type\":\"alert\",\"dest_ip\":\"10.1.3.5\",\"proto\":\"TCP\",\"alert\":{\"policy_id\":\"87eb7aa4-5c63-4479-b5ae-bc35105c69e2\",\"severity\":1,\"signature_id\":2024364,\"rev\":4,\"signature\":\"ET SCAN Possible Nmap User-Agent Observed\",\"gid\":1,\"category\":\"Web Application Attack\",\"metadata\":{\"reviewed_at\":[\"2024_05_06\"],\"signature_severity\":[\"Informational\"],\"updated_at\":[\"2020_08_06\"],\"confidence\":[\"Medium\"],\"attack_target\":[\"Client_and_Server\"],\"affected_product\":[\"Any\"],\"deployment\":[\"Perimeter\"],\"performance_impact\":[\"Low\"],\"created_at\":[\"2017_06_08\"]},\"action\":\"allowed\"},\"src_port\":80,\"tx_id\":0,\"flow\":{\"dest_port\":80,\"bytes_toclient\":80,\"dest_ip\":\"10.2.1.10\",\"src_port\":53160,\"pkts_toserver\":3,\"bytes_toserver\":486,\"pkts_toclient\":2,\"start\":\"2026-03-25T16:16:03.453545+0000\",\"src_ip\":\"10.1.3.5\"},\"http\":{\"http_method\":\"HEAD\",\"protocol\":\"HTTP/1.1\",\"length\":0,\"hostname\":\"localhost.localdomain\",\"http_user_agent\":\"Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)\",\"xff\":\"127.0.0.1:49498\",\"url\":\"http:///\"},\"app_proto\":\"http\",\"direction\":\"to_client\",\"timestamp\":\"2026-03-25T16:16:03.496548+0000\",\"pkt_src\":\"wire/pcap\",\"src_ip\":\"10.2.1.10\",\"dest_port\":53160,\"pcap_cnt\":37448}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "IDSAlert",
+          "aviatrix.ids.category": "Web Application Attack",
+          "aviatrix.ids.dst_ip": "10.1.3.5",
+          "aviatrix.ids.dst_port": "53160",
+          "aviatrix.ids.event_type": "alert",
+          "aviatrix.ids.flow.bytes_toclient": 80,
+          "aviatrix.ids.flow.bytes_toserver": 486,
+          "aviatrix.ids.flow.pkts_toclient": 2,
+          "aviatrix.ids.flow.pkts_toserver": 3,
+          "aviatrix.ids.gateway": "egress-spoke",
+          "aviatrix.ids.gid": 1,
+          "aviatrix.ids.http.hostname": "localhost.localdomain",
+          "aviatrix.ids.http.method": "HEAD",
+          "aviatrix.ids.http.url": "http:///",
+          "aviatrix.ids.protocol": "TCP",
+          "aviatrix.ids.rev": 4,
+          "aviatrix.ids.severity": 1,
+          "aviatrix.ids.signature": "ET SCAN Possible Nmap User-Agent Observed",
+          "aviatrix.ids.signature_id": 2024364,
+          "aviatrix.ids.src_ip": "10.2.1.10",
+          "aviatrix.ids.src_port": "80",
+          "content": "IDS Alert: ET SCAN Possible Nmap User-Agent Observed (Web Application Attack) 10.2.1.10:80 -> 10.1.3.5:53160",
+          "log.source": "aviatrix",
+          "severity": "ERROR",
+          "timestamp": "YYYY-03-25T16:16:03.496548+0000"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

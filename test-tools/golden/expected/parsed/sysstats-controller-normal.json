@@ -1,0 +1,33 @@
+{
+  "case": "sysstats-controller-normal",
+  "input": "<14>Mar  4 22:56:37 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.767139 name=controller cpu_idle=90 memory_free=1531636 memory_available=4872892 memory_total=8027376 disk_total=65842432 disk_free=49702152",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:56:37.000Z",
+          "cpu_idle": 90,
+          "disk_free": 49702152,
+          "disk_total": 65842432,
+          "event": {
+            "original": "<14>Mar  4 22:56:37 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.767139 name=controller cpu_idle=90 memory_free=1531636 memory_available=4872892 memory_total=8027376 disk_total=65842432 disk_free=49702152"
+          },
+          "gateway": "controller",
+          "memory_available": 4872892,
+          "memory_free": 1531636,
+          "memory_total": 8027376,
+          "message": "<14>Mar  4 22:56:37 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.767139 name=controller cpu_idle=90 memory_free=1531636 memory_available=4872892 memory_total=8027376 disk_total=65842432 disk_free=49702152",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:56:37.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

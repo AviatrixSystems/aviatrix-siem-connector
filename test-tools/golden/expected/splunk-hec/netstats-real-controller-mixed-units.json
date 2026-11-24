@@ -1,0 +1,37 @@
+{
+  "case": "netstats-real-controller-mixed-units",
+  "input": "<14>Nov  5 12:23:37 Controller-10.0.0.131 run_cloudxd.py[333589]: AviatrixGwNetStats: timestamp=2026-11-05T12:23:37.679444 name=controller public_ip=203.0.113.3 private_ip=10.0.0.131 interface=eth0 total_rx_rate=80.33Mb total_tx_rate=263.33Kb total_rx_tx_rate=80.59Mb total_rx_cum=33.2GB total_tx_cum=147.4GB total_rx_tx_cum=180.6GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=2891 bw_out_limit_exceeded=1092 pps_limit_exceeded=2690 linklocal_limit_exceeded=0 conntrack_count=1415",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "bw_in_limit_exceeded": "2891",
+            "bw_out_limit_exceeded": "1092",
+            "conntrack_count": "1415",
+            "conntrack_limit_exceeded": "0",
+            "gateway": "controller",
+            "interface": "eth0",
+            "linklocal_limit_exceeded": "0",
+            "pps_limit_exceeded": "2690",
+            "private_ip": "10.0.0.131",
+            "public_ip": "203.0.113.3",
+            "syslog": "<14>Nov  5 12:23:37 Controller-10.0.0.131 run_cloudxd.py[333589]: AviatrixGwNetStats: timestamp=2026-11-05T12:23:37.679444 name=controller public_ip=203.0.113.3 private_ip=10.0.0.131 interface=eth0 total_rx_rate=80.33Mb total_tx_rate=263.33Kb total_rx_tx_rate=80.59Mb total_rx_cum=33.2GB total_tx_cum=147.4GB total_rx_tx_cum=180.6GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=2891 bw_out_limit_exceeded=1092 pps_limit_exceeded=2690 linklocal_limit_exceeded=0 conntrack_count=1415",
+            "total_rx_cum": "33.2GB",
+            "total_rx_rate": 84232110.08,
+            "total_rx_tx_cum": "180.6GB",
+            "total_rx_tx_rate": 84504739.84,
+            "total_tx_cum": "147.4GB",
+            "total_tx_rate": 269649.92
+          },
+          "source": "avx-gw-net-stats",
+          "sourcetype": "aviatrix:gateway:network",
+          "time": "YYYY-11-05T12:23:37.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

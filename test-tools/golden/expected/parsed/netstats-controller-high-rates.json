@@ -1,0 +1,42 @@
+{
+  "case": "netstats-controller-high-rates",
+  "input": "<14>Mar  4 22:55:50 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T22:55:50.257650 name=controller public_ip=18.190.163.185 private_ip=10.0.0.120 interface=eth0 total_rx_rate=214.74Kb total_tx_rate=350.94Kb total_rx_tx_rate=565.68Kb total_rx_cum=730.8MB total_tx_cum=509.6MB total_rx_tx_cum=1.2GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=1167",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:55:50.000Z",
+          "bw_in_limit_exceeded": "0",
+          "bw_out_limit_exceeded": "0",
+          "conntrack_count": "1167",
+          "conntrack_limit_exceeded": "0",
+          "event": {
+            "original": "<14>Mar  4 22:55:50 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T22:55:50.257650 name=controller public_ip=18.190.163.185 private_ip=10.0.0.120 interface=eth0 total_rx_rate=214.74Kb total_tx_rate=350.94Kb total_rx_tx_rate=565.68Kb total_rx_cum=730.8MB total_tx_cum=509.6MB total_rx_tx_cum=1.2GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=1167"
+          },
+          "gateway": "controller",
+          "interface": "eth0",
+          "linklocal_limit_exceeded": "0",
+          "message": "<14>Mar  4 22:55:50 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwNetStats: timestamp=2026-03-04T22:55:50.257650 name=controller public_ip=18.190.163.185 private_ip=10.0.0.120 interface=eth0 total_rx_rate=214.74Kb total_tx_rate=350.94Kb total_rx_tx_rate=565.68Kb total_rx_cum=730.8MB total_tx_cum=509.6MB total_rx_tx_cum=1.2GB conntrack_limit_exceeded=0 bw_in_limit_exceeded=0 bw_out_limit_exceeded=0 pps_limit_exceeded=0 linklocal_limit_exceeded=0 conntrack_count=1167",
+          "pps_limit_exceeded": "0",
+          "private_ip": "10.0.0.120",
+          "public_ip": "18.190.163.185",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_net_stats"
+          ],
+          "total_rx_cum": "730.8MB",
+          "total_rx_rate": 219893.76,
+          "total_rx_tx_cum": "1.2GB",
+          "total_rx_tx_rate": 579256.32,
+          "total_tx_cum": "509.6MB",
+          "total_tx_rate": 359362.56,
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:55:50.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-real-end-no-response-bytes",
+  "input": "<153>Dec 10 00:36:21 GW-backend-eks-spoke-198.51.100.38-sink traffic_server[5363]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"100.64.127.120\",\"src_port\":37964,\"dest\":\"203.0.113.38\",\"dest_port\":80,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"example3.com\",\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"proto\":\"TCP\",\"session_start\":1765240579110927579,\"session_time\":86402405592960,\"session_stage\":\"end\",\"session_id\":\"d5bd5032-93dc-46ed-aea2-7ae88bfb3e78\",\"request_bytes\":192,\"url\":\"example3.com/\",\"timestamp\":1765326981}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-12-10T00:36:21.000Z",
+          "DstFqdn": "example3.com",
+          "DstHostname": "example3.com",
+          "DstIpAddr": "203.0.113.38",
+          "DstPortNumber": 80,
+          "DvcAction": "Allow",
+          "DvcHostname": "backend-eks-spoke",
+          "DvcOriginalAction": "Permit",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-12-10T00:36:21.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-12-10T00:36:21.000Z",
+          "EventSubType": "POLICY",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+          "NetworkSessionId": "d5bd5032-93dc-46ed-aea2-7ae88bfb3e78",
+          "SrcBytes": 192,
+          "SrcIpAddr": "100.64.127.120",
+          "SrcPortNumber": 37964,
+          "TimeGenerated": "YYYY-12-10T00:36:21.000Z",
+          "Url": "example3.com/",
+          "action": "Permit",
+          "dst_ip": "203.0.113.38",
+          "dst_port": 80,
+          "enforced": true,
+          "gw_hostname": "backend-eks-spoke",
+          "mitm_ids": "true",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_request_bytes": "192",
+          "mitm_session_id": "d5bd5032-93dc-46ed-aea2-7ae88bfb3e78",
+          "mitm_session_stage": "end",
+          "mitm_session_time": "86402405592960",
+          "mitm_sni_hostname": "example3.com",
+          "mitm_stage": "txn",
+          "mitm_url_parts": "example3.com/",
+          "proto": "TCP",
+          "src_ip": "100.64.127.120",
+          "src_port": 37964,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-12-10T00:36:21.000Z (epoch)",
+          "uuid": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "case": "mitm-other-src",
+  "input": "<153>Mar  4 22:57:25 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"100.64.17.166\",\"src_port\":48762,\"dest\":\"140.82.112.3\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"SNI\",\"sni_hostname\":\"github.com\",\"decided_by\":\"1b513efd-dcb0-4bb5-8ea7-a43b482cad7a\",\"proto\":\"TCP\",\"session_start\":1772665045108445406,\"session_stage\":\"start\",\"session_id\":\"c3026ef9-00ba-493a-89e8-89c33251fb26\",\"timestamp\":1772665045}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:57:25.000Z",
+          "DstFqdn": "github.com",
+          "DstHostname": "github.com",
+          "DstIpAddr": "140.82.112.3",
+          "DstPortNumber": 443,
+          "DvcAction": "Allow",
+          "DvcHostname": "frontend-eks-spoke",
+          "DvcOriginalAction": "Permit",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-03-04T22:57:25.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Success",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Informational",
+          "EventStartTime": "YYYY-03-04T22:57:25.000Z",
+          "EventSubType": "POLICY",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a",
+          "NetworkSessionId": "c3026ef9-00ba-493a-89e8-89c33251fb26",
+          "SrcIpAddr": "100.64.17.166",
+          "SrcPortNumber": 48762,
+          "TimeGenerated": "YYYY-03-04T22:57:25.000Z",
+          "action": "Permit",
+          "dst_ip": "140.82.112.3",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "frontend-eks-spoke",
+          "mitm_ids": "true",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_session_id": "c3026ef9-00ba-493a-89e8-89c33251fb26",
+          "mitm_session_stage": "start",
+          "mitm_sni_hostname": "github.com",
+          "mitm_stage": "SNI",
+          "proto": "TCP",
+          "src_ip": "100.64.17.166",
+          "src_port": 48762,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-03-04T22:57:25.000Z (epoch)",
+          "uuid": "1b513efd-dcb0-4bb5-8ea7-a43b482cad7a"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

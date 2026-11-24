@@ -1,0 +1,26 @@
+{
+  "case": "cmd-v1-user-login-mgmt",
+  "input": "<14>Mar  4 22:58:22 18.190.163.185 Mar  4 22:58:22 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password', 'get_password', '--user_name', 'copilot_service_account', '--password', '********', '--api_token', '', '--login_ip', ''], result=Success, reason=",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "USER_LOGIN_MANAGEMENT",
+            "args": "['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password', 'get_password', '--user_name', 'copilot_service_account', '--password', '********', '--api_token', '', '--login_ip', '']",
+            "reason": "",
+            "result": "Success",
+            "syslog": "<14>Mar  4 22:58:22 18.190.163.185 Mar  4 22:58:22 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=USER_LOGIN_MANAGEMENT, argv=['--rtn_file', '/dev/null', 'user_login_management', 'action', 'get_password', 'get_password', '--user_name', 'copilot_service_account', '--password', '********', '--api_token', '', '--login_ip', ''], result=Success, reason=",
+            "timestamp": "YYYY-03-04T22:58:22.000Z (epoch)"
+          },
+          "source": "avx-cmd",
+          "sourcetype": "aviatrix:controller:audit",
+          "time": "YYYY-03-04T22:58:22.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

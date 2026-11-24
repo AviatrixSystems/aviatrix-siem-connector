@@ -1,0 +1,26 @@
+{
+  "case": "fqdn-allowed-rule",
+  "input": "<14>Mar  4 22:59:12 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=140.82.112.3 hostname=github.com state=MATCHED Rule=*.github.com;1",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "FQDNFilter",
+          "aviatrix.firewall.dst_ip": "140.82.112.3",
+          "aviatrix.firewall.gateway": "egress-fqdn-gw",
+          "aviatrix.firewall.hostname": "github.com",
+          "aviatrix.firewall.rule": "*.github.com;1",
+          "aviatrix.firewall.src_ip": "10.10.1.163",
+          "aviatrix.firewall.state": "MATCHED",
+          "content": "FQDN Allow: 10.10.1.163 -> github.com (140.82.112.3) on egress-fqdn-gw",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T22:59:12.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "case": "sysstats-gw-alias-cpu-cores",
+  "input": "<14>Mar  4 22:56:13 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:13 AviatrixGwSysStats: timestamp=2026-03-04T22:56:13.870508 name=backend-eks-spoke alias=backend-eks-spoke cpu_idle=99 memory_free=205972 memory_available=1372680 memory_total=3828976 disk_total=65842432 disk_free=58005892 cpu_cores=[busy:{start:{seconds:1772664933  nanos:186170743}  end:{seconds:1772664973  nanos:829302459}  min:2  max:16  avg:4} name:1  busy:{start:{seconds:1772664933  nanos:42325579}  end:{seconds:1772664973  nanos:665290483}  min:1  max:13  avg:3} name:-1  busy:{start:{seconds:1772664933  nanos:194136238}  end:{seconds:1772664973  nanos:382080585}  min:2  max:14  avg:4}]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:56:13.000Z",
+          "alias": "backend-eks-spoke",
+          "cpu_aggregate_busy_avg": 4,
+          "cpu_aggregate_busy_max": 14,
+          "cpu_aggregate_busy_min": 2,
+          "cpu_busy": 4,
+          "cpu_core_count": 2,
+          "cpu_cores": "[busy:{start:{seconds:1772664933  nanos:186170743}  end:{seconds:1772664973  nanos:829302459}  min:2  max:16  avg:4} name:1  busy:{start:{seconds:1772664933  nanos:42325579}  end:{seconds:1772664973  nanos:665290483}  min:1  max:13  avg:3} name:-1  busy:{start:{seconds:1772664933  nanos:194136238}  end:{seconds:1772664973  nanos:382080585}  min:2  max:14  avg:4}]",
+          "cpu_cores_parsed": [
+            {
+              "busy_avg": 4,
+              "busy_max": 16,
+              "busy_min": 2,
+              "name": "0"
+            },
+            {
+              "busy_avg": 3,
+              "busy_max": 13,
+              "busy_min": 1,
+              "name": "1"
+            },
+            {
+              "busy_avg": 4,
+              "busy_max": 14,
+              "busy_min": 2,
+              "name": "-1"
+            }
+          ],
+          "cpu_idle": 99,
+          "disk_free": 58005892,
+          "disk_total": 65842432,
+          "event": {
+            "original": "<14>Mar  4 22:56:13 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:13 AviatrixGwSysStats: timestamp=2026-03-04T22:56:13.870508 name=backend-eks-spoke alias=backend-eks-spoke cpu_idle=99 memory_free=205972 memory_available=1372680 memory_total=3828976 disk_total=65842432 disk_free=58005892 cpu_cores=[busy:{start:{seconds:1772664933  nanos:186170743}  end:{seconds:1772664973  nanos:829302459}  min:2  max:16  avg:4} name:1  busy:{start:{seconds:1772664933  nanos:42325579}  end:{seconds:1772664973  nanos:665290483}  min:1  max:13  avg:3} name:-1  busy:{start:{seconds:1772664933  nanos:194136238}  end:{seconds:1772664973  nanos:382080585}  min:2  max:14  avg:4}]"
+          },
+          "gateway": "backend-eks-spoke",
+          "memory_available": 1372680,
+          "memory_free": 205972,
+          "memory_total": 3828976,
+          "message": "<14>Mar  4 22:56:13 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:13 AviatrixGwSysStats: timestamp=2026-03-04T22:56:13.870508 name=backend-eks-spoke alias=backend-eks-spoke cpu_idle=99 memory_free=205972 memory_available=1372680 memory_total=3828976 disk_total=65842432 disk_free=58005892 cpu_cores=[busy:{start:{seconds:1772664933  nanos:186170743}  end:{seconds:1772664973  nanos:829302459}  min:2  max:16  avg:4} name:1  busy:{start:{seconds:1772664933  nanos:42325579}  end:{seconds:1772664973  nanos:665290483}  min:1  max:13  avg:3} name:-1  busy:{start:{seconds:1772664933  nanos:194136238}  end:{seconds:1772664973  nanos:382080585}  min:2  max:14  avg:4}]",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:56:13.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

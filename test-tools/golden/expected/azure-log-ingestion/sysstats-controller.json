@@ -1,0 +1,29 @@
+{
+  "case": "sysstats-controller",
+  "input": "<14>Mar  4 22:56:02 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:02.140234 name=controller cpu_idle=91 memory_free=1509804 memory_available=4847420 memory_total=8027376 disk_total=65842432 disk_free=49704556",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:56:02.000Z",
+          "TimeGenerated": "YYYY-03-04T22:56:02.000Z",
+          "cpu_idle": 91,
+          "disk_free": 49704556,
+          "disk_total": 65842432,
+          "gateway": "controller",
+          "ls_timestamp": "YYYY-03-04T22:56:02.000Z",
+          "memory_available": 4847420,
+          "memory_free": 1509804,
+          "memory_total": 8027376,
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "unix_time": "YYYY-03-04T22:56:02.000Z (epoch)"
+        }
+      ],
+      "path": "/azure/azure-gw-sys-stats"
+    }
+  ]
+}

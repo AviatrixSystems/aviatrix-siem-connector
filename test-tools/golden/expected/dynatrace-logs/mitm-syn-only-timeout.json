@@ -1,0 +1,35 @@
+{
+  "avx": {
+    "min": "8.2"
+  },
+  "case": "mitm-syn-only-timeout",
+  "input": "<153>Mar  4 22:58:18 GW-frontend-eks-spoke-18.216.17.241-sink traffic_server[5141]: {\"priority\":\"LOG_ALERT\",\"action\":\"Deny\",\"reason\":\"CONNECTION_SYN_ONLY_TIMEOUT\",\"src\":\"10.1.5.205\",\"src_port\":59568,\"dest\":\"23.220.75.232\",\"dest_port\":31337,\"enforced\":false,\"ids\":false,\"stage\":\"txn\",\"proto\":\"TCP\",\"session_start\":1772665098403597389,\"session_time\":1780,\"session_stage\":\"end\",\"session_id\":\"4f13c8ba-0079-41cf-9677-d19f1a20a6c2\",\"timestamp\":1772665098}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "Deny",
+          "aviatrix.dcf.dst_ip": "23.220.75.232",
+          "aviatrix.dcf.dst_port": 31337,
+          "aviatrix.dcf.enforced": false,
+          "aviatrix.dcf.gateway": "frontend-eks-spoke",
+          "aviatrix.dcf.layer": "L7",
+          "aviatrix.dcf.policy_uuid": "",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.reason": "CONNECTION_SYN_ONLY_TIMEOUT",
+          "aviatrix.dcf.session_id": "4f13c8ba-0079-41cf-9677-d19f1a20a6c2",
+          "aviatrix.dcf.src_ip": "10.1.5.205",
+          "aviatrix.dcf.src_port": 59568,
+          "aviatrix.event.type": "WebInspection",
+          "content": "L7 DCF Deny: 10.1.5.205 -> 23.220.75.232:31337",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-03-04T22:58:18.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

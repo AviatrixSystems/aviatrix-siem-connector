@@ -1,0 +1,63 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-lowercase-proto-egress-path",
+  "input": "<153>Nov  3 17:56:16 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"session_stage\":\"start\",\"reason\":\"POLICY\",\"enforced\":true,\"src\":\"10.10.2.113\",\"session_id\":\"1682c7e1-2785-4838-ae17-e7aafeffb00c\",\"dest\":\"203.0.113.37\",\"priority\":\"LOG_ALERT\",\"session_start\":1793728576371733505,\"decided_by\":\"4a2ec33a-cdb3-4820-815a-5a78b8b2731f\",\"src_port\":48842,\"stage\":\"SNI\",\"proto\":\"tcp\",\"action\":\"Deny\",\"ids\":false,\"sni_hostname\":\"example2.com\",\"dest_port\":443,\"timestamp\":1793728576,\"egress_path\":\"EGRESS_PATH_DEFAULT\"}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-03T17:56:16.000Z",
+          "DstFqdn": "example2.com",
+          "DstHostname": "example2.com",
+          "DstIpAddr": "203.0.113.37",
+          "DstPortNumber": 443,
+          "DvcAction": "Deny",
+          "DvcHostname": "app-spoke",
+          "DvcOriginalAction": "Deny",
+          "EventCount": 1,
+          "EventEndTime": "YYYY-11-03T17:56:16.000Z",
+          "EventProduct": "Distributed Cloud Firewall",
+          "EventResult": "Failure",
+          "EventSchema": "WebSession",
+          "EventSchemaVersion": "0.2.7",
+          "EventSeverity": "Low",
+          "EventStartTime": "YYYY-11-03T17:56:16.000Z",
+          "EventSubType": "POLICY",
+          "EventType": "HTTPsession",
+          "EventVendor": "Aviatrix",
+          "NetworkProtocol": "TCP",
+          "NetworkRuleName": "4a2ec33a-cdb3-4820-815a-5a78b8b2731f",
+          "NetworkSessionId": "1682c7e1-2785-4838-ae17-e7aafeffb00c",
+          "SrcIpAddr": "10.10.2.113",
+          "SrcPortNumber": 48842,
+          "TimeGenerated": "YYYY-11-03T17:56:16.000Z",
+          "action": "Deny",
+          "dst_ip": "203.0.113.37",
+          "dst_port": 443,
+          "enforced": true,
+          "gw_hostname": "app-spoke",
+          "mitm_ids": "false",
+          "mitm_priority": "LOG_ALERT",
+          "mitm_reason": "POLICY",
+          "mitm_session_id": "1682c7e1-2785-4838-ae17-e7aafeffb00c",
+          "mitm_session_stage": "start",
+          "mitm_sni_hostname": "example2.com",
+          "mitm_stage": "SNI",
+          "proto": "TCP",
+          "src_ip": "10.10.2.113",
+          "src_port": 48842,
+          "tags": [
+            "mitm"
+          ],
+          "unix_time": "YYYY-11-03T17:56:16.000Z (epoch)",
+          "uuid": "4a2ec33a-cdb3-4820-815a-5a78b8b2731f"
+        }
+      ],
+      "path": "/azure/azure-mitm"
+    }
+  ]
+}

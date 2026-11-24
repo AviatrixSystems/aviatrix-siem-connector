@@ -1,0 +1,29 @@
+{
+  "avx": {
+    "min": "8.0.10"
+  },
+  "case": "tunnel-current-with-intf",
+  "input": "<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down ",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "<receive time>",
+          "event": {
+            "original": "<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down "
+          },
+          "message": "<14>2026-03-04T23:10:01.104233+00:00 ip-10-0-0-120 cloudxd: AviatrixTunnelStatusChange: Gateway spoke-b reported Tunnel <spoke-b(AWS us-east-2)intf=eth1,transit-a(AWS us-east-2)intf=eth2 > old_state=Up new_state=Down ",
+          "tags": [
+            "_avx_grok_failure_tunnel_status",
+            "unparsed"
+          ],
+          "type": "syslog",
+          "unix_time": "<receive time>"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

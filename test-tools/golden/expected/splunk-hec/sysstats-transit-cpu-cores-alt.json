@@ -1,0 +1,55 @@
+{
+  "case": "sysstats-transit-cpu-cores-alt",
+  "input": "<14>Mar  4 22:56:19 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:19 AviatrixGwSysStats: timestamp=2026-03-04T22:56:19.570098 name=k8s-transit alias=k8s-transit cpu_idle=100 memory_free=5556856 memory_available=6934948 memory_total=7867120 disk_total=65842432 disk_free=58036576 cpu_cores=[name:2  busy:{start:{seconds:1772664939  nanos:100860608}  end:{seconds:1772664979  nanos:459789245}  max:2} name:3  busy:{start:{seconds:1772664939  nanos:575021985}  end:{seconds:1772664979  nanos:406147090}  max:2} name:-1  busy:{start:{seconds:1772664939  nanos:295260253}  end:{seconds:1772664979  nanos:557595362}  max:1} busy:{start:{seconds:1772664939  nanos:851931578}  end:{seconds:1772664979  nanos:743929935}  max:1} name:1  busy:{start:{seconds:1772664939  nanos:60009195}  end:{seconds:1772664979  nanos:451072365}  max:1}]",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "alias": "k8s-transit",
+            "cpu_aggregate_busy_max": 1,
+            "cpu_busy": 1,
+            "cpu_core_count": 4,
+            "cpu_cores_parsed": [
+              {
+                "busy_max": 2,
+                "name": "2"
+              },
+              {
+                "busy_max": 2,
+                "name": "3"
+              },
+              {
+                "busy_max": 1,
+                "name": "-1"
+              },
+              {
+                "busy_max": 1,
+                "name": "0"
+              },
+              {
+                "busy_max": 1,
+                "name": "1"
+              }
+            ],
+            "cpu_cores_raw": "[name:2  busy:{start:{seconds:1772664939  nanos:100860608}  end:{seconds:1772664979  nanos:459789245}  max:2} name:3  busy:{start:{seconds:1772664939  nanos:575021985}  end:{seconds:1772664979  nanos:406147090}  max:2} name:-1  busy:{start:{seconds:1772664939  nanos:295260253}  end:{seconds:1772664979  nanos:557595362}  max:1} busy:{start:{seconds:1772664939  nanos:851931578}  end:{seconds:1772664979  nanos:743929935}  max:1} name:1  busy:{start:{seconds:1772664939  nanos:60009195}  end:{seconds:1772664979  nanos:451072365}  max:1}]",
+            "cpu_idle": 100,
+            "disk_free": 58036576,
+            "disk_total": 65842432,
+            "gateway": "k8s-transit",
+            "memory_available": 6934948,
+            "memory_free": 5556856,
+            "memory_total": 7867120,
+            "syslog": "<14>Mar  4 22:56:19 GW-k8s-transit-3.128.129.113-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:19 AviatrixGwSysStats: timestamp=2026-03-04T22:56:19.570098 name=k8s-transit alias=k8s-transit cpu_idle=100 memory_free=5556856 memory_available=6934948 memory_total=7867120 disk_total=65842432 disk_free=58036576 cpu_cores=[name:2  busy:{start:{seconds:1772664939  nanos:100860608}  end:{seconds:1772664979  nanos:459789245}  max:2} name:3  busy:{start:{seconds:1772664939  nanos:575021985}  end:{seconds:1772664979  nanos:406147090}  max:2} name:-1  busy:{start:{seconds:1772664939  nanos:295260253}  end:{seconds:1772664979  nanos:557595362}  max:1} busy:{start:{seconds:1772664939  nanos:851931578}  end:{seconds:1772664979  nanos:743929935}  max:1} name:1  busy:{start:{seconds:1772664939  nanos:60009195}  end:{seconds:1772664979  nanos:451072365}  max:1}]"
+          },
+          "source": "avx-gw-sys-stats",
+          "sourcetype": "aviatrix:gateway:system",
+          "time": "YYYY-03-04T22:56:19.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

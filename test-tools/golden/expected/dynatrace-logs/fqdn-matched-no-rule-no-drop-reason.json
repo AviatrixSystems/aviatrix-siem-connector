@@ -1,0 +1,26 @@
+{
+  "case": "fqdn-matched-no-rule-no-drop-reason",
+  "input": "<14>Mar  4 23:07:01 GW-egress-fqdn-gw-198.51.100.60 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.70.1.5 D_IP=203.0.113.70 hostname=docs.example.com state=MATCHED",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "FQDNFilter",
+          "aviatrix.firewall.dst_ip": "203.0.113.70",
+          "aviatrix.firewall.gateway": "egress-fqdn-gw",
+          "aviatrix.firewall.hostname": "docs.example.com",
+          "aviatrix.firewall.rule": "",
+          "aviatrix.firewall.src_ip": "10.70.1.5",
+          "aviatrix.firewall.state": "MATCHED",
+          "content": "FQDN Allow: 10.70.1.5 -> docs.example.com (203.0.113.70) on egress-fqdn-gw",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-04T23:07:01.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

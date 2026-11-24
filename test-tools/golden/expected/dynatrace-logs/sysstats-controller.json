@@ -1,0 +1,5 @@
+{
+  "case": "sysstats-controller",
+  "input": "<14>Mar  4 22:56:02 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:02.140234 name=controller cpu_idle=91 memory_free=1509804 memory_available=4847420 memory_total=8027376 disk_total=65842432 disk_free=49704556",
+  "requests": []
+}

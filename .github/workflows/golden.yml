@@ -1,0 +1,85 @@
+name: Golden I/O Tests
+
+# Field-by-field output checks (test-tools/golden/README.md).
+# PRs and pushes: the "parsed" output only (filter stage, ~3 min).
+# Nightly and manual: all outputs (parsed, splunk-hec, dynatrace-logs,
+# azure-log-ingestion).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'logstash-configs/**'
+      - 'test-tools/sample-logs/**'
+      - 'test-tools/golden/**'
+      - 'test-tools/ci/output-env-vars.sh'
+      - '.github/workflows/golden.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'logstash-configs/**'
+      - 'test-tools/sample-logs/**'
+      - 'test-tools/golden/**'
+      - 'test-tools/ci/output-env-vars.sh'
+      - '.github/workflows/golden.yml'
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      outputs:
+        description: Space-separated outputs (empty = all)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  LOGSTASH_IMAGE: docker.elastic.co/logstash/logstash:8.16.2
+
+jobs:
+  golden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Pull Logstash image
+        run: docker pull "$LOGSTASH_IMAGE"
+
+      - name: Select outputs
+        id: sel
+        run: |
+          if [[ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]]; then
+            outs="parsed"
+          else
+            outs="${{ inputs.outputs }}"
+          fi
+          args=""
+          for o in $outs; do args+=" --output $o"; done
+          echo "args=$args" >> "$GITHUB_OUTPUT"
+
+      - name: Check corpus annotations
+        run: python3 test-tools/golden/golden.py list > /dev/null
+
+      - name: Golden check
+        run: |
+          python3 test-tools/golden/golden.py check ${{ steps.sel.outputs.args }} \
+            --actual-dir "$RUNNER_TEMP/golden-actual"
+
+      - name: Azure column contract (report only)
+        if: always()
+        run: python3 test-tools/golden/golden.py azure-columns || true
+
+      - name: Upload actual output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-actual
+          path: ${{ runner.temp }}/golden-actual
+          retention-days: 7

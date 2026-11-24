@@ -1,0 +1,40 @@
+{
+  "avx": {
+    "min": "10.0"
+  },
+  "case": "suricata-real-dns-alert-no-action",
+  "input": "<174>Sep 10 14:32:38 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"pcap_cnt\":302,\"event_type\":\"alert\",\"direction\":\"to_server\",\"app_proto\":\"dns\",\"flow_id\":1909643457098901,\"flow\":{\"bytes_toserver\":75,\"pkts_toclient\":0,\"dest_port\":53,\"src_ip\":\"10.10.1.177\",\"dest_ip\":\"203.0.113.39\",\"src_port\":35049,\"pkts_toserver\":1,\"bytes_toclient\":0,\"start\":\"2026-09-10T14:32:38.837839+0000\"},\"dest_ip\":\"203.0.113.39\",\"proto\":\"UDP\",\"tx_id\":0,\"timestamp\":\"2026-09-10T14:32:38.837839+0000\",\"pkt_src\":\"wire/pcap\",\"dns\":{\"version\":3,\"id\":877,\"type\":\"request\",\"opcode\":0,\"rcode\":\"NOERROR\",\"flags\":\"120\",\"queries\":[{\"rrname\":\"example5.com\",\"rrtype\":\"A\"}],\"tx_id\":0,\"rd\":true,\"additionals\":[{\"opt\":[{\"code\":10,\"data\":\"f2aa44e0c48ded5f\"}],\"rrname\":\"\",\"rrtype\":\"OPT\",\"ttl\":0}]},\"dest_port\":53,\"ip_v\":4,\"src_ip\":\"10.10.1.177\",\"src_port\":35049,\"alert\":{\"metadata\":{\"updated_at\":[\"2020_09_14\"],\"confidence\":[\"Medium\"],\"created_at\":[\"2012_01_31\"],\"signature_severity\":[\"Major\"]},\"severity\":2,\"policy_id\":\"81d10deb-0898-4774-aab1-b7dc5750afa4\",\"signature\":\"ET DNS Query for .su TLD (Soviet Union) Often Malware Related\",\"rev\":4,\"signature_id\":2014169,\"category\":\"Potentially Bad Traffic\",\"gid\":1,\"session_id\":\"\"}}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "IDSAlert",
+          "aviatrix.ids.category": "Potentially Bad Traffic",
+          "aviatrix.ids.dst_ip": "203.0.113.39",
+          "aviatrix.ids.dst_port": "53",
+          "aviatrix.ids.event_type": "alert",
+          "aviatrix.ids.flow.bytes_toclient": 0,
+          "aviatrix.ids.flow.bytes_toserver": 75,
+          "aviatrix.ids.flow.pkts_toclient": 0,
+          "aviatrix.ids.flow.pkts_toserver": 1,
+          "aviatrix.ids.gateway": "egress-spoke",
+          "aviatrix.ids.gid": 1,
+          "aviatrix.ids.protocol": "UDP",
+          "aviatrix.ids.rev": 4,
+          "aviatrix.ids.severity": 2,
+          "aviatrix.ids.signature": "ET DNS Query for .su TLD (Soviet Union) Often Malware Related",
+          "aviatrix.ids.signature_id": 2014169,
+          "aviatrix.ids.src_ip": "10.10.1.177",
+          "aviatrix.ids.src_port": "35049",
+          "content": "IDS Alert: ET DNS Query for .su TLD (Soviet Union) Often Malware Related (Potentially Bad Traffic) 10.10.1.177:35049 -> 203.0.113.39:53",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-09-10T14:32:38.837839+0000"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

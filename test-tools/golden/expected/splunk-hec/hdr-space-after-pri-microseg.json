@@ -1,0 +1,5 @@
+{
+  "case": "hdr-space-after-pri-microseg",
+  "input": "<133> Nov 23 10:00:00 GW-aws-usw1-0a330200-gw-198.51.100.58 /usr/local/bin/avx-gw-state-sync[4242]: 2026/11/23 10:00:00 AviatrixGwMicrosegPacket: POLICY=0b6c3f9e-2f43-4b8e-9d1e-5f0a6f3c2a11 SRC_MAC=06:ef:2f:7d:10:83 DST_MAC=06:97:38:9c:5a:df IP_SZ=60 SRC_IP=10.12.34.56 DST_IP=10.65.43.21 PROTO=TCP SRC_PORT=50123 DST_PORT=443 DATA=0x ACT=ALLOW ENFORCED=TRUE",
+  "requests": []
+}

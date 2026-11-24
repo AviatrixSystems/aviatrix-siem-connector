@@ -1,0 +1,134 @@
+{
+  "avx": {
+    "min": "9.0"
+  },
+  "case": "suricata-7-tunnel-gre-metadata",
+  "input": "<174>Mar  4 23:06:12 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"timestamp\":\"2026-03-04T23:06:12.881004+0000\",\"flow_id\":118823401992377,\"in_iface\":\"ids0\",\"event_type\":\"alert\",\"src_ip\":\"10.60.1.12\",\"src_port\":40420,\"dest_ip\":\"203.0.113.60\",\"dest_port\":443,\"proto\":\"TCP\",\"ip_v\":4,\"pkt_src\":\"wire/pcap\",\"tunnel\":{\"src_ip\":\"127.0.0.2\",\"dest_ip\":\"127.0.0.3\",\"proto\":\"GRE\",\"depth\":0,\"pkt_src\":\"wire/pcap\"},\"tx_id\":0,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2200311,\"rev\":2,\"signature\":\"ET POLICY Example Suspicious UA\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":{\"created_at\":[\"2024_01_01\"],\"signature_severity\":[\"Minor\"]}},\"app_proto\":\"http\",\"direction\":\"to_server\",\"flow\":{\"pkts_toserver\":3,\"pkts_toclient\":2,\"bytes_toserver\":512,\"bytes_toclient\":300,\"start\":\"2026-03-04T23:06:12.880001+0000\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.60\",\"src_port\":40420,\"dest_port\":443}}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:06:12.000Z",
+          "event": {
+            "original": "<174>Mar  4 23:06:12 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"timestamp\":\"2026-03-04T23:06:12.881004+0000\",\"flow_id\":118823401992377,\"in_iface\":\"ids0\",\"event_type\":\"alert\",\"src_ip\":\"10.60.1.12\",\"src_port\":40420,\"dest_ip\":\"203.0.113.60\",\"dest_port\":443,\"proto\":\"TCP\",\"ip_v\":4,\"pkt_src\":\"wire/pcap\",\"tunnel\":{\"src_ip\":\"127.0.0.2\",\"dest_ip\":\"127.0.0.3\",\"proto\":\"GRE\",\"depth\":0,\"pkt_src\":\"wire/pcap\"},\"tx_id\":0,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2200311,\"rev\":2,\"signature\":\"ET POLICY Example Suspicious UA\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":{\"created_at\":[\"2024_01_01\"],\"signature_severity\":[\"Minor\"]}},\"app_proto\":\"http\",\"direction\":\"to_server\",\"flow\":{\"pkts_toserver\":3,\"pkts_toclient\":2,\"bytes_toserver\":512,\"bytes_toclient\":300,\"start\":\"2026-03-04T23:06:12.880001+0000\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.60\",\"src_port\":40420,\"dest_port\":443}}"
+          },
+          "gw_hostname": "egress-spoke",
+          "message": "<174>Mar  4 23:06:12 GW-egress-spoke-198.51.100.44-sink suricata[4]: {\"timestamp\":\"2026-03-04T23:06:12.881004+0000\",\"flow_id\":118823401992377,\"in_iface\":\"ids0\",\"event_type\":\"alert\",\"src_ip\":\"10.60.1.12\",\"src_port\":40420,\"dest_ip\":\"203.0.113.60\",\"dest_port\":443,\"proto\":\"TCP\",\"ip_v\":4,\"pkt_src\":\"wire/pcap\",\"tunnel\":{\"src_ip\":\"127.0.0.2\",\"dest_ip\":\"127.0.0.3\",\"proto\":\"GRE\",\"depth\":0,\"pkt_src\":\"wire/pcap\"},\"tx_id\":0,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2200311,\"rev\":2,\"signature\":\"ET POLICY Example Suspicious UA\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":{\"created_at\":[\"2024_01_01\"],\"signature_severity\":[\"Minor\"]}},\"app_proto\":\"http\",\"direction\":\"to_server\",\"flow\":{\"pkts_toserver\":3,\"pkts_toclient\":2,\"bytes_toserver\":512,\"bytes_toclient\":300,\"start\":\"2026-03-04T23:06:12.880001+0000\",\"src_ip\":\"10.60.1.12\",\"dest_ip\":\"203.0.113.60\",\"src_port\":40420,\"dest_port\":443}}",
+          "suricataData": {
+            "__json_string__": {
+              "alert": {
+                "action": "allowed",
+                "category": "Potential Corporate Privacy Violation",
+                "gid": 1,
+                "metadata": {
+                  "created_at": [
+                    "2024_01_01"
+                  ],
+                  "signature_severity": [
+                    "Minor"
+                  ]
+                },
+                "rev": 2,
+                "severity": 1,
+                "signature": "ET POLICY Example Suspicious UA",
+                "signature_id": 2200311
+              },
+              "app_proto": "http",
+              "dest_ip": "203.0.113.60",
+              "dest_port": 443,
+              "direction": "to_server",
+              "event_type": "alert",
+              "flow": {
+                "bytes_toclient": 300,
+                "bytes_toserver": 512,
+                "dest_ip": "203.0.113.60",
+                "dest_port": 443,
+                "pkts_toclient": 2,
+                "pkts_toserver": 3,
+                "src_ip": "10.60.1.12",
+                "src_port": 40420,
+                "start": "YYYY-03-04T23:06:12.880001+0000"
+              },
+              "flow_id": 118823401992377,
+              "in_iface": "ids0",
+              "ip_v": 4,
+              "pkt_src": "wire/pcap",
+              "proto": "TCP",
+              "src_ip": "10.60.1.12",
+              "src_port": 40420,
+              "timestamp": "YYYY-03-04T23:06:12.881004+0000",
+              "tunnel": {
+                "depth": 0,
+                "dest_ip": "127.0.0.3",
+                "pkt_src": "wire/pcap",
+                "proto": "GRE",
+                "src_ip": "127.0.0.2"
+              },
+              "tx_id": 0
+            }
+          },
+          "suricataDataJson": {
+            "alert": {
+              "action": "allowed",
+              "category": "Potential Corporate Privacy Violation",
+              "gid": 1,
+              "metadata": {
+                "created_at": [
+                  "2024_01_01"
+                ],
+                "signature_severity": [
+                  "Minor"
+                ]
+              },
+              "rev": 2,
+              "severity": 1,
+              "signature": "ET POLICY Example Suspicious UA",
+              "signature_id": 2200311
+            },
+            "app_proto": "http",
+            "dest_ip": "203.0.113.60",
+            "dest_port": 443,
+            "direction": "to_server",
+            "event_type": "alert",
+            "flow": {
+              "bytes_toclient": 300,
+              "bytes_toserver": 512,
+              "dest_ip": "203.0.113.60",
+              "dest_port": 443,
+              "pkts_toclient": 2,
+              "pkts_toserver": 3,
+              "src_ip": "10.60.1.12",
+              "src_port": 40420,
+              "start": "YYYY-03-04T23:06:12.880001+0000"
+            },
+            "flow_id": 118823401992377,
+            "in_iface": "ids0",
+            "ip_v": 4,
+            "pkt_src": "wire/pcap",
+            "proto": "TCP",
+            "src_ip": "10.60.1.12",
+            "src_port": 40420,
+            "timestamp": "YYYY-03-04T23:06:12.881004+0000",
+            "tunnel": {
+              "depth": 0,
+              "dest_ip": "127.0.0.3",
+              "pkt_src": "wire/pcap",
+              "proto": "GRE",
+              "src_ip": "127.0.0.2"
+            },
+            "tx_id": 0
+          },
+          "syslog_pri": "174",
+          "tags": [
+            "suricata"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T23:06:12.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "case": "cmd-v1-fail-reason-commas-no-username",
+  "input": "<14>Mar  4 23:08:01 203.0.113.5 Mar  4 23:08:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=CREATE_SPOKE_GW, argv=['--rtn_file', '/dev/null', 'create_spoke_gw', '--gw_name', 'spoke-test-1', '--vpc_id', 'vpc-0abc1234', '--gw_size', 't3.small', '--insane_mode', None], result=Fail, reason=Gateway spoke-test-1 already exists, size=t3.small, choose another name",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "CREATE_SPOKE_GW",
+            "args": "['--rtn_file', '/dev/null', 'create_spoke_gw', '--gw_name', 'spoke-test-1', '--vpc_id', 'vpc-0abc1234', '--gw_size', 't3.small', '--insane_mode', None]",
+            "reason": "Gateway spoke-test-1 already exists, size=t3.small, choose another name",
+            "result": "Fail",
+            "syslog": "<14>Mar  4 23:08:01 203.0.113.5 Mar  4 23:08:01 Controller-10.0.0.120 run_cloudxd.py[3085]: AviatrixCMD: action=CREATE_SPOKE_GW, argv=['--rtn_file', '/dev/null', 'create_spoke_gw', '--gw_name', 'spoke-test-1', '--vpc_id', 'vpc-0abc1234', '--gw_size', 't3.small', '--insane_mode', None], result=Fail, reason=Gateway spoke-test-1 already exists, size=t3.small, choose another name",
+            "timestamp": "YYYY-03-04T23:08:01.000Z (epoch)"
+          },
+          "source": "avx-cmd",
+          "sourcetype": "aviatrix:controller:audit",
+          "time": "YYYY-03-04T23:08:01.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "case": "vpn-real-mac-client",
+  "input": "<14>Mar 10 12:37:41 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=user1, Status=active, Gateway=egress-vpn-gw, GatewayIP=, VPNVirtualIP=192.168.43.6, PublicIP=198.51.100.32, Login=2026-03-10 12:37:39, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=mac, VPNClientVersion=AVPNC-2.17.7",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-10T12:37:41.000Z",
+          "TimeGenerated": "YYYY-03-10T12:37:41.000Z",
+          "tags": [
+            "vpn_session"
+          ],
+          "unix_time": "YYYY-03-10T12:37:41.000Z (epoch)",
+          "vpn_client_platform": "mac",
+          "vpn_client_version": "AVPNC-2.17.7",
+          "vpn_duration": "N/A",
+          "vpn_gateway": "egress-vpn-gw",
+          "vpn_login": "YYYY-03-10 12:37:39",
+          "vpn_logout": "N/A",
+          "vpn_public_ip": "198.51.100.32",
+          "vpn_rx_bytes": "N/A",
+          "vpn_status": "active",
+          "vpn_tx_bytes": "N/A",
+          "vpn_user": "user1",
+          "vpn_virtual_ip": "192.168.43.6"
+        }
+      ],
+      "path": "/azure/azure-vpn-session"
+    }
+  ]
+}

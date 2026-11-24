@@ -1,0 +1,5 @@
+{
+  "case": "fqdn-allowed-rule",
+  "input": "<14>Mar  4 22:59:12 GW-egress-fqdn-gw-18.191.10.20 avx-nfq: AviatrixFQDNRule2[CRIT]nfq_ssl_handle_client_hello() L#291  Gateway=egress-fqdn-gw S_IP=10.10.1.163 D_IP=140.82.112.3 hostname=github.com state=MATCHED Rule=*.github.com;1",
+  "requests": []
+}

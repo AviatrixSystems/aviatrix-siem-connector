@@ -1,0 +1,25 @@
+{
+  "case": "vpn-connect-masked-public-ip",
+  "input": "<14>Mar 10 12:40:01 203.0.113.5 Mar 10 12:40:01 Controller-10.0.0.141 run_cloudxd.py[1272]: AviatrixVPNSession: User=jane.doe@example.com, Status=active, Gateway=vpn-gw-2, GatewayIP=198.51.100.140, VPNVirtualIP=192.168.44.10, PublicIP=<omitted>, Login=2026-03-10 12:39:58, Logout=N/A, Duration=N/A, RXbytes=N/A, TXbytes=N/A, VPNClientPlatform=, VPNClientVersion=",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.event.type": "VPNSession",
+          "aviatrix.vpn.gateway": "vpn-gw-2",
+          "aviatrix.vpn.gateway_ip": "198.51.100.140",
+          "aviatrix.vpn.public_ip": "<omitted>",
+          "aviatrix.vpn.status": "active",
+          "aviatrix.vpn.user": "jane.doe@example.com",
+          "content": "VPN active: jane.doe@example.com on vpn-gw-2",
+          "log.source": "aviatrix",
+          "severity": "INFORMATIONAL",
+          "timestamp": "YYYY-03-10T12:40:01.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

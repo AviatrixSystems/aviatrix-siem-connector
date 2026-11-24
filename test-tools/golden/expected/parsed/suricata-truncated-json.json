@@ -1,0 +1,29 @@
+{
+  "case": "suricata-truncated-json",
+  "input": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":4",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-11-23T10:00:04.000Z",
+          "event": {
+            "original": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":4"
+          },
+          "gw_hostname": "spoke",
+          "message": "<174>Nov 23 10:00:04 GW-spoke-198.51.100.7 suricata[4]: {\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":4",
+          "suricataData": "{\"timestamp\":\"2026-11-23T10:00:04.000000+0000\",\"flow_id\":1,\"event_type\":\"alert\",\"src_ip\":\"203.0.113.5\",\"src_port\":4",
+          "syslog_pri": "174",
+          "tags": [
+            "_avx_json_parse_failure",
+            "unparsed"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-11-23T10:00:04.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "case": "cmd-v25-api-post",
+  "input": "<14>Mar  4 22:58:42 18.190.163.185 Mar  4 22:58:42 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=POST url=/v2.5/api/gateways/spoke/backend-eks-spoke/size user=admin req_data={\"gw_name\": \"backend-eks-spoke\", \"gw_size\": \"t3.medium\"} resp_status=200 resp_data={\"return\": true, \"results\": \"Gateway backend-eks-spoke resized to t3.medium\"}",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:58:42.000Z",
+          "action": "/v2.5/api/gateways/spoke/backend-eks-spoke/size",
+          "args": {
+            "__json_string__": {
+              "gw_name": "backend-eks-spoke",
+              "gw_size": "t3.medium"
+            }
+          },
+          "controller_ip": "10.0.0.120",
+          "event": {
+            "original": "<14>Mar  4 22:58:42 18.190.163.185 Mar  4 22:58:42 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=POST url=/v2.5/api/gateways/spoke/backend-eks-spoke/size user=admin req_data={\"gw_name\": \"backend-eks-spoke\", \"gw_size\": \"t3.medium\"} resp_status=200 resp_data={\"return\": true, \"results\": \"Gateway backend-eks-spoke resized to t3.medium\"}"
+          },
+          "gw_hostname": "Controller-10.0.0.120",
+          "message": "<14>Mar  4 22:58:42 18.190.163.185 Mar  4 22:58:42 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=POST url=/v2.5/api/gateways/spoke/backend-eks-spoke/size user=admin req_data={\"gw_name\": \"backend-eks-spoke\", \"gw_size\": \"t3.medium\"} resp_status=200 resp_data={\"return\": true, \"results\": \"Gateway backend-eks-spoke resized to t3.medium\"}",
+          "reason": {
+            "__json_string__": {
+              "results": "Gateway backend-eks-spoke resized to t3.medium",
+              "return": true
+            }
+          },
+          "result": "200",
+          "tags": [
+            "cmd",
+            "V2.5API"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:58:42.000Z (epoch)",
+          "username": "admin"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "10.0"
+  },
+  "case": "microseg-82-deny-not-enforced",
+  "input": "<158>Mar  4 22:55:01 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:01 AviatrixGwMicrosegPacket: POLICY=126bafc2-10ee-4eb7-b5e8-238f10515c5f SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.82.93 DST_IP=212.227.228.245 PROTO=TCP SRC_PORT=57476 DST_PORT=443 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=3574532756463495801 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "DENY",
+            "dst_ip": "212.227.228.245",
+            "dst_mac": "02:c7:c5:7c:2e:b3",
+            "dst_port": 443,
+            "enforced": false,
+            "gw_ip": "18.119.198.171",
+            "ip_size": "60",
+            "proto": "TCP",
+            "session_byte_cnt": "0",
+            "session_dur": "0",
+            "session_end_reason": "0",
+            "session_end_reason_text": "active",
+            "session_event": "0",
+            "session_event_type": "Start",
+            "session_id": "3574532756463495801",
+            "session_pkt_cnt": "0",
+            "src_ip": "100.64.82.93",
+            "src_mac": "02:c4:64:a1:45:77",
+            "src_port": 57476,
+            "syslog": "<158>Mar  4 22:55:01 GW-backend-eks-spoke-18.119.198.171-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:55:01 AviatrixGwMicrosegPacket: POLICY=126bafc2-10ee-4eb7-b5e8-238f10515c5f SRC_MAC=02:c4:64:a1:45:77 DST_MAC=02:c7:c5:7c:2e:b3 IP_SZ=60 SRC_IP=100.64.82.93 DST_IP=212.227.228.245 PROTO=TCP SRC_PORT=57476 DST_PORT=443 DATA=0x ACT=DENY ENFORCED=false SESSION_ID=3574532756463495801 SESSION_EVENT=0 SESSION_END_REASON=0 SESSION_PKT_CNT=0 SESSION_BYTE_CNT=0 SESSION_DUR=0",
+            "timestamp": "YYYY-03-04T22:55:01.000Z (epoch)",
+            "uuid": "126bafc2-10ee-4eb7-b5e8-238f10515c5f"
+          },
+          "source": "avx-l4-fw",
+          "sourcetype": "aviatrix:firewall:l4",
+          "time": "YYYY-03-04T22:55:01.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

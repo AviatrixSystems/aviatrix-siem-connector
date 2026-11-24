@@ -1,0 +1,60 @@
+{
+  "case": "sysstats-gw-cpu-cores-variable",
+  "input": "<14>Mar  4 22:56:37 GW-k8s-demo-db-3.12.42.129-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:37 AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.617567 name=k8s-demo-db alias=k8s-demo-db cpu_idle=98 memory_free=877956 memory_available=2618000 memory_total=3828972 disk_total=65842432 disk_free=57902860 cpu_cores=[name:1  busy:{start:{seconds:1772664957  nanos:214398024}  end:{seconds:1772664997  nanos:956640907}  min:1  max:35  avg:13} name:-1  busy:{start:{seconds:1772664957  nanos:981187995}  end:{seconds:1772664997  nanos:827073453}  min:1  max:36  avg:13} busy:{start:{seconds:1772664957  nanos:196660042}  end:{seconds:1772664997  nanos:851915891}  min:1  max:38  avg:13}]",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T22:56:37.000Z",
+          "alias": "k8s-demo-db",
+          "cpu_aggregate_busy_avg": 13,
+          "cpu_aggregate_busy_max": 36,
+          "cpu_aggregate_busy_min": 1,
+          "cpu_busy": 13,
+          "cpu_core_count": 2,
+          "cpu_cores": "[name:1  busy:{start:{seconds:1772664957  nanos:214398024}  end:{seconds:1772664997  nanos:956640907}  min:1  max:35  avg:13} name:-1  busy:{start:{seconds:1772664957  nanos:981187995}  end:{seconds:1772664997  nanos:827073453}  min:1  max:36  avg:13} busy:{start:{seconds:1772664957  nanos:196660042}  end:{seconds:1772664997  nanos:851915891}  min:1  max:38  avg:13}]",
+          "cpu_cores_parsed": [
+            {
+              "busy_avg": 13,
+              "busy_max": 35,
+              "busy_min": 1,
+              "name": "1"
+            },
+            {
+              "busy_avg": 13,
+              "busy_max": 36,
+              "busy_min": 1,
+              "name": "-1"
+            },
+            {
+              "busy_avg": 13,
+              "busy_max": 38,
+              "busy_min": 1,
+              "name": "0"
+            }
+          ],
+          "cpu_idle": 98,
+          "disk_free": 57902860,
+          "disk_total": 65842432,
+          "event": {
+            "original": "<14>Mar  4 22:56:37 GW-k8s-demo-db-3.12.42.129-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:37 AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.617567 name=k8s-demo-db alias=k8s-demo-db cpu_idle=98 memory_free=877956 memory_available=2618000 memory_total=3828972 disk_total=65842432 disk_free=57902860 cpu_cores=[name:1  busy:{start:{seconds:1772664957  nanos:214398024}  end:{seconds:1772664997  nanos:956640907}  min:1  max:35  avg:13} name:-1  busy:{start:{seconds:1772664957  nanos:981187995}  end:{seconds:1772664997  nanos:827073453}  min:1  max:36  avg:13} busy:{start:{seconds:1772664957  nanos:196660042}  end:{seconds:1772664997  nanos:851915891}  min:1  max:38  avg:13}]"
+          },
+          "gateway": "k8s-demo-db",
+          "memory_available": 2618000,
+          "memory_free": 877956,
+          "memory_total": 3828972,
+          "message": "<14>Mar  4 22:56:37 GW-k8s-demo-db-3.12.42.129-sink /usr/local/bin/avx-gw-state-sync 2026/03/04 22:56:37 AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.617567 name=k8s-demo-db alias=k8s-demo-db cpu_idle=98 memory_free=877956 memory_available=2618000 memory_total=3828972 disk_total=65842432 disk_free=57902860 cpu_cores=[name:1  busy:{start:{seconds:1772664957  nanos:214398024}  end:{seconds:1772664997  nanos:956640907}  min:1  max:35  avg:13} name:-1  busy:{start:{seconds:1772664957  nanos:981187995}  end:{seconds:1772664997  nanos:827073453}  min:1  max:36  avg:13} busy:{start:{seconds:1772664957  nanos:196660042}  end:{seconds:1772664997  nanos:851915891}  min:1  max:38  avg:13}]",
+          "syslog_pri": "14",
+          "tags": [
+            "gw_sys_stats"
+          ],
+          "type": "syslog",
+          "unix_time": "YYYY-03-04T22:56:37.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

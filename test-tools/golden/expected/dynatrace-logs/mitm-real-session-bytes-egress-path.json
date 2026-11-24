@@ -1,0 +1,38 @@
+{
+  "avx": {
+    "min": "10.1"
+  },
+  "case": "mitm-real-session-bytes-egress-path",
+  "input": "<153>Sep 21 15:55:37 GW-app-spoke-198.51.100.20-sink traffic_server[266299]: {\"reason\":\"POLICY\",\"session_stage\":\"end\",\"enforced\":true,\"session_bytes\":85,\"src\":\"10.10.2.216\",\"session_id\":\"ea42bbf7-7f04-4035-aac1-9cc136850346\",\"dest\":\"198.51.100.39\",\"priority\":\"LOG_ALERT\",\"session_start\":1790006137922125333,\"url\":\"198.51.100.39/\",\"session_time\":98217,\"decided_by\":\"b32d68fc-7608-454c-a603-5cc5ce163c5c\",\"src_port\":51782,\"stage\":\"txn\",\"proto\":\"tcp\",\"action\":\"Deny\",\"ids\":false,\"sni_hostname\":\"198.51.100.39\",\"request_bytes\":85,\"dest_port\":80,\"timestamp\":1790006137,\"egress_path\":\"EGRESS_PATH_DEFAULT\"}",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.dcf.action": "Deny",
+          "aviatrix.dcf.dst_ip": "198.51.100.39",
+          "aviatrix.dcf.dst_port": 80,
+          "aviatrix.dcf.enforced": true,
+          "aviatrix.dcf.gateway": "app-spoke",
+          "aviatrix.dcf.layer": "L7",
+          "aviatrix.dcf.policy_uuid": "b32d68fc-7608-454c-a603-5cc5ce163c5c",
+          "aviatrix.dcf.protocol": "TCP",
+          "aviatrix.dcf.reason": "POLICY",
+          "aviatrix.dcf.request_bytes": 85,
+          "aviatrix.dcf.session_id": "ea42bbf7-7f04-4035-aac1-9cc136850346",
+          "aviatrix.dcf.sni_hostname": "198.51.100.39",
+          "aviatrix.dcf.src_ip": "10.10.2.216",
+          "aviatrix.dcf.src_port": 51782,
+          "aviatrix.dcf.url": "198.51.100.39/",
+          "aviatrix.event.type": "WebInspection",
+          "content": "L7 DCF Deny: 10.10.2.216 -> 198.51.100.39",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-09-21T15:55:37.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

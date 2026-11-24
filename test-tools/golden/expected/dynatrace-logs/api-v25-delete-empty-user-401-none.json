@@ -1,0 +1,28 @@
+{
+  "case": "api-v25-delete-empty-user-401-none",
+  "input": "<14>Mar  4 23:08:12 203.0.113.5 Mar  4 23:08:12 Controller-10.0.0.120 cloudxd[3085]: AviatrixAPI: method=DELETE url=/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78 user= req_data={} resp_status=401 UNAUTHORIZED resp_data=None ",
+  "requests": [
+    {
+      "auth_scheme": "Bearer",
+      "content_type": "application/json",
+      "events": [
+        {
+          "aviatrix.controller.action": "/v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78",
+          "aviatrix.controller.args": {
+            "__json_string__": {}
+          },
+          "aviatrix.controller.host": "Controller-10.0.0.120",
+          "aviatrix.controller.reason": "None ",
+          "aviatrix.controller.result": "401 UNAUTHORIZED",
+          "aviatrix.controller.username": "",
+          "aviatrix.event.type": "ControllerAudit",
+          "content": "Controller API: /v2.5/app-domains/9b1f3a6c-2d4e-4f80-a1b2-c3d4e5f60718? host=10.0.0.120 ip=198.51.100.78 - 401 UNAUTHORIZED",
+          "log.source": "aviatrix",
+          "severity": "WARN",
+          "timestamp": "YYYY-03-04T23:08:12.000Z"
+        }
+      ],
+      "path": "/dynatrace/logs"
+    }
+  ]
+}

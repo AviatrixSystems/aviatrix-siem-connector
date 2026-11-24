@@ -1,0 +1,28 @@
+{
+  "avx": {
+    "min": "8.2",
+    "until": "10.0"
+  },
+  "case": "mitm-truncated-8k-limit",
+  "input": "<153>Mar  4 23:05:02 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"10.60.1.12\",\"src_port\":40313,\"dest\":\"203.0.113.11\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"app.example.com\",\"url\":\"app.example.com/search?q=aaaaaaaaaaaaaaaaaaaaaaaa",
+  "requests": [
+    {
+      "auth_scheme": "",
+      "content_type": "application/json",
+      "events": [
+        {
+          "@timestamp": "YYYY-03-04T23:05:02.000Z",
+          "gw_hostname": "egress-spoke",
+          "message": "<153>Mar  4 23:05:02 GW-egress-spoke-198.51.100.44-sink traffic_server[6120]: {\"priority\":\"LOG_ALERT\",\"action\":\"Permit\",\"reason\":\"POLICY\",\"src\":\"10.60.1.12\",\"src_port\":40313,\"dest\":\"203.0.113.11\",\"dest_port\":443,\"enforced\":true,\"ids\":true,\"stage\":\"txn\",\"sni_hostname\":\"app.example.com\",\"url\":\"app.example.com/search?q=aaaaaaaaaaaaaaaaaaaaaaaa",
+          "syslog_pri": "153",
+          "tags": [
+            "_avx_json_parse_failure",
+            "unparsed"
+          ],
+          "unix_time": "YYYY-03-04T23:05:02.000Z (epoch)"
+        }
+      ],
+      "path": "/parsed"
+    }
+  ]
+}

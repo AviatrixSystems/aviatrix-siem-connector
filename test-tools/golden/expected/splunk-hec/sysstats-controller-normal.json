@@ -1,0 +1,28 @@
+{
+  "case": "sysstats-controller-normal",
+  "input": "<14>Mar  4 22:56:37 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.767139 name=controller cpu_idle=90 memory_free=1531636 memory_available=4872892 memory_total=8027376 disk_total=65842432 disk_free=49702152",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "cpu_idle": 90,
+            "disk_free": 49702152,
+            "disk_total": 65842432,
+            "gateway": "controller",
+            "memory_available": 4872892,
+            "memory_free": 1531636,
+            "memory_total": 8027376,
+            "syslog": "<14>Mar  4 22:56:37 Controller-10.0.0.120 run_cloudxd.py[5628]: AviatrixGwSysStats: timestamp=2026-03-04T22:56:37.767139 name=controller cpu_idle=90 memory_free=1531636 memory_available=4872892 memory_total=8027376 disk_total=65842432 disk_free=49702152"
+          },
+          "source": "avx-gw-sys-stats",
+          "sourcetype": "aviatrix:gateway:system",
+          "time": "YYYY-03-04T22:56:37.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}

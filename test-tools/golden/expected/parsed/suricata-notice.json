@@ -1,0 +1,5 @@
+{
+  "case": "suricata-notice",
+  "input": "<14>Mar  4 22:56:46 GW-backend-eks-spoke-18.119.198.171-sink suricata[25587]: Notice: lipc: Note: LIPC version mismatch. 33864 != 1 [ProcessLipcRequest:source-lipc.c:442]",
+  "requests": []
+}

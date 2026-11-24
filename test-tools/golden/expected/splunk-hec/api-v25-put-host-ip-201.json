@@ -1,0 +1,57 @@
+{
+  "case": "api-v25-put-host-ip-201",
+  "input": "<14>Aug 30 00:15:56 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=PUT url=/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd? host=198.51.100.2 ip=203.0.113.218 user=admin req_data={\"name\": \"test-sg-1\", \"selector\": {\"any\": [{\"all\": {\"name\": \"web-vm\", \"type\": \"vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"} resp_status=201 CREATED resp_data={\"name\": \"test-sg-1\", \"selector\": {\"any\": [{\"all\": {\"name\": \"web-vm\", \"type\": \"vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"}",
+  "requests": [
+    {
+      "auth_scheme": "Splunk",
+      "content_type": "application/json",
+      "events": [
+        {
+          "event": {
+            "action": "/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd? host=198.51.100.2 ip=203.0.113.218",
+            "args": {
+              "__json_string__": {
+                "name": "test-sg-1",
+                "selector": {
+                  "any": [
+                    {
+                      "all": {
+                        "name": "web-vm",
+                        "type": "vm"
+                      }
+                    }
+                  ]
+                },
+                "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
+              }
+            },
+            "reason": {
+              "__json_string__": {
+                "name": "test-sg-1",
+                "selector": {
+                  "any": [
+                    {
+                      "all": {
+                        "name": "web-vm",
+                        "type": "vm"
+                      }
+                    }
+                  ]
+                },
+                "uuid": "e12fa2e7-b7b1-4776-8a54-8a00dfc860bd"
+              }
+            },
+            "result": "201 CREATED",
+            "syslog": "<14>Aug 30 00:15:56 Controller-10.0.1.118 cloudxd: AviatrixAPI: method=PUT url=/v2.5/app-domains/e12fa2e7-b7b1-4776-8a54-8a00dfc860bd? host=198.51.100.2 ip=203.0.113.218 user=admin req_data={\"name\": \"test-sg-1\", \"selector\": {\"any\": [{\"all\": {\"name\": \"web-vm\", \"type\": \"vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"} resp_status=201 CREATED resp_data={\"name\": \"test-sg-1\", \"selector\": {\"any\": [{\"all\": {\"name\": \"web-vm\", \"type\": \"vm\"}}]}, \"uuid\": \"e12fa2e7-b7b1-4776-8a54-8a00dfc860bd\"}",
+            "timestamp": "YYYY-08-30T00:15:56.000Z (epoch)",
+            "username": "admin"
+          },
+          "source": "avx-cmd",
+          "sourcetype": "aviatrix:controller:audit",
+          "time": "YYYY-08-30T00:15:56.000Z (epoch)"
+        }
+      ],
+      "path": "/services/collector/event"
+    }
+  ]
+}
