@@ -20,5 +20,9 @@ FROM docker.elastic.co/logstash/logstash:8.16.2
 
 RUN logstash-plugin install logstash-output-zabbix
 
-COPY --chmod=644 assembled/zabbix-full.conf /usr/share/logstash/pipeline/logstash.conf
-COPY --chmod=644 patterns/ /usr/share/logstash/patterns/
+# No COPY --chmod on directories: BuildKit applies it to dirs too (untraversable).
+USER root
+COPY assembled/zabbix-full.conf /usr/share/logstash/pipeline/logstash.conf
+COPY patterns/ /usr/share/logstash/patterns/
+RUN chmod -R a+rX,go-w /usr/share/logstash/pipeline /usr/share/logstash/patterns
+USER 1000
