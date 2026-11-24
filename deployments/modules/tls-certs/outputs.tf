@@ -3,6 +3,11 @@ output "secret_arn" {
   value       = aws_secretsmanager_secret.tls.arn
 }
 
+output "secret_version_arn" {
+  description = "Same ARN as secret_arn, but taken from the secret version so consumers wait until the cert bundle has a value (avoids boot-time ResourceNotFoundException)"
+  value       = aws_secretsmanager_secret_version.tls.arn
+}
+
 output "ca_cert_pem" {
   description = "CA certificate PEM -- upload to Aviatrix as 'Server CA Certificate'"
   value       = tls_self_signed_cert.ca.cert_pem

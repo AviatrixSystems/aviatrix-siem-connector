@@ -1,15 +1,28 @@
 # DOCKER RUN FOR DYNATRACE COMBINED OUTPUT (METRICS + LOGS)
+# Rendered by deployments/modules/aws-logstash for BOTH plaintext and TLS mode
+# (TLS adds a stunnel sidecar that forwards to the published syslog port), and
+# stored in Secrets Manager; the instance fetches and runs it at boot.
+# Module-provided vars: log_profile, syslog_port, plus defaults for
+# logstash_image, splunk_port, dt_region, dt_metrics_url, dt_logs_url,
+# dt_metric_source, dt_log_source, dt_logs_token, zabbix_port, zabbix_host_prefix.
+# Dynatrace platform tokens (dt0s16.*) are sent as Bearer and need the
+# <env>.apps.dynatrace.com /platform/classic/environment-api path. dt_region
+# defaults to "apps" ("live", the old documented value, is mapped to "apps").
+# Set dt_metrics_url / dt_logs_url to override the full URLs instead.
+# Required: dt_environment_id (unless both URLs are set), dt_api_token.
+# dt_logs_token defaults to dt_api_token.
 docker run -d --restart=always \
   -v /logstash/pipeline/:/usr/share/logstash/pipeline/ \
   -v /logstash/patterns:/usr/share/logstash/patterns \
-  -p 5000:5000/tcp \
-  -p 5000:5000/udp \
+  -p ${syslog_port}:${syslog_port}/tcp \
+  -p ${syslog_port}:${syslog_port}/udp \
+  -e SYSLOG_PORT=${syslog_port} \
   -e LOG_PROFILE=${log_profile} \
-  -e DT_METRICS_URL=https://${dt_environment_id}.${dt_region}.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest \
-  -e DT_API_TOKEN=${dt_api_token} \
-  -e DT_METRIC_SOURCE=${dt_metric_source} \
-  -e DT_LOGS_URL=https://${dt_environment_id}.${dt_region}.dynatrace.com/platform/classic/environment-api/v2/logs/ingest \
-  -e DT_LOGS_TOKEN=${dt_logs_token} \
-  -e DT_LOG_SOURCE=${dt_log_source} \
+  -e DT_METRICS_URL="${dt_metrics_url != "" ? dt_metrics_url : "https://${dt_environment_id}.${dt_region == "live" ? "apps" : dt_region}.dynatrace.com/platform/classic/environment-api/v2/metrics/ingest"}" \
+  -e DT_API_TOKEN="${dt_api_token}" \
+  -e DT_METRIC_SOURCE="${dt_metric_source}" \
+  -e DT_LOGS_URL="${dt_logs_url != "" ? dt_logs_url : "https://${dt_environment_id}.${dt_region == "live" ? "apps" : dt_region}.dynatrace.com/platform/classic/environment-api/v2/logs/ingest"}" \
+  -e DT_LOGS_TOKEN="${dt_logs_token}" \
+  -e DT_LOG_SOURCE="${dt_log_source}" \
   -e XPACK_MONITORING_ENABLED=false \
-  docker.elastic.co/logstash/logstash:8.16.2
+  ${logstash_image}

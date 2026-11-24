@@ -27,9 +27,15 @@ variable "container_image" {
 }
 
 variable "syslog_port" {
-  description = "Syslog port"
+  description = "Syslog port (passed to Logstash as SYSLOG_PORT; the image must be built from a config assembled after SYSLOG_PORT support was added)"
   type        = number
   default     = 5000
+}
+
+variable "allowed_syslog_cidrs" {
+  description = "Source CIDRs allowed to send syslog (or TLS syslog) to the tasks. The NLB preserves client IPs, so list your Aviatrix gateway/controller egress IPs here. Default 0.0.0.0/0 keeps the old behavior. NLB health checks are allowed from the VPC CIDR separately."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "log_profile" {
@@ -43,9 +49,10 @@ variable "log_profile" {
 }
 
 variable "logstash_config_variables" {
-  description = "Environment variables for the Logstash container (e.g., Splunk HEC token, Dynatrace API token)"
+  description = "Environment variables for the Logstash container (e.g., Splunk HEC token, Dynatrace API token). Stored in Secrets Manager and injected as ECS secrets; names are uppercased (kept as-is for azure-log-ingestion)."
   type        = map(string)
   default     = {}
+  sensitive   = true
 }
 
 variable "desired_count" {
@@ -61,7 +68,7 @@ variable "cpu" {
 }
 
 variable "memory" {
-  description = "Fargate task memory in MiB"
+  description = "Fargate task memory in MiB (the Logstash heap is set to half of this via LS_JAVA_OPTS)"
   type        = number
   default     = 1024
 }

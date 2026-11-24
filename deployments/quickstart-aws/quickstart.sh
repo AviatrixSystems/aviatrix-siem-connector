@@ -3,8 +3,8 @@
 #
 # Deploy an Aviatrix syslog-to-SIEM connector on ECS Fargate in one command.
 #
-# Usage:
-#   wget -qO- https://github.com/AviatrixSystems/aviatrix-siem-connector/releases/latest/download/quickstart-aws.sh | bash -s -- \
+# Usage (the release asset is named quickstart.sh; curl -f fails loudly on 404):
+#   curl -fsSL https://github.com/AviatrixSystems/aviatrix-siem-connector/releases/latest/download/quickstart.sh | bash -s -- \
 #     --output-type splunk-hec \
 #     --vpc-id vpc-xxx \
 #     --subnets subnet-aaa,subnet-bbb \
@@ -12,6 +12,10 @@
 #     --splunk-hec-token xxx
 
 set -euo pipefail
+
+# Terraform auto-installed by a previous run lives here; keep it on PATH so a
+# later --destroy (in a fresh shell) can find it.
+export PATH="$HOME/.local/bin:$PATH"
 
 # --- Defaults ---
 OUTPUT_TYPE=""
@@ -28,8 +32,23 @@ PLAN_ONLY=false
 TERRAFORM_VERSION="1.9.8"
 GITHUB_REPO="AviatrixSystems/aviatrix-siem-connector"
 
-# SIEM-specific vars (collected into logstash_config_variables map)
-declare -A CONFIG_VARS
+ALLOWED_CIDRS=""
+
+# SIEM-specific vars (collected into logstash_config_variables map).
+# Stored as CV_<KEY> variables plus a key list instead of an associative
+# array, so the script also runs on macOS's stock bash 3.2.
+CONFIG_KEYS=""
+set_cfg() {
+  printf -v "CV_$1" '%s' "$2"
+  case " $CONFIG_KEYS " in
+    *" $1 "*) ;;
+    *) CONFIG_KEYS="${CONFIG_KEYS:+$CONFIG_KEYS }$1" ;;
+  esac
+}
+get_cfg() {
+  local name="CV_$1"
+  printf '%s' "${!name:-}"
+}
 
 # --- Parse args ---
 print_usage() {
@@ -38,15 +57,19 @@ Aviatrix SIEM Connector — AWS Quickstart
 
 Required:
   --output-type <type>          splunk-hec, dynatrace, dynatrace-metrics,
-                                dynatrace-logs, zabbix, azure-log-ingestion
+                                dynatrace-logs, zabbix
+                                (azure-log-ingestion: use deployments/azure-aci)
   --vpc-id <vpc-id>             VPC for NLB and ECS tasks
   --subnets <id,id,...>         Comma-separated subnet IDs (multi-AZ recommended)
 
 Optional:
   --internal                    Create internal NLB (default: internet-facing)
+  --allowed-cidrs <cidr,...>    Source CIDRs allowed to send syslog
+                                (default: 0.0.0.0/0; use your gateway egress IPs)
   --syslog-port <port>          Syslog listen port (default: 5000)
   --log-profile <profile>       all, security, or networking (default: all)
-  --image-tag <tag>             Container image tag (default: latest)
+  --image-tag <tag>             Release/image tag (default: latest release,
+                                resolved to its version tag)
   --name <name>                 Stack name / working directory (default: avx-siem-connector)
   --region <region>             AWS region (default: current CLI region)
 
@@ -74,6 +97,7 @@ while [[ $# -gt 0 ]]; do
     --vpc-id)           VPC_ID="$2"; shift 2 ;;
     --subnets)          SUBNETS="$2"; shift 2 ;;
     --internal)         INTERNAL_NLB="true"; shift ;;
+    --allowed-cidrs)    ALLOWED_CIDRS="$2"; shift 2 ;;
     --syslog-port)      SYSLOG_PORT="$2"; shift 2 ;;
     --log-profile)      LOG_PROFILE="$2"; shift 2 ;;
     --image-tag)        IMAGE_TAG="$2"; shift 2 ;;
@@ -82,21 +106,57 @@ while [[ $# -gt 0 ]]; do
     --destroy)          DESTROY=true; shift ;;
     --plan)             PLAN_ONLY=true; shift ;;
     # Splunk
-    --splunk-address)   CONFIG_VARS[SPLUNK_ADDRESS]="$2"; shift 2 ;;
-    --splunk-port)      CONFIG_VARS[SPLUNK_PORT]="$2"; shift 2 ;;
-    --splunk-hec-token) CONFIG_VARS[SPLUNK_HEC_AUTH]="$2"; shift 2 ;;
+    --splunk-address)   set_cfg SPLUNK_ADDRESS "$2"; shift 2 ;;
+    --splunk-port)      set_cfg SPLUNK_PORT "$2"; shift 2 ;;
+    --splunk-hec-token) set_cfg SPLUNK_HEC_AUTH "$2"; shift 2 ;;
     # Dynatrace
-    --dt-metrics-url)   CONFIG_VARS[DT_METRICS_URL]="$2"; shift 2 ;;
-    --dt-logs-url)      CONFIG_VARS[DT_LOGS_URL]="$2"; shift 2 ;;
-    --dt-api-token)     CONFIG_VARS[DT_API_TOKEN]="$2"; shift 2 ;;
-    --dt-logs-token)    CONFIG_VARS[DT_LOGS_TOKEN]="$2"; shift 2 ;;
+    --dt-metrics-url)   set_cfg DT_METRICS_URL "$2"; shift 2 ;;
+    --dt-logs-url)      set_cfg DT_LOGS_URL "$2"; shift 2 ;;
+    --dt-api-token)     set_cfg DT_API_TOKEN "$2"; shift 2 ;;
+    --dt-logs-token)    set_cfg DT_LOGS_TOKEN "$2"; shift 2 ;;
     # Zabbix
-    --zabbix-server)    CONFIG_VARS[ZABBIX_SERVER]="$2"; shift 2 ;;
-    --zabbix-port)      CONFIG_VARS[ZABBIX_PORT]="$2"; shift 2 ;;
+    --zabbix-server)    set_cfg ZABBIX_SERVER "$2"; shift 2 ;;
+    --zabbix-port)      set_cfg ZABBIX_PORT "$2"; shift 2 ;;
     -h|--help)          print_usage; exit 0 ;;
     *) echo "Unknown option: $1"; print_usage; exit 1 ;;
   esac
 done
+
+# --- Install Terraform if needed ---
+sha256_of() {
+  if command -v sha256sum &>/dev/null; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
+ensure_terraform() {
+  command -v terraform &>/dev/null && return 0
+  echo "Terraform not found. Installing v${TERRAFORM_VERSION} to $HOME/.local/bin..."
+  local arch tf_arch os zip base tf_tmp expected actual
+  arch=$(uname -m)
+  case "$arch" in
+    x86_64|amd64) tf_arch="amd64" ;;
+    aarch64|arm64) tf_arch="arm64" ;;
+    *) echo "Unsupported architecture: $arch"; exit 1 ;;
+  esac
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  zip="terraform_${TERRAFORM_VERSION}_${os}_${tf_arch}.zip"
+  base="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}"
+  tf_tmp="$(mktemp -d)"
+  curl -fsSL "$base/$zip" -o "$tf_tmp/$zip"
+  curl -fsSL "$base/terraform_${TERRAFORM_VERSION}_SHA256SUMS" -o "$tf_tmp/SHA256SUMS"
+  expected=$(awk -v f="$zip" '$2 == f {print $1}' "$tf_tmp/SHA256SUMS")
+  actual=$(sha256_of "$tf_tmp/$zip")
+  if [[ -z "$expected" || "$expected" != "$actual" ]]; then
+    echo "Error: Terraform download checksum mismatch for $zip"
+    rm -rf "$tf_tmp"
+    exit 1
+  fi
+  unzip -qo "$tf_tmp/$zip" -d "$tf_tmp"
+  mkdir -p "$HOME/.local/bin"
+  mv "$tf_tmp/terraform" "$HOME/.local/bin/terraform"
+  rm -rf "$tf_tmp"
+  echo "Terraform installed: $(terraform version | head -1)"
+}
 
 # --- Handle destroy ---
 if $DESTROY; then
@@ -107,6 +167,7 @@ if $DESTROY; then
     exit 1
   fi
   echo "Destroying deployment in $WORK_DIR..."
+  ensure_terraform
   cd "$WORK_DIR"
   terraform destroy -auto-approve
   echo ""
@@ -128,32 +189,60 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
 fi
 
 # --- Validate SIEM-specific args ---
+need() {  # need <KEY> <flag>
+  if [[ -z "$(get_cfg "$1")" ]]; then
+    echo "Error: $2 is required for $OUTPUT_TYPE"
+    exit 1
+  fi
+}
 case "$OUTPUT_TYPE" in
   splunk-hec)
-    [[ -z "${CONFIG_VARS[SPLUNK_ADDRESS]:-}" ]] && { echo "Error: --splunk-address is required for splunk-hec"; exit 1; }
-    [[ -z "${CONFIG_VARS[SPLUNK_HEC_AUTH]:-}" ]] && { echo "Error: --splunk-hec-token is required for splunk-hec"; exit 1; }
+    need SPLUNK_ADDRESS --splunk-address
+    need SPLUNK_HEC_AUTH --splunk-hec-token
     ;;
   dynatrace)
-    [[ -z "${CONFIG_VARS[DT_METRICS_URL]:-}" ]] && { echo "Error: --dt-metrics-url is required for dynatrace"; exit 1; }
-    [[ -z "${CONFIG_VARS[DT_LOGS_URL]:-}" ]]    && { echo "Error: --dt-logs-url is required for dynatrace"; exit 1; }
-    [[ -z "${CONFIG_VARS[DT_API_TOKEN]:-}" ]]   && { echo "Error: --dt-api-token is required for dynatrace"; exit 1; }
+    need DT_METRICS_URL --dt-metrics-url
+    need DT_LOGS_URL --dt-logs-url
+    need DT_API_TOKEN --dt-api-token
     # Default DT_LOGS_TOKEN to DT_API_TOKEN if not set
-    [[ -z "${CONFIG_VARS[DT_LOGS_TOKEN]:-}" ]]  && CONFIG_VARS[DT_LOGS_TOKEN]="${CONFIG_VARS[DT_API_TOKEN]}"
+    [[ -z "$(get_cfg DT_LOGS_TOKEN)" ]] && set_cfg DT_LOGS_TOKEN "$(get_cfg DT_API_TOKEN)"
     ;;
   dynatrace-metrics)
-    [[ -z "${CONFIG_VARS[DT_METRICS_URL]:-}" ]] && { echo "Error: --dt-metrics-url is required for dynatrace-metrics"; exit 1; }
-    [[ -z "${CONFIG_VARS[DT_API_TOKEN]:-}" ]]   && { echo "Error: --dt-api-token is required for dynatrace-metrics"; exit 1; }
+    need DT_METRICS_URL --dt-metrics-url
+    need DT_API_TOKEN --dt-api-token
     ;;
   dynatrace-logs)
-    [[ -z "${CONFIG_VARS[DT_LOGS_URL]:-}" ]]   && { echo "Error: --dt-logs-url is required for dynatrace-logs"; exit 1; }
-    [[ -z "${CONFIG_VARS[DT_API_TOKEN]:-}" ]]   && { echo "Error: --dt-api-token is required for dynatrace-logs"; exit 1; }
+    need DT_LOGS_URL --dt-logs-url
+    need DT_API_TOKEN --dt-api-token
     # Default DT_LOGS_TOKEN to DT_API_TOKEN if not set
-    [[ -z "${CONFIG_VARS[DT_LOGS_TOKEN]:-}" ]]  && CONFIG_VARS[DT_LOGS_TOKEN]="${CONFIG_VARS[DT_API_TOKEN]}"
+    [[ -z "$(get_cfg DT_LOGS_TOKEN)" ]] && set_cfg DT_LOGS_TOKEN "$(get_cfg DT_API_TOKEN)"
     ;;
   zabbix)
-    [[ -z "${CONFIG_VARS[ZABBIX_SERVER]:-}" ]] && { echo "Error: --zabbix-server is required for zabbix"; exit 1; }
+    need ZABBIX_SERVER --zabbix-server
+    ;;
+  azure-log-ingestion)
+    echo "Error: azure-log-ingestion needs Azure DCR/stream settings this quickstart has no flags for."
+    echo "Use deployments/azure-aci (or deployments/aws-ecs-fargate with a tfvars file) instead."
+    exit 1
+    ;;
+  *)
+    echo "Error: unknown --output-type: $OUTPUT_TYPE"
+    print_usage
+    exit 1
     ;;
 esac
+
+# --- Resolve "latest" to a concrete release tag ---
+# A mutable :latest image tag never changes the ECS task definition, so a
+# re-run would not roll out a new release. Pin the version instead.
+if [[ "$IMAGE_TAG" == "latest" ]]; then
+  LATEST_URL=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$GITHUB_REPO/releases/latest" || true)
+  if [[ "$LATEST_URL" == */tag/* ]]; then
+    IMAGE_TAG="${LATEST_URL##*/tag/}"
+  else
+    echo "Warning: could not resolve the latest release tag; using 'latest' (re-runs will not roll out new images)."
+  fi
+fi
 
 echo "============================================"
 echo " Aviatrix SIEM Connector — AWS Quickstart"
@@ -167,26 +256,7 @@ echo "  Syslog port:  $SYSLOG_PORT"
 echo "  Image tag:    $IMAGE_TAG"
 echo ""
 
-# --- Install Terraform if needed ---
-if ! command -v terraform &>/dev/null; then
-  echo "Terraform not found. Installing v${TERRAFORM_VERSION}..."
-  ARCH=$(uname -m)
-  case "$ARCH" in
-    x86_64|amd64) TF_ARCH="amd64" ;;
-    aarch64|arm64) TF_ARCH="arm64" ;;
-    *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
-  esac
-  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-  TF_URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS}_${TF_ARCH}.zip"
-  TF_TMP="$(mktemp -d)"
-  curl -sL "$TF_URL" -o "$TF_TMP/terraform.zip"
-  unzip -qo "$TF_TMP/terraform.zip" -d "$TF_TMP"
-  mkdir -p "$HOME/.local/bin"
-  mv "$TF_TMP/terraform" "$HOME/.local/bin/terraform"
-  rm -rf "$TF_TMP"
-  export PATH="$HOME/.local/bin:$PATH"
-  echo "Terraform installed: $(terraform version -json | head -1)"
-fi
+ensure_terraform
 
 # --- Download Terraform module ---
 WORK_DIR="$HOME/$STACK_NAME"
@@ -202,7 +272,7 @@ fi
 # Only download if not already present (idempotent)
 if [[ ! -f "$WORK_DIR/main.tf" ]]; then
   echo "Downloading Terraform module..."
-  curl -sL "$RELEASE_URL/quickstart-aws.tar.gz" -o "$WORK_DIR/quickstart-aws.tar.gz"
+  curl -fsSL "$RELEASE_URL/quickstart-aws.tar.gz" -o "$WORK_DIR/quickstart-aws.tar.gz"
   tar -xzf "$WORK_DIR/quickstart-aws.tar.gz" -C "$WORK_DIR" --strip-components=1
   rm "$WORK_DIR/quickstart-aws.tar.gz"
 fi
@@ -215,21 +285,37 @@ IFS=',' read -ra SUBNET_ARRAY <<< "$SUBNETS"
 SUBNET_HCL=$(printf ', "%s"' "${SUBNET_ARRAY[@]}")
 SUBNET_HCL="[${SUBNET_HCL:2}]"
 
+# Escape a value for an HCL double-quoted string (\ " ${ %{)
+hcl_escape() {
+  printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\${/$${/g' -e 's/%{/%%{/g'
+}
+
 # Build logstash_config_variables map
 CONFIG_MAP="{"
-for key in "${!CONFIG_VARS[@]}"; do
-  CONFIG_MAP+=$'\n'"    $key = \"${CONFIG_VARS[$key]}\""
+for key in $CONFIG_KEYS; do
+  CONFIG_MAP+=$'\n'"    $key = \"$(hcl_escape "$(get_cfg "$key")")\""
 done
 CONFIG_MAP+=$'\n'"  }"
 
+# Optional syslog source CIDRs
+CIDR_LINE=""
+if [[ -n "$ALLOWED_CIDRS" ]]; then
+  IFS=',' read -ra CIDR_ARRAY <<< "$ALLOWED_CIDRS"
+  CIDR_HCL=$(printf ', "%s"' "${CIDR_ARRAY[@]}")
+  CIDR_LINE="allowed_syslog_cidrs = [${CIDR_HCL:2}]"
+fi
+
+# terraform.tfvars holds credentials: keep it private
+umask 077
 cat > terraform.tfvars <<EOF
 vpc_id          = "$VPC_ID"
 subnet_ids      = $SUBNET_HCL
 output_type     = "$OUTPUT_TYPE"
-internal_nlb = $INTERNAL_NLB
+internal_nlb    = $INTERNAL_NLB
 syslog_port     = $SYSLOG_PORT
 log_profile     = "$LOG_PROFILE"
 image_tag       = "$IMAGE_TAG"
+$CIDR_LINE
 logstash_config_variables = $CONFIG_MAP
 EOF
 

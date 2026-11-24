@@ -32,15 +32,21 @@ variable "output_type" {
 }
 
 variable "image_tag" {
-  description = "GHCR image tag (e.g., 'latest', 'v1.0.0')"
+  description = "GHCR image tag. Use a release tag (e.g. 'v1.0.0'; quickstart.sh resolves 'latest' to one): a mutable 'latest' never changes the task definition, so new images are not rolled out."
   type        = string
   default     = "latest"
 }
 
 variable "syslog_port" {
-  description = "Syslog listener port (TCP and UDP)"
+  description = "Syslog listener port (TCP and UDP), passed to Logstash as SYSLOG_PORT (needs an image whose configs support SYSLOG_PORT)"
   type        = number
   default     = 5000
+}
+
+variable "allowed_syslog_cidrs" {
+  description = "Source CIDRs allowed to send syslog to the tasks. The NLB preserves client IPs, so list your Aviatrix gateway/controller egress IPs. Default 0.0.0.0/0 keeps the old behavior. NLB health checks are allowed from the VPC CIDR separately."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "log_profile" {
@@ -55,9 +61,10 @@ variable "log_profile" {
 }
 
 variable "logstash_config_variables" {
-  description = "SIEM-specific environment variables (e.g., SPLUNK_ADDRESS, SPLUNK_HEC_AUTH)"
+  description = "SIEM-specific environment variables (e.g., SPLUNK_ADDRESS, SPLUNK_HEC_AUTH). Stored in Secrets Manager and injected as ECS secrets."
   type        = map(string)
   default     = {}
+  sensitive   = true
 }
 
 variable "internal_nlb" {
@@ -79,7 +86,7 @@ variable "cpu" {
 }
 
 variable "memory" {
-  description = "Fargate memory in MiB"
+  description = "Fargate memory in MiB (the Logstash heap is set to half of this via LS_JAVA_OPTS)"
   type        = number
   default     = 1024
 }

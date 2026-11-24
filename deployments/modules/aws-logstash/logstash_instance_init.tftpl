@@ -1,6 +1,34 @@
 #!/bin/bash
 # STANDARD INIT FOR AVIATRIX SIEM CONNECTOR (AL2023)
+#
+# Change markers: these lines make user_data (and so the launch template /
+# instance) change whenever the config, patterns or runtime command change,
+# which triggers instance replacement / ASG instance refresh.
+#   config-etag:     ${config_etag}
+#   patterns-etag:   ${patterns_etag}
+#   runtime-version: ${runtime_version_id}
 set -e  # Exit on error
+
+# retry <cmd...>: retry for up to ~5 minutes (IAM/secret propagation at boot)
+retry() {
+  local n=0
+  until "$@"; do
+    n=$((n + 1))
+    if [ "$n" -ge 30 ]; then
+      echo "giving up after $n attempts: $*" >&2
+      return 1
+    fi
+    sleep 10
+  done
+}
+
+get_secret() {
+  aws secretsmanager get-secret-value \
+    --secret-id "$1" \
+    --query 'SecretString' \
+    --output text \
+    --region "${aws_region}"
+}
 
 # Install packages
 sudo yum update -y
@@ -15,66 +43,42 @@ mkdir -p /logstash/pipeline
 mkdir -p /logstash/patterns
 
 # Download config files from S3
-aws s3 cp s3://${aws_s3_bucket_id}/avx.conf /logstash/patterns/avx.conf
-aws s3 cp s3://${aws_s3_bucket_id}/${logstash_config_name} /logstash/pipeline/${logstash_config_name}
+retry aws s3 cp s3://${aws_s3_bucket_id}/avx.conf /logstash/patterns/avx.conf
+retry aws s3 cp s3://${aws_s3_bucket_id}/${logstash_config_name} /logstash/pipeline/${logstash_config_name}
 
 # Set proper permissions
 chmod 644 /logstash/patterns/avx.conf
 chmod 644 /logstash/pipeline/${logstash_config_name}
 
-%{ if tls_enabled }
+# Fetch the rendered Logstash `docker run` command (rendered by Terraform from
+# logstash-configs/outputs/<output_type>/docker_run.tftpl). It carries the SIEM
+# credentials, so it lives in Secrets Manager rather than in this user_data.
+(umask 077 && retry get_secret "${runtime_secret_arn}" > /logstash/logstash-run.sh)
+
+%{ if tls_enabled ~}
 # --- TLS: Fetch certs from Secrets Manager ---
 mkdir -p /logstash/certs
 
-SECRET_JSON=$(aws secretsmanager get-secret-value \
-  --secret-id "${tls_secret_arn}" \
-  --query 'SecretString' \
-  --output text \
-  --region "${aws_region}")
+SECRET_JSON=$(retry get_secret "${tls_secret_arn}")
 
-echo "$SECRET_JSON" | jq -r '.server_cert' > /logstash/certs/server.crt
-echo "$SECRET_JSON" | jq -r '.server_key'  > /logstash/certs/server.key
-echo "$SECRET_JSON" | jq -r '.ca_cert'     > /logstash/certs/ca.crt
+echo "$SECRET_JSON" | jq -er '.server_cert' > /logstash/certs/server.crt
+echo "$SECRET_JSON" | jq -er '.server_key'  > /logstash/certs/server.key
+echo "$SECRET_JSON" | jq -er '.ca_cert'     > /logstash/certs/ca.crt
 chmod 600 /logstash/certs/server.key
 
-# --- TLS: Write docker-compose.yml ---
-cat > /logstash/docker-compose.yml <<'COMPOSE'
-services:
-  stunnel:
-    image: ${tls_sidecar_image}
-    ports:
-      - "${tls_port}:${tls_port}"
-    volumes:
-      - /logstash/certs:/etc/stunnel/certs:ro
-    environment:
-      - TLS_PORT=${tls_port}
-      - LOGSTASH_HOST=logstash
-    restart: always
-    depends_on:
-      - logstash
+# --- TLS: stunnel sidecar ---
+# Runs on the host network and forwards decrypted syslog to the Logstash
+# container's published port on 127.0.0.1. The Logstash container itself is
+# started below from the SAME rendered command as plaintext mode, so image and
+# env cannot diverge between TLS and non-TLS deployments. The security group
+# only opens the TLS port in this mode.
+docker run -d --restart=always --name stunnel --network host \
+  -v /logstash/certs:/etc/stunnel/certs:ro \
+  -e TLS_PORT=${tls_port} \
+  -e LOGSTASH_HOST=127.0.0.1 \
+  -e LOGSTASH_PORT=${syslog_port} \
+  ${tls_sidecar_image}
+%{ endif ~}
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.16.2
-    volumes:
-      - /logstash/pipeline/:/usr/share/logstash/pipeline/
-      - /logstash/patterns:/usr/share/logstash/patterns
-    environment:
-      - LOG_PROFILE=${log_profile}
-      - XPACK_MONITORING_ENABLED=false
-%{ for key, value in config_vars ~}
-      - ${upper(key)}=${value}
-%{ endfor ~}
-    restart: always
-COMPOSE
-
-# --- TLS: Install Docker Compose plugin (not in AL2023 default repos) ---
-COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)
-sudo mkdir -p /usr/local/lib/docker/cli-plugins
-sudo curl -SL "https://github.com/docker/compose/releases/download/$${COMPOSE_VERSION}/docker-compose-linux-x86_64" \
-  -o /usr/local/lib/docker/cli-plugins/docker-compose
-sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-
-# --- TLS: Start with docker compose ---
-cd /logstash
-docker compose up -d
-%{ endif }
+# --- Start Logstash ---
+bash /logstash/logstash-run.sh

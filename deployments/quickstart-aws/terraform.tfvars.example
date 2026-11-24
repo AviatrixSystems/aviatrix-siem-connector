@@ -11,3 +11,11 @@ logstash_config_variables = {
   SPLUNK_ADDRESS  = "your-splunk-server"
   SPLUNK_HEC_AUTH = "your-hec-token"
 }
+
+# Who may send syslog (the NLB preserves client IPs). Default ["0.0.0.0/0"];
+# restrict to your Aviatrix gateway/controller egress IPs.
+# allowed_syslog_cidrs = ["203.0.113.10/32"]
+
+# Pin a release tag: a mutable "latest" never changes the task definition, so
+# new images would not roll out on re-apply.
+# image_tag = "v1.0.0"

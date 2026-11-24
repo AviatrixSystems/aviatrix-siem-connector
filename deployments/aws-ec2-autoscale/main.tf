@@ -26,6 +26,11 @@ module "logstash" {
   ssh_key_name                = var.ssh_key_name
   use_existing_security_group = var.use_existing_security_group
   existing_security_group_id  = var.existing_security_group_id
+  allow_vpc_health_check      = true
+  allowed_syslog_cidrs        = var.allowed_syslog_cidrs
+  ssh_allowed_cidrs           = var.ssh_allowed_cidrs
+  ami_id                      = var.ami_id
+  output_type                 = var.output_type
   logstash_config_path        = local.config_path
   logstash_config_name        = local.config_name
   patterns_path               = local.patterns_path
@@ -35,9 +40,11 @@ module "logstash" {
   tags                        = var.tags
 
   # TLS
-  tls_enabled       = var.tls_enabled
-  tls_port          = var.tls_port
-  tls_secret_arn    = var.tls_enabled ? module.tls[0].secret_arn : ""
+  tls_enabled = var.tls_enabled
+  tls_port    = var.tls_port
+  # The version ARN (not the bare secret ARN) makes the launch template wait
+  # until the cert bundle has a value, so instances never boot before it.
+  tls_secret_arn    = var.tls_enabled ? module.tls[0].secret_version_arn : ""
   tls_sidecar_image = var.tls_sidecar_image
   aws_region        = var.aws_region
 }
@@ -50,7 +57,7 @@ resource "aws_launch_template" "default" {
   name          = "avxlog-${module.logstash.random_suffix}"
   image_id      = module.logstash.ami_id
   instance_type = var.instance_size
-  key_name      = var.ssh_key_name
+  key_name      = var.ssh_key_name != "" ? var.ssh_key_name : null
 
   iam_instance_profile {
     name = module.logstash.iam_instance_profile_name
@@ -91,6 +98,11 @@ resource "aws_autoscaling_group" "default" {
   vpc_zone_identifier = var.instance_subnet_ids
   min_size            = var.autoscale_min_size
   max_size            = var.autoscale_max_size
+
+  # Replace instances the NLB reports unhealthy (failed bootstrap, Logstash
+  # crash loop), not just ones failing EC2 status checks.
+  health_check_type         = "ELB"
+  health_check_grace_period = var.health_check_grace_period
 
   instance_refresh {
     strategy = "Rolling"
@@ -166,6 +178,12 @@ resource "aws_lb_target_group" "default" {
   port     = local.effective_port
   protocol = var.tls_enabled ? "TCP" : upper(var.syslog_protocol)
   vpc_id   = var.vpc_id
+
+  # Syslog senders keep long-lived TCP flows pinned to one target. On scale-in
+  # or refresh, drain briefly and then close the flows so gateways reconnect
+  # to a healthy instance instead of streaming into a terminating one.
+  deregistration_delay   = var.deregistration_delay
+  connection_termination = true
 
   health_check {
     protocol            = "TCP"

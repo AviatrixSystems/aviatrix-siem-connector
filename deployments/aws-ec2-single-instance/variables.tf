@@ -21,21 +21,43 @@ variable "instance_size" {
 }
 
 variable "ssh_key_name" {
-  description = "SSH key pair name"
+  description = "SSH key pair name (empty for no key pair; use SSM Session Manager instead)"
   type        = string
   default     = "logstash"
 }
 
+variable "ssh_allowed_cidrs" {
+  description = "Source CIDRs allowed to SSH (22/tcp). Empty (default) creates no SSH ingress rule."
+  type        = list(string)
+  default     = []
+}
+
+variable "ami_id" {
+  description = "Pin the instance AMI. Empty (default) uses the latest Amazon Linux 2023 AMI."
+  type        = string
+  default     = ""
+}
+
 variable "syslog_port" {
-  description = "Syslog port"
+  description = "Syslog port (passed to Logstash as SYSLOG_PORT)"
   type        = number
   default     = 5000
 }
 
 variable "syslog_protocol" {
-  description = "Syslog protocol"
+  description = "Syslog protocol (tcp or udp)"
   type        = string
   default     = "tcp"
+  validation {
+    condition     = contains(["tcp", "udp"], var.syslog_protocol)
+    error_message = "syslog_protocol must be \"tcp\" or \"udp\"."
+  }
+}
+
+variable "allowed_syslog_cidrs" {
+  description = "Source CIDRs allowed to send syslog (or TLS syslog). Default 0.0.0.0/0 keeps the old behavior; restrict to your Aviatrix gateway/controller egress IPs."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "use_existing_security_group" {
@@ -61,9 +83,10 @@ variable "log_profile" {
 }
 
 variable "logstash_config_variables" {
-  description = "Environment variables for the Logstash container (e.g., Splunk HEC token, Dynatrace API token)"
+  description = "Template variables for logstash-configs/outputs/<output_type>/docker_run.tftpl (e.g., Splunk HEC token, Dynatrace API token, logstash_image). Stored in Secrets Manager and fetched at boot, not embedded in user_data."
   type        = map(string)
   default     = {}
+  sensitive   = true
 }
 
 variable "tags" {
