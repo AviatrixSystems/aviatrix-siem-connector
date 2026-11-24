@@ -8,7 +8,7 @@ output_type = "splunk-hec"  # splunk-hec, dynatrace, zabbix, etc.
 
 # SIEM-specific variables
 logstash_config_variables = {
-  SPLUNK_ADDRESS  = "your-splunk-server"
+  SPLUNK_ADDRESS  = "https://your-splunk-server"
   SPLUNK_HEC_AUTH = "your-hec-token"
 }
 

@@ -8,7 +8,7 @@
 #     --output-type splunk-hec \
 #     --vpc-id vpc-xxx \
 #     --subnets subnet-aaa,subnet-bbb \
-#     --splunk-address 10.0.0.5 \
+#     --splunk-address https://10.0.0.5 \
 #     --splunk-hec-token xxx
 
 set -euo pipefail
@@ -74,7 +74,7 @@ Optional:
   --region <region>             AWS region (default: current CLI region)
 
 SIEM-specific (pass credentials for your chosen output type):
-  --splunk-address <addr>       Splunk HEC server address
+  --splunk-address <url>        Splunk HEC base URL (https:// added if no scheme)
   --splunk-port <port>          Splunk HEC port (default: 8088)
   --splunk-hec-token <token>    Splunk HEC authentication token
   --dt-metrics-url <url>        Dynatrace metrics ingest URL
@@ -106,7 +106,7 @@ while [[ $# -gt 0 ]]; do
     --destroy)          DESTROY=true; shift ;;
     --plan)             PLAN_ONLY=true; shift ;;
     # Splunk
-    --splunk-address)   set_cfg SPLUNK_ADDRESS "$2"; shift 2 ;;
+    --splunk-address)   a="$2"; case "$a" in *://*) ;; *) a="https://$a" ;; esac; set_cfg SPLUNK_ADDRESS "$a"; shift 2 ;;
     --splunk-port)      set_cfg SPLUNK_PORT "$2"; shift 2 ;;
     --splunk-hec-token) set_cfg SPLUNK_HEC_AUTH "$2"; shift 2 ;;
     # Dynatrace
